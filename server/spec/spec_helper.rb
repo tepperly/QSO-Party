@@ -15,6 +15,10 @@ require 'contestlog/genericlog'
 # in spec/support/ and its subdirectories.
 Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
+def datafile(name)
+  Rails.root.join("spec", "data", name)
+end 
+
 RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect

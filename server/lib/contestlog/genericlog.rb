@@ -1,3 +1,4 @@
+# encoding: UTF-8
 # Module for generating/reading generic contest log files
 #
 # Author:: N6RNO
@@ -90,7 +91,7 @@ class Genericlog
     case line
     when /^START-OF-LOG:\s+[vV]?[23](\.[0-9])?/i 
       :Cabrillo
-    when /^\xef\xbb\xbfSTART-OF-LOG:\s+[vV]?[23](\.[0-9])?/i 
+    when Regexp.new('^\xef\xbb\xbfSTART-OF-LOG:\s+[vV]?[23](\.[0-9])?',Regexp::IGNORECASE,'n')
       # some versions of N3FJP add 3 >128 characters to the first line... otherwise the file seems fine
       line.sub!(/.../,'')
       :Cabrillo
@@ -100,6 +101,8 @@ class Genericlog
       :ADIF
     when /^<[^:]+:\d+>/
       :ADIF
+    when /^<\?xml.*\r\n\s*<ADX>/mi
+      :ADX
     when /^%PDF/
       :PDF
     when /^\{\\rtf/
@@ -116,82 +119,28 @@ class Genericlog
       
     # careful Office 2007 files seem to be ZIP archives that hold Open XML files
     # All Office 2007 "x" format files have the following pattern
-    #   @0 -> 504B0304
-    #             PK
-    #   @30 -> 5B436F6E74656E745F54797065735D2E786D6C
-    #               [ C o n t e n t _ T y p e s ] . x m l
-    # else where in the directory you will find the following files
-    #   APP.XMLPK 
-    #   DOCPROPS 
-    #   CORE.XMLPK 
-    #   THEME1.XMLPK ?
-    #   _RELS 
     #
-    # - DOCX will have the following files
-    #   DOCUMENT.XML.RELSPK 
-    #   DOCUMENT.XMLPK 
-    #   FONTTABLE 
-    #   STYLES 
-    #   WORD 
+    # from IRB after IO.binread
+    #   PK\x03\x04\x14\x00\b\b\b\x00!z\x96D
     #
-    # - XLSX will have the following files
-    #   WORKBOOK.XML.RELSPK 
-    #   WORKBOOK.XMLPK 
-    #   STYLES.XMLPK 
-    #   SHEET1.XMLPK 
-
-    #   WORKSHEETS 
-    #
-    # - PPTX will have the following file patterns
-    # PRESENTATION.XMLPK 
-    # SLIDEMASTER1.XMLPK 
-    # SLIDELAYOUT1.XMLPK 
-    # TABLESTYLES.XMLPK 
-    # SLIDE1.XML.RELSPK 
-    # VIEWPROPS.XMLPK 
-    # PRESPROPS.XMLPK 
-    # SLIDEMASTERS 
-    # SLIDE1.XMLPK 
-    # SLIDELAYOUTS 
-    # SLIDES 
-
     # And OpenDocument Format can also be in an archive
-        #   need to do research to know the files that are indicative 
+    #   need to do research to know the files that are indicative 
     #   of ODF
-    
+    #
+    # from IRB after IO.binread
+    #   PK\x03\x04\x14\x00\x00\b\x00\x00/z\x96D\x85l9\x8A.\x00\x00
+    #
+    #   Ruby 1.9.3 has issue with \b aka \x08
+  
+    when Regexp.new('^PK\x03\x04\x14\x00\x00\x08',nil,'n')
+      :ODS
+    when Regexp.new('^PK\x03\x04\x14\x00\x08\x08',nil,'n')
+      :EXCEL
+      
     when /^PK/
+      :ZIP
       
-      openFormat = nil
-      
-      Zip::ZipFile.open(fn) {|zipfile|
-        # if we take the time to read in a little bit of all the files in the zip archive we can help
-        # the user by identifying the type. 
-        
-        Zip::ZipFile.foreach(fn) {|entry|
-          # Be on the lookout for Office 2007
-          case entry.name
-            when  /WORKBOOK\.XMLPK/
-              openFormat = :Excel2007
-              break
-            when /DOCUMENT\.XMLPK/
-              openFormat = :Word2007
-              break
-            when /PRESENTATION\.XMLPK/
-              openFormat = :PowerPoint2007
-              break
-            else
-              @files.push([entry.name,filecoding(zipfile.read(entry),entry.name)])
-          end
-        }
-      }
-      if openFormat.nil?
-        :zip
-      else
-        @files = []
-        openFormat
-      end
-      
-    when /^(\x00{4}\x01)/ 
+    when Regexp.new('^(\x00{4}\x01)',nil,'n') 
       # By AE6Y
       :CQPWIN
     when /^\x00{6} {10}/ && /^.{20}CQPIN/
@@ -199,50 +148,25 @@ class Genericlog
       :CQPDOS
     
     # Generic MS-Office file Multi-Stream Object Header   D0 CF 11 E0 A1 B1 1A E1
-    when /^\xd0\xcf\x11\xe0\xA1\xB1\x1A\xE1\x00/
-        # This is currently ugly and a little heavy handed...
-      #     now just slam Excel into hash @data
-      #     let the user decide what to do ...
-      #
-      book = Spreadsheet.open fn
-      #book.worksheets.each do |s| puts "#{s.name}" end
-      
-      @data = {}
-      book.worksheets.each do |x|
-          tmp = []
-              x.each do |row|
-            line  = ''
-            row.formatted.each do |cell|
-                line << if (cell.to_s =~ /#<Spreadsheet/)
-                cell.value.to_s.strip.ljust(10)
-              else
-                cell.to_s.strip.ljust(10) 
-              end << ','
-            end
-            line.gsub!(/#<Spreadsheet::Formula[^>]+>/,'') # probably not needed now that we use value above
-            line.gsub!(/(\d+)\.\d+/,'\1')
-            tmp.push(line)
-             end
-           @data[x.name.to_sym] = tmp
-       end
-      :Excel
+    when Regexp.new('^\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1\x00',nil,'n')
+      :EXCEL
     #when /^\s*(#{@de}|#{@me}|#{@be}\s+){1,3}/
     # @ftype="ASCII log"
-    when /^\x1B\x43\x00\f/
+    when Regexp.new('^\x1B\x43\x00\f',nil,'n')
       #   ESC C NUL FF   <- EPSON printer code to set page length
       :PrinterCode
-    when /^[A-Z0-9 .-:\/]+,[A-Z0-9 .-:\/]+,[A-Z0-9 .-:\/]+,[A-Z0-9 .-:\/]+/i
+    when /^[A-Z0-9 .-:\/]*,[A-Z0-9 .-:\/]*,[A-Z0-9 .-:\/]*,[A-Z0-9 .-:\/]*/i
       :CSV
     when /^[ -~\n\t\r\f]+$/  #catchall test for ASCII file This must be last one checked
       :ASCII
-    when /^\x52\x61\x72\x21\x1A/
+    when Regexp.new('^\x52\x61\x72\x21\x1A',nil,'n')
       # Rar!      
       # RAR Archive
       :RAR
-    when /^\x1F\x8B\x08/
+    when Regexp.new('^\x1F\x8b\x08',nil,'n')
       # GZIP file
       :GZIP
-    when /^..\x00\x00\x47\x5A\x49\x50/
+    when Regexp.new('^..\x00\x00\x47\x5A\x49\x50',nil,'n')
       # ....GZIP
       # GZIP compressed archive
       :GZA
@@ -265,9 +189,13 @@ class Genericlog
   # Note: Binary files will read into @data in an unpredictable way. We probably so recode the binary reads to be more predictable.
   def read(file_name=nil)
     puts file_name
-    if !file_name.nil?
-      IO.foreach(file_name) {|line| @data.push(line) }
-      @coding = filecoding(@data[0],file_name)
+    unless file_name.nil?
+      head = IO.binread(file_name,2048)
+      @coding = filecoding(head,file_name)
+      case @coding
+      when :Cabrillo,:ADIF,:CabrilloQSOonly,:CSV,:REG1TEST,:ASCII
+        IO.foreach(file_name) {|line| @data.push(line) }
+      end
     end
   end
 
@@ -289,7 +217,7 @@ class Genericlog
   # *data* is an array of the lines in the specified file.
   # When the coding is a binary form such as Excel or CQPWIN, then *data* holds a binary String
   # of the contents of the file.
-  def initialize(file_name=nil,mode=:r,type=:unknown)
+  def initialize(file_name=nil,mode=:rb,type=:unknown)
     init
     @name = Pathname.new(file_name).basename.to_s if file_name
     self.read(file_name)
