@@ -101,7 +101,7 @@ class Genericlog
       :ADIF
     when /^<[^:]+:\d+>/
       :ADIF
-    when /^<\?xml.*\r\n\s*<ADX>/mi
+    when /^<\?xml.*\r?\n\s*<ADX>/mi
       :ADX
     when /^%PDF/
       :PDF
