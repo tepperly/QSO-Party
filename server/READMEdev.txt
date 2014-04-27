@@ -43,12 +43,19 @@ The server environment is in the "server" directory.
 Now run bundler to make sure you have all the needed Ruby GEMS
    bundle install
 
+Now make sure that database is uptodate, run migrations
+   rake db:migrate
+
 Todo: create a "STABLE" branch or tag so that following tests can have an expected result.
 
 Run Rspec tests
+   rake spec
+   # or optionally directly invoke with:
    rspec
 
 Run Cucumber tests
+   rake features
+   # or optionally directly invoke with:
    cucumber
 
 Note: level of pass/failure for the two sets of tests may vary.
