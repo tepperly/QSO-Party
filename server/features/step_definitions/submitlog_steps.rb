@@ -5,12 +5,31 @@
 # License::  &copy; 2014 Northern California Contest Club
 #            2-Clause BSD License
 
-Given(/^a log in format (\S+)$/) do |type|
-  pending # express the regexp above with the code you wish you had
+Given(/^a contest (\S+)$/) do |name|
+  @contest = Contest.create!
+  @contest.update_attribute(:name, name)
 end
 
-When(/^User submits (good|bad format|wrong contest) log\s*(|\S+)$/) do |legal,log|
-  pending # express the regexp above with the code you wish you had
+When(/^User submits a log\s*(|\S+)$/) do |log|
+  visit submitlog_path
+  fill_in "UserEmail", :with => "XX0XXX@arrl.net"
+  fill_in "File", :with => Rails.root.join("spec", "data", log)
+  click_button "Submit"
+end
+
+When(/^User pastes a log:/) do |log|
+  visit submitlog_path
+  fill_in "UserEmail", :with => "XX0XXX@arrl.net"
+  fill_in "Text", :with => log
+  click_button "Submit"
+end
+
+When(/^log is (\S+)$/) do |type|
+ pending # check if log of type
+end
+
+When(/^log is version (\S+)/) do |version|
+  pending # correct version ?
 end
 
 Then(/^save the log$/) do
@@ -32,12 +51,6 @@ end
 Then(/^accept the log$/) do 
   pending # express the regexp above with the code you wish you had 
 end 
-
-
-When(/^log is version (\d+)\.(\d+)$/) do |arg1, arg2| 
-  pending # express the regexp above with the code you wish you had 
-end 
-
 
 Then(/^convert log to (\S+) format and save again$/) do |version| 
   pending # express the regexp above with the code you wish you had 

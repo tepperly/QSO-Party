@@ -24,14 +24,14 @@ module Contestlog
       expect(log.coding).to eq(:Cabrillo)
       expect(log.name).to eq("N6RNO.CAB2")
       expect(log.files).to eq([])
-      expect(log.data[0]).to eq("START-OF-LOG: 2.0\r\n") 
+      expect(log.data[0]).to match(/START-OF-LOG: 2.0\r?\n/) 
     end
 
     it 'opens N6RNO cabrillo 3.0 log' do
       filename = datafile("N6RNO.CAB3")
       expect(log.coding).to eq(:Cabrillo)
       expect(log.name).to eq("N6RNO.CAB3")
-      expect(log.data[0]).to eq("START-OF-LOG: 3.0\r\n") 
+      expect(log.data[0]).to match(/START-OF-LOG: 3.0\r?\n/) 
     end
 
     it 'opens N6RNO zip log' do
