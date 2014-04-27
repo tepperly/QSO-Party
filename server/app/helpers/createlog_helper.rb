@@ -1,0 +1,2 @@
+module CreatelogHelper
+end
