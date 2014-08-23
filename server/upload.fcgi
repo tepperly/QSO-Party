@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/local/bin/ruby
 # -*- encoding: utf-8 -*-
 # CQP upload script
 # Tom Epperly NS6T
