@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CQP Log Submission Form</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="css/jquery.fileupload.css">
+  <script src="//code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+  <script src="js/vendor/jquery.ui.widget.js"></script>
+  <script src="js/jquery.iframe-transport.js"></script>
+  <script src="js/jquery.fileupload.js"></script>
+  <script src="http://jqueryvalidation.org/files/dist/jquery.validate.min.js"></script>
+  <script src="http://jqueryvalidation.org/files/dist/additional-methods.min.js"></script>
+
+</head>
+<body>
+ 
+<div id="tabs">
+  <ul>
+    <li><a href="#tabs-1">Upload or drag-and-drop</a></li>
+    <li><a href="#tabs-2">Traditional cut-and-paste</a></li>
+  </ul>
+  <div id="tabs-1">
+    <div id="step-1">
+      <h1>Step 1: Upload Cabrillo file</h1>
+      <span class="btn btn-success fileinput-button">
+        <i class="glyphicon glyphicon-plus"></i>
+        <span>Drag and drop Cabrillo file here or click to upload...</span>
+        <!-- The file input field used as target for the file upload widget -->
+	<input id="fileupload" type="file" name="cabrillofile" multiple="multiple">
+      </span>
+      <br />
+      <div id="progress" class="progress">
+        <div class="progress-bar progress-bar-success"></div>
+      </div>
+    </div>
+    <div id="step-2">
+      <h1>Step 2: Review Cabrillo file</h1>
+      <p>If there are errors, please fix the problems in your Cabrillo
+      file on your computer and then upload the fixed Cabrillo
+      file.</p>
+    </div>
+    <div id="step-3">
+      <h1>Step 3: Provide Supplemental information</h1>
+      <form action="server/upload.fcgi" method="post" id="supplementalForm" >
+	<input type="hidden" name="logID" value="-1" id="logDBId" />
+	<label for="callsignId">Callsign:</label>
+	<input type="text" name="callsign" value="" id="callsignId" /><br />
+	<label for="emaiId">Email:</label>
+	<input type="email" name="email" id="emailId" /><br/>
+	<label for="confirmId">Confirm Email:</label>
+	<input type="email" name="confirm" id="confirmId" /><br />
+	<label for="phoneId">Phone Number:</label>
+	<input type="text" name="phone" id="phoneId" /><br />
+	<label for="opclassId">Entry class:</label>
+	<select name="opclass" id="opclassId" >
+	  <option value="single">Single-op</option>
+	  <option value="multi-single">Multi-single</option>
+	  <option value="multi-multi" selected="selected">Multi-multi</option>
+	</select>
+	<p><b>Categories</b> (check all that apply)</p>
+	<table>
+	  <tr>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="expedition" value="County Expedition" id="expedition" />
+		County Expedition</label>
+	    </td>
+	    <td width="200" height="25" valign="top" >
+              <label>
+		<input type="checkbox" name="youth" value="Youth" id="youth" />
+		Youth (under 18)</label>
+            </td>
+            <td width="200" height="25" valign="top" >
+              <label>
+		<input type="checkbox" name="mobile" value="Mobile" id="mobile" />
+		Mobile Operation</label>
+            </td>
+	  </tr>
+	  <tr>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="female" value="YL" id="yl" />
+		YL</label>
+            </td>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="school" value="School" id="school" />
+		School</label>
+            </td>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="new" value="New Contester" id="newcontester" />
+		New Contester</label>
+            </td>
+	  </tr>
+	</table>
+	<label for="commentId">Comments:</label><br>
+	<textarea name="comments" id="commentId"cols="80" 
+		  rows="5"></textarea><br>
+        <button type="submit" size="50">Submit</button>
+      </form>
+    </div>
+    <!-- The container for the uploaded files -->
+    <div id="files" class="files"></div>
+  </div>
+  <div id="tabs-2">
+    <p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
+  </div>
+</div>
+ 
+ 
+  <script>
+  $(function () {
+    $('#fileupload').fileupload({
+        url: "server/upload.fcgi",
+        dataType: 'json',
+        done: function (e, data) {
+            console.log("Hello")
+            console.log(JSON.stringify(data.result))
+            $('#progress .progress-bar').css(
+                'width', '0%' );
+            $.each(data.result.files, function (index, file) {
+                console.log("File name = " + file.name)
+                console.log("ID = " + file.id)
+                $('#logDBId').val(file.id);
+                $('<p/>').text(file.name).appendTo('#files');
+            });
+            if (data.result.callsign) {
+              $('#callsignId').val(data.result.callsign);
+            }
+            if (data.result.email) { 
+              $('#emailId').val(data.result.email);
+            }
+            console.log("Done")
+        },
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css(
+                'width',
+                progress + '%'
+            );
+        }
+    }).prop('disabled', !$.support.fileInput)
+        .parent().addClass($.support.fileInput ? undefined :
+    'disabled');
+    $( "#tabs" ).tabs();
+    $( "#supplementalForm" ).validate({
+       rules: {
+         email: "required",
+         confirm: {
+           equalTo: "#emailId"
+         }
+       }
+     });
+});
+  </script>
+</body>
+</html>
