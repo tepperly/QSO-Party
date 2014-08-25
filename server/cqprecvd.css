@@ -1,0 +1,13 @@
+table {
+    width: 80%;
+}
+
+.evenRow {
+    color: black;
+    background-color: white;
+}
+
+.oddRow {
+    color: black;
+    background-color: WhiteSmoke;
+}
