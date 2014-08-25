@@ -13,7 +13,7 @@ require_relative 'database'
 require_relative 'logscan'
 
 CALLSIGN = /^\s*callsign\s*:\s*(\S+)\s*$/i
-LOGDIR="/tmp/logs"
+LOGDIR="/usr/local/cqplogs"
 MAXTRIES=20
 
 $outfile = open("/tmp/foo.txt", "a")
