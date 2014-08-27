@@ -79,10 +79,20 @@ class LogDatabase
     raise DatabaseError, "Foo"
   end
 
-  def addExtra(id, email, phone, comments, county, youth, mobile, female, school, newcontester)
+  def getASCIIFile(id)
+    connect
+    filename = nil
+    if @connection
+      str = "select asciifile from CQPLog where id = #{id.to_i} limit 1;"
+      filename = getOne(str)
+    end
+    filename
+  end
+
+  def addExtra(id,callsign, email, phone, comments, county, youth, mobile, female, school, newcontester)
     connect
     if @connection
-      queryStr = "update CQPLog set emailaddr='#{Mysql2::Client::escape(email)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1 where id = #{id.to_i} limit 1;"
+      queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign)}', emailaddr='#{Mysql2::Client::escape(email)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1 where id = #{id.to_i} limit 1;"
       $outfile.write(queryStr + "\n");
       @connection.query(queryStr)
       true

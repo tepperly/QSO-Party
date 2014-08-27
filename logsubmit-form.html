@@ -46,17 +46,17 @@
     <div id="step-3">
       <h1>Step 3: Provide Supplemental information</h1>
       <form action="server/upload.fcgi" method="post" id="supplementalForm" >
-	<input type="hidden" name="logID" value="-1" id="logDBId" />
-	<label for="callsignId">Callsign:</label>
-	<input type="text" name="callsign" value="" id="callsignId" /><br />
-	<label for="emaiId">Email:</label>
-	<input type="email" name="email" id="emailId" /><br/>
-	<label for="confirmId">Confirm Email:</label>
-	<input type="email" name="confirm" id="confirmId" /><br />
-	<label for="phoneId">Phone Number:</label>
-	<input type="text" name="phone" id="phoneId" /><br />
+	<input type="hidden" name="logID" value="-1" id="logDBId" class="jForm"/>
+	<label for="callsignId">Callsign*:</label>
+	<input type="text" name="callsign" value="" id="callsignId" class="jForm"/><br />
+	<label for="emaiId">Email*:</label>
+	<input type="email" name="email" id="emailId" class="jForm"/><br/>
+	<label for="confirmId">Confirm Email*:</label>
+	<input type="email" name="confirm" id="confirmId" class="jForm"/><br />
+	<label for="phoneId">Phone Number*:</label>
+	<input type="text" name="phone" id="phoneId" class="jForm"/><br />
 	<label for="opclassId">Entry class:</label>
-	<select name="opclass" id="opclassId" >
+	<select name="opclass" id="opclassId" class="jForm">
 	  <option value="single">Single-op</option>
 	  <option value="multi-single">Multi-single</option>
 	  <option value="multi-multi" selected="selected">Multi-multi</option>
@@ -66,46 +66,51 @@
 	  <tr>
             <td width="200" height="25" valign="top">
               <label>
-		<input type="checkbox" name="expedition" value="County Expedition" id="expedition" />
+		<input type="checkbox" name="expedition" value="County Expedition" id="expedition" class="jForm"/>
 		County Expedition</label>
 	    </td>
 	    <td width="200" height="25" valign="top" >
               <label>
-		<input type="checkbox" name="youth" value="Youth" id="youth" />
+		<input type="checkbox" name="youth" value="Youth" id="youth" class="jForm"/>
 		Youth (under 18)</label>
             </td>
             <td width="200" height="25" valign="top" >
               <label>
-		<input type="checkbox" name="mobile" value="Mobile" id="mobile" />
+		<input type="checkbox" name="mobile" value="Mobile" id="mobile" class="jForm"/>
 		Mobile Operation</label>
             </td>
 	  </tr>
 	  <tr>
             <td width="200" height="25" valign="top">
               <label>
-		<input type="checkbox" name="female" value="YL" id="yl" />
+		<input type="checkbox" name="female" value="YL" id="yl" class="jForm"/>
 		YL</label>
             </td>
             <td width="200" height="25" valign="top">
               <label>
-		<input type="checkbox" name="school" value="School" id="school" />
+		<input type="checkbox" name="school" value="School" id="school" class="jForm"/>
 		School</label>
             </td>
             <td width="200" height="25" valign="top">
               <label>
-		<input type="checkbox" name="new" value="New Contester" id="newcontester" />
+		<input type="checkbox" name="new" value="New Contester" id="newcontester" class="jForm"/>
 		New Contester</label>
             </td>
 	  </tr>
 	</table>
 	<label for="commentId">Comments:</label><br>
-	<textarea name="comments" id="commentId"cols="80" 
-		  rows="5"></textarea><br>
-        <button type="submit" size="50">Submit</button>
+	<textarea name="comments" id="commentId" cols="80" 
+		  rows="5" class="jForm"></textarea><br>
+        <button type="submit" id="submit" size="50" class="jForm">Submit</button>
+	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
-    <!-- The container for the uploaded files -->
-    <div id="files" class="files"></div>
+    <div id="doneMsg" style="visibility: hidden;"><p>Upload Completed!</p></div>
+    <div id="reminder" >
+      <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
+	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.</p>
+      </p>
+    </div>
   </div>
   <div id="tabs-2">
     <p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
@@ -115,8 +120,12 @@
  
   <script>
   $(function () {
+    var urlval = "server/upload.fcgi";
+    $('#step-2').fadeTo(100, 0.4);
+    $('.jForm').prop("disabled", true);
+    $('#step-3').fadeTo(100, 0.4);
     $('#fileupload').fileupload({
-        url: "server/upload.fcgi",
+        url: urlval,
         dataType: 'json',
         done: function (e, data) {
             console.log("Hello")
@@ -127,7 +136,6 @@
                 console.log("File name = " + file.name)
                 console.log("ID = " + file.id)
                 $('#logDBId').val(file.id);
-                $('<p/>').text(file.name).appendTo('#files');
             });
             if (data.result.callsign) {
               $('#callsignId').val(data.result.callsign);
@@ -135,6 +143,11 @@
             if (data.result.email) { 
               $('#emailId').val(data.result.email);
             }
+            $('#step-1').fadeTo(100, 0.4);
+            $('#fileupload').fileupload("disable");
+            $('#step-2').fadeTo(100, 1.0);
+            $('.jForm').prop("disabled", false);
+            $('#step-3').fadeTo(100, 1.0);
             console.log("Done")
         },
         progressall: function (e, data) {
@@ -156,6 +169,37 @@
          }
        }
      });
+    $("#supplementalForm" ).submit(function(ev) {
+      var urlval = "server/upload.fcgi";
+      $.ajax({
+          type: "POST",
+          url : urlval,
+          data: $("#supplementalForm").serialize(),
+          success: function(data)
+          {
+             $("#logDBId").val("");
+             $("#callsignId").val("");
+             $("#emailId").val("");
+             $("#confirmId").val("");
+             $("#phoneId").val("");
+             $("#opclassId").val("multi-multi");
+             $("#commentId").val("");
+             $("#expedition").prop("checked", false);
+             $("#youth").prop("checked", false);
+             $("#mobile").prop("checked", false);
+             $("#yl").prop("checked", false);
+             $("#school").prop("checked", false);
+             $("#newcontester").prop("checked", false);
+             $("#doneMsg").css("visibility", "visible");
+             $('#step-1').fadeTo(100, 1.0);
+             $('#fileupload').fileupload("enable");
+             $('#step-2').fadeTo(100, 0.4);
+             $('.jForm').prop("disabled", true);
+             $('#step-3').fadeTo(100, 0.4);
+          }
+      });
+      ev.preventDefault();
+    });
 });
   </script>
 </body>

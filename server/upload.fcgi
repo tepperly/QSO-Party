@@ -11,6 +11,7 @@ require 'json'
 require_relative 'charset'
 require_relative 'database'
 require_relative 'logscan'
+require_relative 'patchlog'
 
 CALLSIGN = /^\s*callsign\s*:\s*(\S+)\s*$/i
 LOGDIR="/usr/local/cqplogs"
@@ -159,11 +160,32 @@ else
                    value.class.to_s + "\n")
   }
   if hasRequired(request)
-    db.addExtra(request["logID"].to_i, request["email"], request["phone"],
+    db.addExtra(request["logID"].to_i, request["callsign"],
+                request["email"], request["phone"],
                 request["comments"],
                 checkBox(request, "expedition"), checkBox(request, "youth"),
                 checkBox(request, "mobile"), checkBox(request, "female"),
                 checkBox(request, "school"), checkBox(request, "new"))
+    asciiFile = db.getASCIIFile(request["logID"].to_i)
+    if asciiFile
+      attrib = makeAttributes(request["logID"].to_i, request["callsign"],
+                              request["email"], request["confirm"], request["phone"],
+                              request["comments"],
+                              checkBox(request, "expedition"), checkBox(request, "youth"),
+                              checkBox(request, "mobile"), checkBox(request, "female"),
+                              checkBox(request, "school"), checkBox(request, "new"))
+      open(asciiFile,File::Constants::RDONLY,
+           :encoding => "US-ASCII") { |io|
+        content = io.read()
+        content = patchLog(content, attrib) # add X-CQP lines
+        open(asciiFile.gsub(/\.ascii$/, ".log"), 
+             File::Constants::CREAT | File::Constants::EXCL | 
+             File::Constants::WRONLY,
+             :encoding => "US-ASCII") { |lout|
+          lout.write(content)
+        }
+      }
+    end
   else
     $outfile.write("Missing some of required\n")
   end
