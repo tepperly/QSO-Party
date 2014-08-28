@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
 <link rel="stylesheet" href="css/jquery.fileupload.css">
+  <link rel="stylesheet" href="css/cqp_style.css">
   <script src="//code.jquery.com/jquery-1.11.1.js"></script>
   <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
   <script src="js/vendor/jquery.ui.widget.js"></script>
@@ -19,7 +20,7 @@
 
 </head>
 <body>
- 
+<img  src="images/cqplogo80075.jpg" /> 
 <div id="tabs" style="display: none">
   <ul>
     <li><a href="#tabs-1">Upload or drag-and-drop</a></li>
@@ -123,7 +124,7 @@
       <h1>Step 1: Cut-n-paste Cabrillo file</h1>
       <form id="cutnpaste" action="server/upload.fcgi" method="post" accept-charset="UTF-8">
 	<label for="cabcontentId">Paste your log here:</label><br>
-	<textarea name="cabcontent" id="cabcontentId" cols="100" 
+	<textarea name="cabcontent" id="cabcontentId" cols="100" wrap="off"
 		  rows="5" ></textarea><br>
 	<button type="submit" id="cabsubmit">Submit</button>
       </form>
@@ -190,7 +191,7 @@
 	  </tr>
 	</table>
 	<label for="AltcommentId">Comments:</label><br>
-	<textarea name="comments" id="AltcommentId" cols="80" 
+	<textarea name="comments" id="AltcommentId" cols="80"
 		  rows="5" class="jForma"></textarea><br>
         <button type="submit" id="Altsubmit" size="50" class="jForma">Submit</button>
 	<p>* Indicates <strong>required</strong> fields.
@@ -209,7 +210,7 @@
   <h1>Upload your CQP Load</h1>
   <form id="OneForm" action="server/upload.fcgi" method="post" accept-charset="UTF-8">
     <label for="ALLcabcontentId">Paste your log here:</label><br>
-    <textarea name="cabcontent" id="ALLcabcontentId" cols="100" 
+    <textarea name="cabcontent" id="ALLcabcontentId" cols="100" wrap="off"
 	      rows="5" ></textarea><br>
     <input type="hidden" name="logID" value="-1" id="ALLlogDBId" class="jFormb"/>
     <label for="ALLcallsignId">Callsign*:</label>
@@ -264,7 +265,7 @@
       </tr>
     </table>
     <label for="ALLcommentId">Comments:</label><br>
-    <textarea name="comments" id="ALLcommentId" cols="80" 
+    <textarea name="comments" id="ALLcommentId" cols="80" wrap="off"
 	      rows="5" class="jFormb"></textarea><br>
     <button type="submit" id="ALLsubmit" size="50" class="jFormb">Submit</button>
     <button type="reset" id="ALLreset" size="50" value="Reset" class="jFormb">Reset</button>
