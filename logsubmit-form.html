@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <title>CQP Log Submission Form</title>
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 40x40 64x64 128x128" type="image/vnd.microsoft.icon">
+
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
@@ -18,13 +20,15 @@
 </head>
 <body>
  
-<div id="tabs">
+<div id="tabs" style="display: none">
   <ul>
     <li><a href="#tabs-1">Upload or drag-and-drop</a></li>
     <li><a href="#tabs-2">Traditional cut-and-paste</a></li>
   </ul>
   <div id="tabs-1">
     <div id="step-1">
+      <p>Uploading a CQP Cabrillo file is as easy as 1, 2, 3.  Please complete all three steps to complete
+	your contest entry.</p>
       <h1>Step 1: Upload Cabrillo file</h1>
       <span class="btn btn-success fileinput-button">
         <i class="glyphicon glyphicon-plus"></i>
@@ -105,7 +109,7 @@
 	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
-    <div id="doneMsg" style="visibility: hidden;"><p>Upload Completed!</p></div>
+    <div id="doneMsg" style="visibility: hidden;"><p><strong>Upload Completed!</strong></p></div>
     <div id="reminder" >
       <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
 	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.</p>
@@ -113,22 +117,183 @@
     </div>
   </div>
   <div id="tabs-2">
-    <p>Morbi tincidunt, dui sit amet facilisis feugiat, odio metus gravida ante, ut pharetra massa metus id nunc. Duis scelerisque molestie turpis. Sed fringilla, massa eget luctus malesuada, metus eros molestie lectus, ut tempus eros massa ut dolor. Aenean aliquet fringilla sem. Suspendisse sed ligula in ligula suscipit aliquam. Praesent in eros vestibulum mi adipiscing adipiscing. Morbi facilisis. Curabitur ornare consequat nunc. Aenean vel metus. Ut posuere viverra nulla. Aliquam erat volutpat. Pellentesque convallis. Maecenas feugiat, tellus pellentesque pretium posuere, felis lorem euismod felis, eu ornare leo nisi vel felis. Mauris consectetur tortor et purus.</p>
+    <div id="step-1a">
+      <p>Uploading a CQP Cabrillo file is as easy as 1, 2, 3.  Please complete all three steps to complete
+	your contest entry.</p>
+      <h1>Step 1: Cut-n-paste Cabrillo file</h1>
+      <form id="cutnpaste" action="server/upload.fcgi" method="post" accept-charset="UTF-8">
+	<label for="cabcontentId">Paste your log here:</label><br>
+	<textarea name="cabcontent" id="cabcontentId" cols="100" 
+		  rows="5" ></textarea><br>
+	<button type="submit" id="cabsubmit">Submit</button>
+      </form>
+    </div>
+    <div id="step-2a">
+      <h1>Step 2: Review Cabrillo file</h1>
+      <p>If there are errors, please fix the problems in your Cabrillo
+      file on your computer and then upload the fixed Cabrillo
+      file.</p>
+    </div>
+    <div id="step-3a">
+      <h1>Step 3: Provide Supplemental information</h1>
+      <form action="server/upload.fcgi" method="post" id="AltsupplementalForm" >
+	<input type="hidden" name="logID" value="-1" id="AltlogDBId" class="jForma"/>
+	<label for="AltcallsignId">Callsign*:</label>
+	<input type="text" name="callsign" value="" id="AltcallsignId" class="jForma"/><br />
+	<label for="AltemaiId">Email*:</label>
+	<input type="email" name="email" id="AltemailId" class="jForma"/><br/>
+	<label for="AltconfirmId">Confirm Email*:</label>
+	<input type="email" name="confirm" id="AltconfirmId" class="jForma"/><br />
+	<label for="AltphoneId">Phone Number*:</label>
+	<input type="text" name="phone" id="AltphoneId" class="jForma"/><br />
+	<label for="AltopclassId">Entry class:</label>
+	<select name="opclass" id="AltopclassId" class="jForma">
+	  <option value="single">Single-op</option>
+	  <option value="multi-single">Multi-single</option>
+	  <option value="multi-multi" selected="selected">Multi-multi</option>
+	</select>
+	<p><b>Categories</b> (check all that apply)</p>
+	<table>
+	  <tr>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="expedition" value="County Expedition" id="Altexpedition" class="jForma"/>
+		County Expedition</label>
+	    </td>
+	    <td width="200" height="25" valign="top" >
+              <label>
+		<input type="checkbox" name="youth" value="Youth" id="Altyouth" class="jForma"/>
+		Youth (under 18)</label>
+            </td>
+            <td width="200" height="25" valign="top" >
+              <label>
+		<input type="checkbox" name="mobile" value="Mobile" id="Altmobile" class="jForma"/>
+		Mobile Operation</label>
+            </td>
+	  </tr>
+	  <tr>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="female" value="YL" id="Altyl" class="jForma"/>
+		YL</label>
+            </td>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="school" value="School" id="Altschool" class="jForma"/>
+		School</label>
+            </td>
+            <td width="200" height="25" valign="top">
+              <label>
+		<input type="checkbox" name="new" value="New Contester" id="Altnewcontester" class="jForma"/>
+		New Contester</label>
+            </td>
+	  </tr>
+	</table>
+	<label for="AltcommentId">Comments:</label><br>
+	<textarea name="comments" id="AltcommentId" cols="80" 
+		  rows="5" class="jForma"></textarea><br>
+        <button type="submit" id="Altsubmit" size="50" class="jForma">Submit</button>
+	<p>* Indicates <strong>required</strong> fields.
+      </form>
+    </div>
+    <div id="AltdoneMsg" style="visibility: hidden;"><p><strong>Upload Completed!</strong></p></div>
+    <div id="Altreminder" >
+      <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
+	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.</p>
+      </p>
+    </div>
   </div>
 </div>
+
+<div id="AllInOne"> 
+  <h1>Upload your CQP Load</h1>
+  <form id="OneForm" action="server/upload.fcgi" method="post" accept-charset="UTF-8">
+    <label for="ALLcabcontentId">Paste your log here:</label><br>
+    <textarea name="cabcontent" id="ALLcabcontentId" cols="100" 
+	      rows="5" ></textarea><br>
+    <input type="hidden" name="logID" value="-1" id="ALLlogDBId" class="jFormb"/>
+    <label for="ALLcallsignId">Callsign*:</label>
+    <input type="text" name="callsign" value="" id="ALLcallsignId" class="jFormb"/><br />
+    <label for="ALLemaiId">Email*:</label>
+    <input type="email" name="email" id="ALLemailId" class="jFormb"/><br/>
+    <label for="ALLconfirmId">Confirm Email*:</label>
+    <input type="email" name="confirm" id="ALLconfirmId" class="jFormb"/><br />
+    <label for="ALLphoneId">Phone Number*:</label>
+    <input type="text" name="phone" id="ALLphoneId" class="jFormb"/><br />
+    <label for="ALLopclassId">Entry class:</label>
+    <select name="opclass" id="ALLopclassId" class="jFormb">
+      <option value="single">Single-op</option>
+      <option value="multi-single">Multi-single</option>
+      <option value="multi-multi" selected="selected">Multi-multi</option>
+    </select>
+    <p><b>Categories</b> (check all that apply)</p>
+    <table>
+      <tr>
+        <td width="200" height="25" valign="top">
+          <label>
+	    <input type="checkbox" name="expedition" value="County Expedition" id="ALLexpedition" class="jFormb"/>
+	    County Expedition</label>
+	</td>
+	<td width="200" height="25" valign="top" >
+          <label>
+	    <input type="checkbox" name="youth" value="Youth" id="ALLyouth" class="jFormb"/>
+	    Youth (under 18)</label>
+        </td>
+        <td width="200" height="25" valign="top" >
+          <label>
+	    <input type="checkbox" name="mobile" value="Mobile" id="ALLmobile" class="jFormb"/>
+	    Mobile Operation</label>
+        </td>
+      </tr>
+      <tr>
+        <td width="200" height="25" valign="top">
+          <label>
+	    <input type="checkbox" name="female" value="YL" id="ALLyl" class="jFormb"/>
+	    YL</label>
+        </td>
+        <td width="200" height="25" valign="top">
+          <label>
+	    <input type="checkbox" name="school" value="School" id="ALLschool" class="jFormb"/>
+	    School</label>
+        </td>
+        <td width="200" height="25" valign="top">
+          <label>
+	    <input type="checkbox" name="new" value="New Contester" id="ALLnewcontester" class="jFormb"/>
+	    New Contester</label>
+        </td>
+      </tr>
+    </table>
+    <label for="ALLcommentId">Comments:</label><br>
+    <textarea name="comments" id="ALLcommentId" cols="80" 
+	      rows="5" class="jFormb"></textarea><br>
+    <button type="submit" id="ALLsubmit" size="50" class="jFormb">Submit</button>
+    <button type="reset" id="ALLreset" size="50" value="Reset" class="jFormb">Reset</button>
+    <p>* Indicates <strong>required</strong> fields.
+  </form>
+    <div id="Altreminder" >
+      <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
+	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.</p>
+      </p>
+    </div>
+</div>
+
  
- 
-  <script>
+<script>
   $(function () {
     var urlval = "server/upload.fcgi";
+    $('#tabs').show();
+    $('#AllInOne').hide();
     $('#step-2').fadeTo(100, 0.4);
     $('.jForm').prop("disabled", true);
     $('#step-3').fadeTo(100, 0.4);
+    $('#step-2a').fadeTo(100, 0.4);
+    $('.jForma').prop("disabled", true);
+    $('#step-3a').fadeTo(100, 0.4);
     $('#fileupload').fileupload({
         url: urlval,
         dataType: 'json',
         done: function (e, data) {
-            console.log("Hello")
+            console.log("Success 4");
             console.log(JSON.stringify(data.result))
             $('#progress .progress-bar').css(
                 'width', '0%' );
@@ -160,7 +325,7 @@
     }).prop('disabled', !$.support.fileInput)
         .parent().addClass($.support.fileInput ? undefined :
     'disabled');
-    $( "#tabs" ).tabs();
+    $( "#tabs" ).tabs({ active: 0});
     $( "#supplementalForm" ).validate({
        rules: {
          email: "required",
@@ -175,8 +340,8 @@
           type: "POST",
           url : urlval,
           data: $("#supplementalForm").serialize(),
-          success: function(data)
-          {
+          success: function(data) {
+             console.log("Success 3");
              $("#logDBId").val("");
              $("#callsignId").val("");
              $("#emailId").val("");
@@ -200,7 +365,91 @@
       });
       ev.preventDefault();
     });
-});
-  </script>
+    $( "#AltsupplementalForm" ).validate({
+       rules: {
+         email: "required",
+         confirm: {
+           equalTo: "#AltemailId"
+         }
+       }
+     });
+    $('#AltsupplementalForm').submit(function(ev) {
+      var urlval = "server/upload.fcgi";
+      $.ajax({
+          type: "POST",
+          dataType: "json",
+          url : urlval,
+          data: $("#AltsupplementalForm").serialize(),
+          success: function(data) {
+             console.log("Success 2");
+             $("#AltlogDBId").val("");
+             $("#AltcallsignId").val("");
+             $("#AltemailId").val("");
+             $("#AltconfirmId").val("");
+             $("#AltphoneId").val("");
+             $("#AltopclassId").val("multi-multi");
+             $("#AltcommentId").val("");
+             $("#Altexpedition").prop("checked", false);
+             $("#Altyouth").prop("checked", false);
+             $("#Altmobile").prop("checked", false);
+             $("#Altyl").prop("checked", false);
+             $("#Altschool").prop("checked", false);
+             $("#Altnewcontester").prop("checked", false);
+             $("#AltdoneMsg").css("visibility", "visible");
+             $('#step-1a').fadeTo(100, 1.0);
+             $('#fileupload').fileupload("enable");
+             $('#step-2a').fadeTo(100, 0.4);
+             $('.jForma').prop("disabled", true);
+             $('#step-3a').fadeTo(100, 0.4);
+          },
+          error: function(xhr, tstatus, errthrn)  {
+             console.log("Error 2");
+             console.log(xhr.responseText);
+             console.log(tstatus);
+             console.log(errthrn);
+          }
+      });
+      ev.preventDefault();
+    });
+
+    $('#cutnpaste' ).submit(function(ev) {
+      var urlval = "server/upload.fcgi";
+      $.ajax({
+          type: "POST",
+          url : urlval,
+          dataType: "json",
+          data: $("#cutnpaste").serialize(),
+          success: function(data) {
+             console.log("Success 1");
+             $('#step-1a').fadeTo(100, 0.4);
+             $('#cabcontentId').val("");
+             $('#step-2a').fadeTo(100, 1.0);
+             $('.jForma').prop("disabled", false);
+             $('#step-3a').fadeTo(100, 1.0);
+             console.log(data);
+             $.each(data.files, function (index, file) {
+                console.log("ID = " + file.id)
+                $('#AltlogDBId').val(file.id);
+              });
+              if (data.callsign) {
+                $('#AltcallsignId').val(data.callsign);
+              }
+              if (data.email) { 
+                $('#AltemailId').val(data.email);
+              }
+             $('#cabcontentId').prop("disabled", true);
+             console.log("Success 1 done");
+          },
+          error: function(xhr, tstatus, errthrn)      {
+             console.log("Error 1");
+             console.log(xhr.responseText);
+             console.log(tstatus);
+             console.log(errthrn);
+          }
+      });
+      ev.preventDefault();
+    });
+  });
+</script>
 </body>
 </html>

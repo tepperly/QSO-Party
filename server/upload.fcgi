@@ -98,6 +98,7 @@ end
 request = CGI.new
 timestamp = Time.new.utc
 db = LogDatabase.new
+logID=nil
 jsonout = { }
 if request.multipart?
   $outfile.write("Received multipart request\n")
@@ -133,18 +134,16 @@ if request.multipart?
     saveLog(encodedContent.encoding.to_s, callsign, "encoding", timestamp,
             Encoding::US_ASCII)
     if untouchedFilename and asciiFilename
-      id = db.addLog(callsign, untouchedFilename, asciiFilename,
+      logID = db.addLog(callsign, untouchedFilename, asciiFilename,
                      encodedContent.encoding.to_s,
                      timestamp, Digest::SHA1.hexdigest(content).to_s)
-    else
-      id = nil
     end
 
     $outfile.write("content length=" + content.length.to_s + "\n")
     $outfile.write("content encoding=" + content.encoding.to_s + "\n")
     $outfile.write("content SHA1=" + Digest::SHA1.hexdigest(content).to_s + "\n" )
-    if id
-      fileent["id"]=id.to_i
+    if logID
+      fileent["id"]=logID.to_i
     end
     jsonout["files"].push(fileent)
     jsonout["callsign"] = callsign
@@ -159,16 +158,49 @@ else
     $outfile.write("cgi[" + key.to_s + "] = '" + value.to_s + "' of type " +
                    value.class.to_s + "\n")
   }
+  if request.has_key?("cabcontent")
+    jsonout["files"] = [ ]
+    fileent = { }
+    content = request["cabcontent"]
+    $outfile.write("content encoding=" + content.encoding.to_s + "\n")
+    encodedContent = content
+    probableEncoding = Encoding::UTF_8
+    callsign = getCallsign(content)
+    if not callsign
+      callsign="UNKNOWN"
+    end
+    untouchedFilename = saveLog(content, callsign, "virgin", timestamp)
+    asciiFilename = saveLog(encodedContent, callsign, "ascii", timestamp, Encoding::US_ASCII)
+    saveLog(encodedContent.encoding.to_s, callsign, "encoding", timestamp,
+            Encoding::US_ASCII)
+    if untouchedFilename and asciiFilename
+      logID = db.addLog(callsign, untouchedFilename, asciiFilename,
+                     encodedContent.encoding.to_s,
+                     timestamp, Digest::SHA1.hexdigest(content.clone.force_encoding(Encoding::ASCII_8BIT)).to_s)
+    end
+    if logID
+      fileent["id"] = logID.to_i
+    end
+    jsonout["files"].push(fileent)
+    jsonout["callsign"] = callsign
+    email = guessEmail(encodedContent)
+    if email
+      jsonout["email"] = email
+    end
+  end
   if hasRequired(request)
-    db.addExtra(request["logID"].to_i, request["callsign"],
+    if not logID
+      logID = request["logID"].to_i
+    end
+    db.addExtra(logID, request["callsign"],
                 request["email"], request["phone"],
                 request["comments"],
                 checkBox(request, "expedition"), checkBox(request, "youth"),
                 checkBox(request, "mobile"), checkBox(request, "female"),
                 checkBox(request, "school"), checkBox(request, "new"))
-    asciiFile = db.getASCIIFile(request["logID"].to_i)
+    asciiFile = db.getASCIIFile(logID)
     if asciiFile
-      attrib = makeAttributes(request["logID"].to_i, request["callsign"],
+      attrib = makeAttributes(logID, request["callsign"],
                               request["email"], request["confirm"], request["phone"],
                               request["comments"],
                               checkBox(request, "expedition"), checkBox(request, "youth"),

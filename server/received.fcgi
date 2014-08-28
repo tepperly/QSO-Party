@@ -37,6 +37,7 @@ class CallsignReport
     @request.out() {
       html = @request.html() { 
         @request.head() { 
+          @request.link("href" => "../favicon.ico", "rel" => "icon", "sizes" => "16x16 32x32 40x40 64x64 128x128", "type" => "image/vnd.microsoft.icon" ) +
           @request.title { "CQP Callsigns Confirmed Received" } +
           @request.link("href" => "cqprecvd.css", "rel"=>"stylesheet")  { }+
           @request.style() {
