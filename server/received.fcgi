@@ -5,16 +5,20 @@
 # ns6t@arrl.net
 #
 #
-require 'cgi'
+require 'fcgi'
 require_relative 'database'
 
 
 class CallsignReport
   NUMCOLUMNS = 4
 
-  def initialize(req)
+  def initialize(req, db = nil)
     @request = req
-    @db = LogDatabase.new
+    if db
+      @db = db
+    else
+      @db = LogDatabase.new
+    end
     @timestamp = Time.new.utc
 
   end
@@ -39,8 +43,9 @@ class CallsignReport
         @request.head() { 
           @request.link("href" => "../favicon.ico", "rel" => "icon", "sizes" => "16x16 32x32 40x40 64x64 128x128", "type" => "image/vnd.microsoft.icon" ) +
           @request.title { "CQP Callsigns Confirmed Received" } +
-          @request.link("href" => "cqprecvd.css", "rel"=>"stylesheet")  { }+
-          @request.style() {
+          @request.link("href" => "cqprecvd.css", "rel"=>"stylesheet", 
+                        "type" => "text/css")  { }+
+          @request.style("type" => "text/css") {
             "th, td { 
                width: " + (100.0/table.length).to_s + "%;
              }
@@ -48,7 +53,9 @@ class CallsignReport
           }
         } +
         @request.body() {
-          @request.img("src" => "../images/cqplogo80075.jpg", "alt" => "California QSO Party") +
+          @request.div("id" => "masthead") {
+             @request.img("src" => "../images/cqplogo80075.jpg", "alt" => "California QSO Party") 
+          } +
           @request.h1() { "CQP 2014 Logs Received" } +
           @request.p() { "The call signs for all logs received are
     shown below. Please ensure any log you've submitted is shown
@@ -85,5 +92,8 @@ class CallsignReport
   end
 end
 
-csr = CallsignReport.new(CGI.new("html4"))
-csr.report
+ldb = LogDatabase.new
+FCGI.each_cgi("html4") { |cgi|
+  csr = CallsignReport.new(cgi, ldb)
+  csr.report
+}

@@ -29,6 +29,7 @@ class LogDatabase
     if not @connection
       @connection = Mysql2::Client.new(:host => "localhost",
                                        :username => "cqpuser",
+                                       :reconnect => true,
                                        :password => "cqp234ddx")
       if @connection 
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")

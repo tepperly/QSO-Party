@@ -16,3 +16,7 @@ h1 {
     width: 150px;
     text-align: right;
 }
+
+#cabcontentId, #ALLcabcontentId {
+    font-family: "Courier New", "Lucida Console", monospace;
+}
