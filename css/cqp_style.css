@@ -1,0 +1,18 @@
+h1 {
+    font-family: Trebuchet, Verdana, Sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1.75em;
+    margin: 0.4 0;
+}
+
+.catCol {
+    width: 200px;
+    height: 25px;
+    vertical-align: top;
+}
+
+.inLabel {
+    width: 150px;
+    text-align: right;
+}
