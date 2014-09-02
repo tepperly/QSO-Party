@@ -36,7 +36,7 @@ class CallsignReport
     table
   end
 
-  def generateHTML(table)
+  def generateHTML(table, num)
     count = 0
     @request.out() {
       html = @request.html() { 
@@ -77,7 +77,7 @@ class CallsignReport
               }
             }
           } +
-          @request.p() { "Data based on logs received before: " +
+          @request.p() { "Data based on #{num} logs received before: " +
             @timestamp.to_s + "." }
         }
       }
@@ -88,7 +88,7 @@ class CallsignReport
   def report
     callsigns = @db.callsignsRcvd()
     table = splitIntoColumns(callsigns)
-    generateHTML(table)
+    generateHTML(table, callsigns.length)
   end
 end
 

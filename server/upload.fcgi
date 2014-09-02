@@ -40,6 +40,7 @@ def logFilename(prefix, suffix, time, numtry)
 end
 
 def saveLog(content, fileprefix, filesuffix, time, encoding=nil)
+  fileprefix = fileprefix.gsub(/[^A-Za-z0-9]/, "_")
   filename = nil
   if (not encoding) or (content.encoding == encoding)
     converted = content
@@ -70,7 +71,7 @@ def saveLog(content, fileprefix, filesuffix, time, encoding=nil)
 end
 
 def hasRequired(request)
-  required = [ "email", "confirm", "phone", "logID", "comments" ]
+  required = [ "email", "confirm", "phone", "logID", "comments", "opclass" ]
   # "expedition", "youth", "female", "school", "new", "logID" ]
   required.each { |key|
     if not request.has_key?(key)
@@ -193,7 +194,9 @@ FCGI.each_cgi { |request|
         logID = request["logID"].to_i
       end
       db.addExtra(logID, request["callsign"],
-                  request["email"], request["phone"],
+                  request["email"], 
+                  request["opclass"],
+                  request["phone"],
                   request["comments"],
                   checkBox(request, "expedition"), checkBox(request, "youth"),
                   checkBox(request, "mobile"), checkBox(request, "female"),
@@ -222,6 +225,8 @@ FCGI.each_cgi { |request|
 #      $outfile.write("Missing some of required\n")
     end
   end
+  content = nil
+  encodedConent = nil
   request.out("text/javascript") { jsonout.to_json }
 #  $outfile.flush
 }
