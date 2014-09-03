@@ -30,7 +30,7 @@ class LogDatabase
       @connection = Mysql2::Client.new(:host => CQPConfig::DATABASE_HOST,
                                        :username => CQPConfig::DATABASE_USER,
                                        :reconnect => true,
-                                       :password => CQPConfig::DATABAES_PASSWORD)
+                                       :password => CQPConfig::DATABASE_PASSWORD)
       if @connection 
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")
         @connection.query("use CQPUploads;")
