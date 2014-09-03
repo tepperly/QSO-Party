@@ -11,7 +11,7 @@ require 'net/http/post/multipart'
 require 'json'
 require 'getoptlong'
 
-$email = "tepperly@gmail.com"
+$email = "cqp.test2014@gmail.com"
 $phone = "925-961-0777"
 
 
