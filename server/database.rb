@@ -10,7 +10,7 @@
 # flush privileges;
 #
 
-
+require_relative 'config'
 require 'mysql2'
 
 class DatabaseError < Exception
@@ -27,10 +27,10 @@ class LogDatabase
 
   def connect
     if not @connection
-      @connection = Mysql2::Client.new(:host => "localhost",
-                                       :username => "cqpuser",
+      @connection = Mysql2::Client.new(:host => CQPConfig::DATABASE_HOST,
+                                       :username => CQPConfig::DATABASE_USER,
                                        :reconnect => true,
-                                       :password => "cqp234ddx")
+                                       :password => CQPConfig::DATABAES_PASSWORD)
       if @connection 
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")
         @connection.query("use CQPUploads;")
