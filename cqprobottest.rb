@@ -234,6 +234,14 @@ end
 
 OPCLASSES = [ "single", "multi-single", "multi-multi", "checklog" ]
 
+SENTQTH = %w( ALAM ALPI AMAD BUTT CALA CCOS COLU DELN ELDO FRES GLEN
+HUMB IMPE INYO KERN KING LAKE LANG LASS MADE MARN MARP MEND MERC MODO
+MONO MONT NAPA NEVA ORAN PLAC PLUM RIVE SACR SBAR SBEN SBER SCLA SCRU
+SDIE SFRA SHAS SIER SISK SJOA SLUI SMAT SOLA SONO STAN SUTT TEHA TRIN
+TULA TUOL VENT YOLO YUBA AL MI TX AK MN UT UT AZ MS VT AR MO VA MT WA
+CO NE WV CT NV WI DE NH WY FL NJ GA NM MR HI NY ID NC IL ND IN OH QC
+IA OK ON KS OR MB KY PA SK LA RI AB ME SC BC MD SD NT MA TN DX )
+
 def randomHdr(id, callsign)
   hdr = { }
   hdr["logID"] = id
@@ -241,6 +249,7 @@ def randomHdr(id, callsign)
   hdr["email"] = $email
   hdr["confirm"] = $email
   hdr["phone"] = $phone
+  hdr["sentQTH"] = SENTQTH[rand(SENTQTH.length)]
   hdr["opclass"] = OPCLASSES[rand(OPCLASSES.length)]
   [ "expedition", "youth", "mobile", "female", "school", "new" ].each { |label|
     if rand(2) == 1
