@@ -60,6 +60,8 @@
 	<input type="email" name="confirm" id="confirmId" class="jForm"/><br />
 	<label for="phoneId" class="inLabel">Phone Number*:</label>
 	<input type="text" name="phone" id="phoneId" class="jForm"/><br />
+	<label for="sentQTHId" class="inLabel">Sent QTH:</label>
+	<input type="text" name="sentQTH" id="sentQTHId" class="jForm"/><br />
 	<label for="opclassId" class="inLabel">Entry class:</label>
 	<select name="opclass" id="opclassId" class="jForm">
 	  <option value="single">Single-op</option>
@@ -148,6 +150,8 @@
 	<input type="email" name="confirm" id="AltconfirmId" class="jForma"/><br />
 	<label for="AltphoneId" class="inLabel">Phone Number*:</label>
 	<input type="text" name="phone" id="AltphoneId" class="jForma"/><br />
+	<label for="AltsentQTHId" class="inLabel">Sent QTH:</label>
+	<input type="text" name="sentQTH" id="AltsentQTHId" class="jForm"/><br />
 	<label for="AltopclassId" class="inLabel">Entry class:</label>
 	<select name="opclass" id="AltopclassId" class="jForma">
 	  <option value="single">Single-op</option>
@@ -222,6 +226,8 @@
     <input type="email" name="confirm" id="ALLconfirmId" class="jFormb"/><br />
     <label for="ALLphoneId" class="inLabel">Phone Number*:</label>
     <input type="text" name="phone" id="ALLphoneId" class="jFormb"/><br />
+    <label for="ALLsentQTHId" class="inLabel">Sent QTH:</label>
+    <input type="text" name="sentQTH" id="ALLsentQTHId" class="jForm"/><br />
     <label for="ALLopclassId" class="inLabel">Entry class:</label>
     <select name="opclass" id="ALLopclassId" class="jFormb">
       <option value="single">Single-op</option>
@@ -349,6 +355,7 @@
              $("#emailId").val("");
              $("#confirmId").val("");
              $("#phoneId").val("");
+             $("#sentQTHId").val("");
              $("#opclassId").val("multi-multi");
              $("#commentId").val("");
              $("#expedition").prop("checked", false);
@@ -389,6 +396,7 @@
              $("#AltemailId").val("");
              $("#AltconfirmId").val("");
              $("#AltphoneId").val("");
+             $("#AltsentQTHId").val("");
              $("#AltopclassId").val("multi-multi");
              $("#AltcommentId").val("");
              $("#Altexpedition").prop("checked", false);

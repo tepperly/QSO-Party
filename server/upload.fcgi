@@ -196,6 +196,7 @@ FCGI.each_cgi { |request|
       db.addExtra(logID, request["callsign"],
                   request["email"], 
                   request["opclass"],
+                  request["sentqth"],
                   request["phone"],
                   request["comments"],
                   checkBox(request, "expedition"), checkBox(request, "youth"),
@@ -204,7 +205,9 @@ FCGI.each_cgi { |request|
       asciiFile = db.getASCIIFile(logID)
       if asciiFile
         attrib = makeAttributes(logID, request["callsign"],
-                                request["email"], request["confirm"], request["phone"],
+                                request["email"], request["confirm"], 
+                                request["sentqth"],
+                                request["phone"],
                                 request["comments"],
                                 checkBox(request, "expedition"), checkBox(request, "youth"),
                                 checkBox(request, "mobile"), checkBox(request, "female"),

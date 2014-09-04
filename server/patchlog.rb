@@ -43,10 +43,11 @@ def patchLog(content, attributes)
   content
 end
 
-def makeAttributes(id, callsign, email, email_confirm, phone, comments,
+def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, comments,
                    expedition, youth, mobile, female, school, newcontester)
   result = { }
   result['X-CQP-CALLSIGN'] = callsign
+  result['X-CQP-SENTQTH'] = sentqth
   result['X-CQP-EMAIL'] = email
   result['X-CQP-CONFIRM1'] = email_confirm
   result['X-CQP-PHONE'] = phone

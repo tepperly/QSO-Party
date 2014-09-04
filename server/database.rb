@@ -34,7 +34,7 @@ class LogDatabase
       if @connection 
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")
         @connection.query("use CQPUploads;")
-        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass char(32), uploadtime datetime, emailaddr varchar(256), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1), index callindex (callsign asc));")
+        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass char(32), uploadtime datetime, emailaddr varchar(256), sentqth varchar(64), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1), index callindex (callsign asc));")
       else
         @connection.query("use CQPUploads;")
       end
@@ -92,10 +92,10 @@ class LogDatabase
     filename
   end
 
-  def addExtra(id,callsign, email, opclass, phone, comments, county, youth, mobile, female, school, newcontester)
+  def addExtra(id,callsign, email, opclass, sentqth, phone, comments, county, youth, mobile, female, school, newcontester)
     connect
     if @connection
-      queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign)}', opclass='#{Mysql2::Client::escape(opclass)}', emailaddr='#{Mysql2::Client::escape(email)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1 where id = #{id.to_i} limit 1;"
+      queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign)}', opclass='#{Mysql2::Client::escape(opclass)}', emailaddr='#{Mysql2::Client::escape(email)}', sentqth='#{Mysql2::Client::escape(sentqth)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1 where id = #{id.to_i} limit 1;"
 #      $outfile.write(queryStr + "\n");
       @connection.query(queryStr)
       true
