@@ -234,6 +234,8 @@ end
 
 OPCLASSES = [ "single", "multi-single", "multi-multi", "checklog" ]
 
+POWER = %w( Low High QRP )
+
 SENTQTH = %w( ALAM ALPI AMAD BUTT CALA CCOS COLU DELN ELDO FRES GLEN
 HUMB IMPE INYO KERN KING LAKE LANG LASS MADE MARN MARP MEND MERC MODO
 MONO MONT NAPA NEVA ORAN PLAC PLUM RIVE SACR SBAR SBEN SBER SCLA SCRU
@@ -251,6 +253,7 @@ def randomHdr(id, callsign)
   hdr["phone"] = $phone
   hdr["sentQTH"] = SENTQTH[rand(SENTQTH.length)]
   hdr["opclass"] = OPCLASSES[rand(OPCLASSES.length)]
+  hdr["power"] = POWER[rand(POWER.length)]
   [ "expedition", "youth", "mobile", "female", "school", "new" ].each { |label|
     if rand(2) == 1
       hdr[label] = ""
@@ -293,7 +296,7 @@ class FormOne
   end
 
   def upload(io)
-     @mg.uploadFile("/cqp/server/upload.cgi", io, @callsign)
+     @mg.uploadFile("/cqp/server/upload.fcgi", io, @callsign)
   end
 
   def runForm
@@ -313,7 +316,7 @@ class FormOne
 
   def stepTwo(id)
     hdr = randomHdr(id, @callsign)
-    @mg.post("/cqp/server/upload.cgi", hdr, @filename)
+    @mg.post("/cqp/server/upload.fcgi", hdr, @filename)
   end
 
   def success?
@@ -326,7 +329,7 @@ class FormTwo < FormOne
   
   def upload(io)
     content = toUTFCompat(io.read())
-    src = @mg.post("/cqp/server/upload.cgi", { "cabcontent" => content }, @filename)
+    src = @mg.post("/cqp/server/upload.fcgi", { "cabcontent" => content }, @filename)
     content = nil
     src
   end
@@ -355,7 +358,7 @@ class FormThree
       hdr = randomHdr(-1, @callsign)
       content = toUTFCompat(io.read())
       hdr["cabcontent"] = content
-      @mg.post("/cqp/server/upload.cgi", hdr, @filename)
+      @mg.post("/cqp/server/upload.fcgi", hdr, @filename)
       @success = @mg.lastSuccess?
       @mg.getFiles(["/cqp/server/received.fcgi",], @filename)
       @success = @mg.lastSuccess? and @success
