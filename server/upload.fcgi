@@ -12,6 +12,7 @@ require_relative 'charset'
 require_relative 'database'
 require_relative 'logscan'
 require_relative 'patchlog'
+require_relative 'email'
 
 CALLSIGN = /^\s*callsign\s*:\s*(\S+)\s*$/i
 LOGDIR="/usr/local/cqplogs"
@@ -196,7 +197,7 @@ FCGI.each_cgi { |request|
       db.addExtra(logID, request["callsign"],
                   request["email"], 
                   request["opclass"],
-                  request["sentqth"],
+                  request["sentQTH"],
                   request["phone"],
                   request["comments"],
                   checkBox(request, "expedition"), checkBox(request, "youth"),
@@ -228,6 +229,7 @@ FCGI.each_cgi { |request|
 #      $outfile.write("Missing some of required\n")
     end
   end
+  emailConfirmation(db, logID)
   content = nil
   encodedConent = nil
   request.out("text/javascript") { jsonout.to_json }

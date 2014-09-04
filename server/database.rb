@@ -18,8 +18,13 @@ end
 
 
 class LogDatabase
-  def new
+  def initialize
     @connection = nil
+    @mapping = Hash.new("")
+    @mapping["single"] = "Single-Op"
+    @mapping["multi-single"] = "Multi-single"
+    @mapping["multi-multi"] = "Multi-multi"
+    @mapping["checklog"] = "Checklog"
   end
 
   DBTIMEFORMAT="%Y-%m-%d %H:%M:%S.%L"
@@ -34,7 +39,7 @@ class LogDatabase
       if @connection 
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")
         @connection.query("use CQPUploads;")
-        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass char(32), uploadtime datetime, emailaddr varchar(256), sentqth varchar(64), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1), index callindex (callsign asc));")
+        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass char(32), uploadtime datetime, emailaddr varchar(256), sentqth varchar(64), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned, index callindex (callsign asc));")
       else
         @connection.query("use CQPUploads;")
       end
@@ -118,4 +123,22 @@ class LogDatabase
     result
   end
 
+  def getEntry(id)
+    connect
+    if id and @connection
+      res = @connection.query("select * from CQPLog where id = #{id} limit 1;")
+      res.each { |row|
+        result = Hash.new
+        row.each { |column, value|
+          result[column] = value
+        }
+        return result
+      }
+    end
+    nil
+  end
+
+  def translateClass(str)
+    @mapping[str]
+  end
 end

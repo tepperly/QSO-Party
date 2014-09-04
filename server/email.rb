@@ -40,3 +40,74 @@ class OutgoingEmail
     @smtp.finish
   end
 end
+
+def confEmail(db, entry)
+  catmap = { "county" => "CA County Expedition",
+    "mobile" => "Mobile",
+    "school" => "School",
+    "female" => "YL Op",
+    "youth" => "Youth Op",
+    "newcontester" => "New Contester" }
+  categories = []
+  ["county", "youth", "mobile", "female", "school", "newcontester"].each { |cat|
+    if entry[cat] == 1
+      categories.push(catmap[cat])
+    end
+  }
+  categories = categories.join(", ")
+  confirm = OutgoingEmail.new
+  confirm.sendEmail(entry["emailaddr"], "CQP 2014 Log Confirmation", "\
+CQP 2014 Log Confirmation
+
+          Callsign: #{entry['callsign_confirm']}
+       Entry-Class: #{db.translateClass(entry['opclass'])}
+          Sent QTH: #{entry['sentqth']}
+Special Categories: #{categories}
+       Received at: #{entry['uploadtime']}
+   Total QSO Lines: #{entry['maxqso']}
+   Valid QSO Lines: #{entry['parseqso']}
+            Log ID: #{entry['id']}
+   Log SHA1 Digest: #{entry['origdigest']}
+
+Thank you for entering the contest and submitting your log. Please
+review the information listed above.  If valid QSO lines is lower 
+than the total QSO lines, it means that some of the QSO lines are
+not close enough to the CQP Cabrillo format for our software to
+read.  To correct incorrect data, please edit and resubmit 
+your log.
+
+73,
+
+Tom NS6T
+")
+end
+
+
+def backupEmail(db, entry)
+  columns = [ "id", "callsign", "callsign_confirm", "origdigest", "opclass", "uploadtime", "emailaddr", "sentqth",
+              "phonenum", "county", "youth", "mobile", "female", "school", "newcontester" ]
+  maxwidth = 0
+  columns.each { |col|
+    if col.length > maxwidth
+      maxwidth = col.length
+    end
+  }
+  body = "CQP 2014 Log Entry Received\n\n"
+  columns.each { |col|
+    body << ("%#{maxwidth}s: %s\n" % [col.upcase, entry[col].to_s])
+  }
+  confirm = OutgoingEmail.new
+  confirm.sendEmail(CQPConfig::LOG_EMAIL_ACCOUNT, "CQP 2014 Log Confirmation", body, 
+                    [{ "mime" => "application/octet", "filename" => File.basename(entry['originalfile']),
+                       "content" => File.read(entry['originalfile'], {:mode => "rb"}) } ])
+end
+
+
+def emailConfirmation(db, id)
+  if entry = db.getEntry(id)
+    if (entry["completed"] == 1) and entry["emailaddr"] and entry["emailaddr"].length > 0
+      confEmail(db, entry)
+      backupEmail(db, entry)
+    end
+  end
+end
