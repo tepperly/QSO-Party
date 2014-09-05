@@ -69,6 +69,11 @@
 	  <option value="multi-multi" selected="selected">Multi-multi</option>
 	  <option value="checklog" >Checklog</option>
 	</select>
+	<select name="power" id="powerId" class="jForm">
+	  <option value="Low">Low Power</option>
+	  <option value="High" selected="selected">High Power</option>
+	  <option value="QRP">QRP</option>
+	</select>
 	<p><b>Categories</b> (check all that apply)</p>
 	<table>
 	  <tr>
@@ -151,12 +156,17 @@
 	<label for="AltphoneId" class="inLabel">Phone Number*:</label>
 	<input type="text" name="phone" id="AltphoneId" class="jForma"/><br />
 	<label for="AltsentQTHId" class="inLabel">Sent QTH:</label>
-	<input type="text" name="sentQTH" id="AltsentQTHId" class="jForm"/><br />
+	<input type="text" name="sentQTH" id="AltsentQTHId" class="jForma"/><br />
 	<label for="AltopclassId" class="inLabel">Entry class:</label>
 	<select name="opclass" id="AltopclassId" class="jForma">
 	  <option value="single">Single-op</option>
 	  <option value="multi-single">Multi-single</option>
 	  <option value="multi-multi" selected="selected">Multi-multi</option>
+	</select>
+	<select name="power" id="AltpowerId" class="jForma">
+	  <option value="Low">Low Power</option>
+	  <option value="High" selected="selected">High Power</option>
+	  <option value="QRP">QRP</option>
 	</select>
 	<p><b>Categories</b> (check all that apply)</p>
 	<table>
@@ -227,12 +237,17 @@
     <label for="ALLphoneId" class="inLabel">Phone Number*:</label>
     <input type="text" name="phone" id="ALLphoneId" class="jFormb"/><br />
     <label for="ALLsentQTHId" class="inLabel">Sent QTH:</label>
-    <input type="text" name="sentQTH" id="ALLsentQTHId" class="jForm"/><br />
+    <input type="text" name="sentQTH" id="ALLsentQTHId" class="jFormb"/><br />
     <label for="ALLopclassId" class="inLabel">Entry class:</label>
     <select name="opclass" id="ALLopclassId" class="jFormb">
       <option value="single">Single-op</option>
       <option value="multi-single">Multi-single</option>
       <option value="multi-multi" selected="selected">Multi-multi</option>
+    </select>
+    <select name="power" id="ALLpowerId" class="jFormb">
+      <option value="Low">Low Power</option>
+      <option value="High" selected="selected">High Power</option>
+      <option value="QRP">QRP</option>
     </select>
     <p><b>Categories</b> (check all that apply)</p>
     <table>
@@ -357,6 +372,7 @@
              $("#phoneId").val("");
              $("#sentQTHId").val("");
              $("#opclassId").val("multi-multi");
+             $("#powerId").val("High");
              $("#commentId").val("");
              $("#expedition").prop("checked", false);
              $("#youth").prop("checked", false);
@@ -398,6 +414,7 @@
              $("#AltphoneId").val("");
              $("#AltsentQTHId").val("");
              $("#AltopclassId").val("multi-multi");
+             $("#AlpowerId").val("High");
              $("#AltcommentId").val("");
              $("#Altexpedition").prop("checked", false);
              $("#Altyouth").prop("checked", false);

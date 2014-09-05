@@ -72,7 +72,7 @@ def saveLog(content, fileprefix, filesuffix, time, encoding=nil)
 end
 
 def hasRequired(request)
-  required = [ "email", "confirm", "phone", "logID", "comments", "opclass" ]
+  required = [ "callsign", "email", "confirm", "phone", "logID", "comments", "opclass", "power", "sentQTH" ]
   # "expedition", "youth", "female", "school", "new", "logID" ]
   required.each { |key|
     if not request.has_key?(key)
@@ -197,6 +197,7 @@ FCGI.each_cgi { |request|
       db.addExtra(logID, request["callsign"],
                   request["email"], 
                   request["opclass"],
+                  request["power"],
                   request["sentQTH"],
                   request["phone"],
                   request["comments"],
