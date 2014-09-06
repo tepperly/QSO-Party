@@ -40,9 +40,9 @@ class LogDatabase
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")
         @connection.query("use CQPUploads;")
         @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(64), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned, index callindex (callsign asc));")
-      else
-        @connection.query("use CQPUploads;")
       end
+    else
+      @connection.query("use CQPUploads;")
     end
     @connection
   end

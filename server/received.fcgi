@@ -41,9 +41,12 @@ class CallsignReport
     @request.out() {
       html = @request.html() { 
         @request.head() { 
-          @request.link("href" => "../favicon.ico", "rel" => "icon", "sizes" => "16x16 32x32 40x40 64x64 128x128", "type" => "image/vnd.microsoft.icon" ) +
+          @request.link("href" => "/cqp/favicon.ico", "rel" => "icon", "sizes" => "16x16 32x32 40x40 64x64 128x128", "type" => "image/vnd.microsoft.icon" ) +
+          @request.meta("http-equiv" => "Content-Type",
+                        "content" => "text/html; charset=UTF-8") +
           @request.title { "CQP Callsigns Confirmed Received" } +
-          @request.link("href" => "cqprecvd.css", "rel"=>"stylesheet", 
+          @request.link("href" => "/cqp/server/cqprecvd.css", 
+                        "rel"=>"stylesheet", 
                         "type" => "text/css")  { }+
           @request.style("type" => "text/css") {
             "th, td { 
@@ -54,7 +57,7 @@ class CallsignReport
         } +
         @request.body() {
           @request.div("id" => "masthead") {
-             @request.img("src" => "../images/cqplogo80075.jpg", "alt" => "California QSO Party") 
+             @request.img("src" => "/cqp/images/cqplogo80075.jpg", "alt" => "California QSO Party") 
           } +
           @request.h1() { "CQP 2014 Logs Received" } +
           @request.p() { "The call signs for all logs received are

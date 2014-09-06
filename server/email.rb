@@ -65,6 +65,7 @@ CQP 2014 Log Confirmation
           Sent QTH: #{entry['sentqth']}
 Special Categories: #{categories}
        Received at: #{entry['uploadtime']}
+       Deadline at: #{CQPConfig::CONTEST_DEADLINE}
    Total QSO Lines: #{entry['maxqso']}
    Valid QSO Lines: #{entry['parseqso']}
             Log ID: #{entry['id']}
@@ -85,7 +86,7 @@ end
 
 
 def backupEmail(db, entry)
-  columns = [ "id", "callsign", "callsign_confirm", "origdigest", "opclass", "pwer", "uploadtime", "emailaddr", "sentqth",
+  columns = [ "id", "callsign", "callsign_confirm", "origdigest", "opclass", "power", "uploadtime", "emailaddr", "sentqth",
               "phonenum", "county", "youth", "mobile", "female", "school", "newcontester" ]
   maxwidth = 0
   columns.each { |col|

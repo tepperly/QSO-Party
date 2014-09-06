@@ -318,8 +318,6 @@
         done: function (e, data) {
             console.log("Success 4");
             console.log(JSON.stringify(data.result))
-            $('#progress .progress-bar').css(
-                'width', '0%' );
             $.each(data.result.files, function (index, file) {
                 console.log("File name = " + file.name)
                 console.log("ID = " + file.id)
@@ -386,6 +384,8 @@
              $('#step-2').fadeTo(100, 0.4);
              $('.jForm').prop("disabled", true);
              $('#step-3').fadeTo(100, 0.4);
+             $('#progress .progress-bar').css(
+                 'width', '0%' );
           }
       });
       ev.preventDefault();
