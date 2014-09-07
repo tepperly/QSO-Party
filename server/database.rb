@@ -39,7 +39,7 @@ class LogDatabase
       if @connection 
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")
         @connection.query("use CQPUploads;")
-        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(64), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned, index callindex (callsign asc));")
+        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), userfilename varchar(1024), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(64), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned, index callindex (callsign asc));")
       end
     else
       @connection.query("use CQPUploads;")
@@ -75,12 +75,12 @@ class LogDatabase
     id
   end
 
-  def addLog(callsign, origfile, asciifile, encoding, timestamp, digest)
+  def addLog(callsign, userfile, origfile, asciifile, encoding, timestamp, digest)
     connect
     if @connection
       id = getID
       if id
-        @connection.query("update CQPLog set callsign='#{Mysql2::Client::escape(callsign)}', originalfile='#{Mysql2::Client::escape(origfile)}', asciifile='#{Mysql2::Client::escape(asciifile)}', logencoding='#{Mysql2::Client::escape(encoding)}', uploadtime='#{timestamp.strftime(DBTIMEFORMAT)}', origdigest='#{Mysql2::Client::escape(digest)}' where id = #{id.to_i} limit 1;")
+        @connection.query("update CQPLog set callsign='#{Mysql2::Client::escape(callsign)}', userfilename='#{Mysql2::Client::escape(userfile)}', originalfile='#{Mysql2::Client::escape(origfile)}', asciifile='#{Mysql2::Client::escape(asciifile)}', logencoding='#{Mysql2::Client::escape(encoding)}', uploadtime='#{timestamp.strftime(DBTIMEFORMAT)}', origdigest='#{Mysql2::Client::escape(digest)}' where id = #{id.to_i} limit 1;")
         return id
       end
     end

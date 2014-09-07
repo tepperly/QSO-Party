@@ -13,20 +13,16 @@ require_relative 'database'
 require_relative 'logscan'
 require_relative 'patchlog'
 require_relative 'email'
+require_relative 'logscan'
 
 CALLSIGN = /^\s*callsign\s*:\s*(\S+)\s*$/i
 LOGDIR="/usr/local/cqplogs"
 MAXTRIES=20
 
-# $outfile = open("/tmp/foo.txt", "a")
-# $outfile.write("Starting\n")
-
 def getCallsign(str)
   match = CALLSIGN.match(str)
   if match
     return match[1].strip.upcase
-#  else
-#    $outfile.write("No callsign\n")
   end
   nil
 end
@@ -40,16 +36,22 @@ def logFilename(prefix, suffix, time, numtry)
   LOGDIR + "/" + prefix + time.strftime("-%Y%m%d-%H%M%S-%L") + extraletter + "." + suffix
 end
 
-def saveLog(content, fileprefix, filesuffix, time, encoding=nil)
-  fileprefix = fileprefix.gsub(/[^A-Za-z0-9]/, "_")
-  filename = nil
+def convertToEncoding(content, encoding)
   if (not encoding) or (content.encoding == encoding)
     converted = content
-    encoding  = content.encoding
   else
+    # basically replace things that can't be encoded
     converted = content.encode(encoding, :invalid => :replace, 
                                :undef => :replace)
   end
+  converted
+end
+
+def saveLog(content, fileprefix, filesuffix, time, encoding=nil)
+  fileprefix = fileprefix.gsub(/[^A-Za-z0-9]/, "_")
+  filename = nil
+  converted = convertToEncoding(content)
+  encoding = converted.encoding
   tries = 0
   success = false
   while tries < MAXTRIES and not success
@@ -63,7 +65,6 @@ def saveLog(content, fileprefix, filesuffix, time, encoding=nil)
         success = true
       }
     rescue
-#      $outfile.write("Failed to write " + filename + "\n")
       tries = tries + 1
       filename = nil
     end
@@ -98,96 +99,94 @@ end
 
 
 db = LogDatabase.new
+logCheck = CheckLog.new
 FCGI.each_cgi { |request|
   timestamp = Time.new.utc
   logID=nil
   jsonout = { }
   if request.multipart?
-#    $outfile.write("Received multipart request\n")
-    request.params.each { |key, value| 
-#      $outfile.write("cgi[" + key.to_s + "] = '" + value.to_s + "' of type " +
-#                     value.class.to_s + "\n")
-    }
     if request.has_key?("cabrillofile")
       jsonout["files"] = [ ]
       fileent = { }
       val = request["cabrillofile"]
-#      $outfile.write("local_path=" + val.local_path.to_s + "\n")
-#      $outfile.write("original_filename=" + val.original_filename.to_s + "\n")
       fileent["name"] = val.original_filename.to_s
-#      $outfile.write("content_type=" + val.content_type.to_s + "\n")
       content = val.read
       probableEncoding = guessEncoding(content)
-#     $outfile.write("probable = " + probableEncoding.to_s + "\n")
       begin
         encodedContent = content.clone.force_encoding(probableEncoding)
-#        $outfile.write("encoded type = " + encodedContent.encoding.to_s + "\n")
         callsign = getCallsign(encodedContent)
       rescue Encoding::UndefinedConversionError, Encoding::InvalidByteSequenceError
-#        $outfile.write("Exception")
         callsign = getCallsign(content)
         encodedContent = content
+      end
+      asciiContent = convertToEncoding(content, Encoding::US_ASCII)
+      log = logCheck.checkLogStr(fileent["name"], logID, asciiContent)
+      if log and log.callsign and log.callsign != "UNKNOWN"
+        callsign = log.callsign
       end
       if not callsign
         callsign = "UNKNOWN"
       end
       untouchedFilename = saveLog(content, callsign, "virgin", timestamp)
-      asciiFilename = saveLog(encodedContent, callsign, "ascii", timestamp, Encoding::US_ASCII)
+      asciiFilename = saveLog(asciiContent, callsign, "ascii", timestamp, Encoding::US_ASCII)
       saveLog(encodedContent.encoding.to_s, callsign, "encoding", timestamp,
               Encoding::US_ASCII)
       if untouchedFilename and asciiFilename
-        logID = db.addLog(callsign, untouchedFilename, asciiFilename,
+        logID = db.addLog(callsign, fileent["name"], untouchedFilename, asciiFilename,
                           encodedContent.encoding.to_s,
                           timestamp, Digest::SHA1.hexdigest(content).to_s)
       end
-      
-#      $outfile.write("content length=" + content.length.to_s + "\n")
-#      $outfile.write("content encoding=" + content.encoding.to_s + "\n")
-#      $outfile.write("content SHA1=" + Digest::SHA1.hexdigest(content).to_s + "\n" )
-      if logID
-        fileent["id"]=logID.to_i
-      end
-      jsonout["files"].push(fileent)
-      jsonout["callsign"] = callsign
-      email = guessEmail(encodedContent)
-      if email
-        jsonout["email"] = email
+
+      if log
+        jsonout = log.to_json
+      else
+        if logID
+          fileent["id"]=logID.to_i
+        end
+        jsonout["files"].push(fileent)
+        jsonout["callsign"] = callsign
+        email = guessEmail(encodedContent)
+        if email
+          jsonout["email"] = email
+        end
       end
     end
   else
-#    $outfile.write("Received non-multipart request\n")
-    request.params.each { |key, value| 
-#      $outfile.write("cgi[" + key.to_s + "] = '" + value.to_s + "' of type " +
-#                     value.class.to_s + "\n")
-    }
     if request.has_key?("cabcontent")
       jsonout["files"] = [ ]
       fileent = { }
       content = request["cabcontent"]
-#      $outfile.write("content encoding=" + content.encoding.to_s + "\n")
       encodedContent = content
-      probableEncoding = Encoding::UTF_8
       callsign = getCallsign(content)
+      asciiContent = convertToEncoding(content, Encoding::US_ASCII)
+      log = logCheck.checkLogStr("", logID, asciiContent)
+      if log and log.callsign and log.callsign != "UNKNOWN"
+        callsign = log.callsign
+      end
       if not callsign
-        callsign="UNKNOWN"
+        callsign = "UNKNOWN"
       end
       untouchedFilename = saveLog(content, callsign, "virgin", timestamp)
-      asciiFilename = saveLog(encodedContent, callsign, "ascii", timestamp, Encoding::US_ASCII)
+      asciiFilename = saveLog(asciiContent, callsign, "ascii", timestamp, Encoding::US_ASCII)
       saveLog(encodedContent.encoding.to_s, callsign, "encoding", timestamp,
               Encoding::US_ASCII)
       if untouchedFilename and asciiFilename
-        logID = db.addLog(callsign, untouchedFilename, asciiFilename,
+        logID = db.addLog(callsign, "", untouchedFilename, asciiFilename,
                           encodedContent.encoding.to_s,
                           timestamp, Digest::SHA1.hexdigest(content.clone.force_encoding(Encoding::ASCII_8BIT)).to_s)
       end
-      if logID
-        fileent["id"] = logID.to_i
-      end
-      jsonout["files"].push(fileent)
-      jsonout["callsign"] = callsign
-      email = guessEmail(encodedContent)
-      if email
-        jsonout["email"] = email
+      if log
+        jsonout = log.to_json
+      else
+        if logID
+          fileent["id"] = logID.to_i
+        end
+        jsonout["files"].push(fileent)
+        jsonout["callsign"] = callsign
+        email = guessEmail(encodedContent)
+        if email
+          jsonout["email"] = email
+        end
       end
     end
     if hasRequired(request)
@@ -226,13 +225,10 @@ FCGI.each_cgi { |request|
           }
         }
       end
-#    else
-#      $outfile.write("Missing some of required\n")
     end
   end
   emailConfirmation(db, logID)
   content = nil
   encodedConent = nil
   request.out("text/javascript") { jsonout.to_json }
-#  $outfile.flush
 }

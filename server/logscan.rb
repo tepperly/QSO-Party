@@ -10,7 +10,9 @@
 # 	levenshtein
 
 require 'time'
+require 'cgi'
 require 'levenshtein'
+require 'json'
 
 class ContestPeriod
   def initialize(start, stop)
@@ -30,22 +32,28 @@ $CONTESTS = [
 ]
 
 class LineIssue
-  def initialize(lineNum, description, isError)
+  def initialize(lineNum, description, isError, header=true)
     @lineNum = lineNum
     @description = description
     @isError = isError
+    @header = header
   end
 
-  attr_reader :lineNum, :description, :isError
+  attr_reader :lineNum, :description, :isError, :header
 
   def to_s
     @lineNum.to_s + ": " + @description
   end
+
+  def to_hash
+    { "line" => @lineNum, "msg" => CGI.escapeHTML(@description) }
+  end
 end
 
 class CQPLog
-  def initialize(id)
+  def initialize(id, filename)
     @id = id
+    @filename = filename
     @version = nil              # Cabrillo version
     @callsign = nil
     @state = 0                  # 0 - before log, 1 - start-of-log, 2 - QSO section, 3 - end-of-line
@@ -101,10 +109,56 @@ class CQPLog
       @state.to_s + "\nBand: " + @band.to_s + "\nBad callsigns: " + @badcallsigns.keys.sort.join(' ') + 
       "\nAliased multipliers:" + @warnmultipliers.keys.sort.join(' ') + "\nBad multipliers: " +
       @badmultipliers.keys.sort.join(' ') + "\nMode = " + @mode.to_s + "\nName: " + @name.to_s + "\nAssisted: " +
-      @assisted.to_s + "\nNum Ops: " + @numops.to_s + "\nCategories: " + @categories.keys.sort.join(' ') + 
+      @assisted.to_s + "\nPower: " + @power.to_s + "\nNum Ops: " + @numops.to_s + 
+      "\nCategories: " + @categories.keys.sort.join(' ') + 
       "\nNum transceivers: " + @numtrans.to_s + "\nMax QSOs: " + @maxqso.to_s + "\nValid QSOs: " + @validqso.to_s + "\nEmail: " +
       @email.to_s + "\nSent QTH: " + @sentqth.keys.sort.join(' ') + "\nOperators: " + @operators.keys.sort.join(' ') + 
       "\nWarnings: " + @warnings.join("\n") + "\nErrors: " + @errors.join("\n") + "\n"
+  end
+
+  def calcOpClass
+    case @numops
+    when :single
+      if @assisted
+        if @numtrans == :two or @numtrans == :unlimited
+          return "multi-multi"
+        else
+          return "multi-single"
+        end
+      else
+        return "single"
+      end
+    when :multi
+      if (not @numtrans) or (@numtrans = :one)
+        return "multi-single"
+      else
+        return "multi-multi"
+      end
+    when :checklog
+      return "checklog"
+    else
+      return "multi-multi"
+    end
+  end
+
+  def to_json
+    result = Hash.new
+    result["callsign"] = (@callsign ? CGI.escapeHTML(@callsign) : "UNKNOWN")
+    result["files"] = [ { "name" => CGI.escapeHTML(@filename), "id" => @id }, ]
+    result["MaxQSO"] = @maxqso
+    result["ParsableQSO"] = @validqso
+    result["opclass"] = calcOpClass
+    result["categories"] = @categories.keys.sort
+    if @email
+      result["email"] = CGI.escapeHTML(@email)
+    end
+    result["SentQTH"] = @sentqth.keys.sort.map { |qth| CGI.escapeHTML(qth) }
+    result["warnings"] = @warnings.map { |w| w.to_hash }
+    result["errors"] = @errors.map { |w| w.to_hash }
+    result["multipliers"] = { "errors" => @badmultipliers.keys.sort.map { |m| CGI.escapeHTML(m) },
+      "warnings" => @warnmultipliers.keys.sort.map { |m| { "log" => CGI.escapeHTML(m), 
+          "real" => CGI.escapeHTML(@warnmultipliers[m]) } } }
+    result
   end
 end
 
@@ -235,9 +289,17 @@ class StandardNearMiss < LineChecker
     end
   end
 
+  def endOfLineIndex(line)
+    ind = line.index(EOLREGEX)
+    if not ind
+      ind = line.length
+    end
+    ind
+  end
+
   def syntaxCheck(line, log, startLineNum)
     if m = @strictregex.match(line)
-      eolIndex = line.index(EOLREGEX)
+      eolIndex = endOfLineIndex(line)
       if eolIndex and (m.end(0) < eolIndex) # regular expression matched less than a lines worth
         if @error
           log.errors << LineIssue.new(startLineNum, "Incorrect #{@name} line.", @error)
@@ -347,7 +409,7 @@ end
 class CatAssistedTag < HeaderTag
   TAG="CATEGORY-ASSISTED"
   TAGREGEX=/\Acategory-assisted:/i
-  WHOLETAG=/\Acategory-assisted:\s*((non-)?assisted)\s*/i
+  WHOLETAG=/\Acategory-assisted:\s*((non-|un)?assisted)\s*/i
 
   def initialize
     super
@@ -359,6 +421,9 @@ class CatAssistedTag < HeaderTag
 
   def tagMatch(match, log, linenum)
     log.assisted = (match[1].upcase == "ASSISTED")
+    if match[1].upcase == "UNASSISTED"
+      log.warnings << LineIssue.new(linenum, TAG + ": " + match[1] + " is nonstandard", false)
+    end
   end
 end
 
@@ -485,7 +550,7 @@ class CatStationTag < HeaderTag
     when "MOBILE", "ROVER"
       log.categories["mobile"] = 1
     when "EXPEDITION", /COUNTY(\s+|-)EXPEDITION/
-      log.categories["cce"] = 1
+      log.categories["expedition"] = 1
     when "SCHOOL"
       log.categories["school"] = 1
     end
@@ -553,7 +618,7 @@ class CategoryTag < HeaderTag
         when 'ALL', /^\d+M$/, 'LIMITED'
           log.band = cat.upcase
         when 'CCE'
-          log.categories["cce"] = 1
+          log.categories["expedition"] = 1
           log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
         when /^SO-?HP$/
           log.numops = :single
@@ -568,7 +633,7 @@ class CategoryTag < HeaderTag
           log.power = :QRP
           log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
         when 'MOBILE'
-          log.category['mobile'] = 1
+          log.categories['mobile'] = 1
           log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
         when 'SINGLE-OP-UNASSISTED'
           log.numops = :single
@@ -617,7 +682,7 @@ class CatOverlayTag < HeaderTag
 
   def tagMatch(match, log, linenum)
     if match[1] and match[1].upcase == "COUNTY-EXPEDITION"
-      log.categories["cce"] = 1
+      log.categories["expedition"] = 1
     end
   end
 
@@ -795,6 +860,7 @@ end
 class AddressTag < HeaderTag
   TAG="ADDRESS"
   TAGREGEX=/\Aaddress:/i
+  ADDRWITHEMAIL=/\Aaddress:\s*\(e-mail\)\s*((([A-Za-z0-9]+_+)|([A-Za-z0-9]+\-+)|([A-Za-z0-9]+\.+)|([A-Za-z0-9]+\++))*[A-Z‌​a-z0-9]+@((\w+\-+)|(\w+\.))*\w{1,63}\.[a-zA-Z]{2,6})\s*/i
   WHOLETAG=/\Aaddress:\s*(.+)\s*/i
 
   def initialize
@@ -803,6 +869,13 @@ class AddressTag < HeaderTag
     @tagregex = TAGREGEX
     @strictregex = WHOLETAG
     @error = false
+  end
+
+  def tagMatch(match, log, linenum)
+    str = match[0]
+    if m = ADDRWITHEMAIL.match(str)
+      log.email = m[1]
+    end
   end
 end
 
@@ -933,7 +1006,7 @@ class QSOTag < StandardNearMiss
   # QSO_THREE is like QSO_TWO but with a recvd signal report
   QSO_THREE=/\Aqso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d+)\s+(\d+)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s+59{1,2}\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)(\s+(\d+\s*)|\s*)$/i
   # QSO_FOUR is like QSO_THREE but with a sent and recvd signal report
-  QSO_FOUR=/\Aqso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d+)\s+(\d+)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s+59{1,2}\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s59{1,2}\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)(\s+(\d+)\s*|\s*)$/i
+  QSO_FOUR=/\Aqso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d+)\s+(\d+)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s+59{1,2}\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s+59{1,2}\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)(\s+(\d+)\s*|\s*)$/i
   QSO_GRP_TWO = [ QSO_THREE, QSO_FOUR ]
 
   def initialize
@@ -989,6 +1062,7 @@ class QSOTag < StandardNearMiss
   end
 
   def multiplierCheck(log, mult)
+    mult = mult.upcase
     if @multipliers.has_key?(mult)
       if @multipliers[mult] != mult
         log.warnmultipliers[mult] = @multipliers[mult]
@@ -1050,6 +1124,7 @@ class QSOTag < StandardNearMiss
         if m.end(0) < line.length
           return checkTheRest(line, m.end(0), log, startLineNum)
         end
+        return advanceCount(startLineNum, line)
       end
     }
     log.errors << LineIssue.new(startLineNum, "Incorrect #{TAG} line.", @error)
@@ -1108,16 +1183,22 @@ class CheckLog
   end
 
   def checkLog(filename, id)
-    log = CQPLog.new(id)
+    log = nil
     open(filename, "r:ascii") { |io|
       content = io.read()
       content = content.encode("ASCII", {:invalid => :replace, :undef => :replace})
-      lineNum = 1
-      lines = mySplit(content, END_OF_RECORD)
-      log.maxqso = content.scan(/\bqso:\s+/i).size # upper bound on number of QSOs
-      lines.each { |line|
-        lineNum = checkStr(line, lineNum, log)
-      }
+      log = checkLogStr(filename, id, content)
+    }
+    log
+  end
+
+  def checkLogStr(filename, id, content)
+    log = CQPLog.new(id, filename)
+    lineNum = 1
+    lines = mySplit(content, END_OF_RECORD)
+    log.maxqso = content.scan(/\bqso:\s+/i).size # upper bound on number of QSOs
+    lines.each { |line|
+      lineNum = checkStr(line, lineNum, log)
     }
     log
   end
@@ -1139,16 +1220,8 @@ class CheckLog
 end
 
 def logProperties(id, str)
-  log = CQPLog.new(id)
+  log = CQPLog.new(id, "")
   log.maxqso = str.scan(/\bqso:\s+/i).size # maximum number of QSO lines
 
 end
-
-logchecker = CheckLog.new
-
-ARGV.each { |file|
-  log = logchecker.checkLog(file, -1)
-  print file + "\n"
-  print log.to_s
-}
 
