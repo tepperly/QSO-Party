@@ -120,6 +120,7 @@ FCGI.each_cgi { |request|
         encodedContent = content
       end
       asciiContent = convertToEncoding(content, Encoding::US_ASCII)
+      logID = db.getID
       log = logCheck.checkLogStr(fileent["name"], logID, asciiContent)
       if log and log.callsign and log.callsign != "UNKNOWN"
         callsign = log.callsign
@@ -132,7 +133,7 @@ FCGI.each_cgi { |request|
       saveLog(encodedContent.encoding.to_s, callsign, "encoding", timestamp,
               Encoding::US_ASCII)
       if untouchedFilename and asciiFilename
-        logID = db.addLog(callsign, fileent["name"], untouchedFilename, asciiFilename,
+        db.addLog(logID, callsign, fileent["name"], untouchedFilename, asciiFilename,
                           encodedContent.encoding.to_s,
                           timestamp, Digest::SHA1.hexdigest(content).to_s)
       end
@@ -159,6 +160,7 @@ FCGI.each_cgi { |request|
       encodedContent = content
       callsign = getCallsign(content)
       asciiContent = convertToEncoding(content, Encoding::US_ASCII)
+      logID = db.getID
       log = logCheck.checkLogStr("", logID, asciiContent)
       if log and log.callsign and log.callsign != "UNKNOWN"
         callsign = log.callsign
@@ -171,9 +173,9 @@ FCGI.each_cgi { |request|
       saveLog(encodedContent.encoding.to_s, callsign, "encoding", timestamp,
               Encoding::US_ASCII)
       if untouchedFilename and asciiFilename
-        logID = db.addLog(callsign, "", untouchedFilename, asciiFilename,
-                          encodedContent.encoding.to_s,
-                          timestamp, Digest::SHA1.hexdigest(content.clone.force_encoding(Encoding::ASCII_8BIT)).to_s)
+        db.addLog(logID, callsign, "", untouchedFilename, asciiFilename,
+                  encodedContent.encoding.to_s,
+                  timestamp, Digest::SHA1.hexdigest(content.clone.force_encoding(Encoding::ASCII_8BIT)).to_s)
       end
       if log
         jsonout = log.to_json

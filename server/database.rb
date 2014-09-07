@@ -62,7 +62,7 @@ class LogDatabase
     if @connection
       id = nil
       tries = 0
-      while not id and tries  < 10
+      while not id and tries  < 20
         begin
           id = getOne("select cast(rand()*#{MAXIDINT} as signed integer) as id;").to_i
           @connection.query("insert into CQPLog (id) values (#{id});")
@@ -75,10 +75,9 @@ class LogDatabase
     id
   end
 
-  def addLog(callsign, userfile, origfile, asciifile, encoding, timestamp, digest)
+  def addLog(id, callsign, userfile, origfile, asciifile, encoding, timestamp, digest)
     connect
     if @connection
-      id = getID
       if id
         @connection.query("update CQPLog set callsign='#{Mysql2::Client::escape(callsign)}', userfilename='#{Mysql2::Client::escape(userfile)}', originalfile='#{Mysql2::Client::escape(origfile)}', asciifile='#{Mysql2::Client::escape(asciifile)}', logencoding='#{Mysql2::Client::escape(encoding)}', uploadtime='#{timestamp.strftime(DBTIMEFORMAT)}', origdigest='#{Mysql2::Client::escape(digest)}' where id = #{id.to_i} limit 1;")
         return id
