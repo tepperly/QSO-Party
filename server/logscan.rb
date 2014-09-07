@@ -162,6 +162,7 @@ class CQPLog
     result["ParsableQSO"] = @validqso
     result["opclass"] = calcOpClass
     result["opmsg"] = calcOpMessage
+    result["power"] = 
     result["categories"] = @categories.keys.sort
     if @email
       result["email"] = CGI.escapeHTML(@email)
