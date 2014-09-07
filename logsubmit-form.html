@@ -74,6 +74,7 @@
 	  <option value="High" selected="selected">High Power</option>
 	  <option value="QRP">QRP</option>
 	</select>
+	<span id="opmsgId" style="color: red"></span>
 	<p><b>Categories</b> (check all that apply)</p>
 	<table>
 	  <tr>
@@ -168,6 +169,7 @@
 	  <option value="High" selected="selected">High Power</option>
 	  <option value="QRP">QRP</option>
 	</select>
+	<span id="AltopmsgId" style="color: red"></span>
 	<p><b>Categories</b> (check all that apply)</p>
 	<table>
 	  <tr>
@@ -329,6 +331,23 @@
             if (data.result.email) { 
               $('#emailId').val(data.result.email);
             }
+            if (data.result.SentQTH) {
+              $('#sentQTHId').val(data.result.SentQTH.join(" "));
+            }
+            if (data.result.opclass) {
+              $('#opclassId').val(data.result.opclass);
+            }
+            if (data.result.opmsg) {
+              $('#opmsgId').html(data.result.opmsg)
+            }
+            if (data.result.power) {
+              $('#powerId').val(data.result.power);
+            }
+            if (data.result.categories) {
+               $.each(data.result.categories, function (index, cat) {
+                  $('#'.concat(cat)).prop("checked", true);
+               });
+            }
             $('#step-1').fadeTo(100, 0.4);
             $('#fileupload').fileupload("disable");
             $('#step-2').fadeTo(100, 1.0);
@@ -370,6 +389,7 @@
              $("#phoneId").val("");
              $("#sentQTHId").val("");
              $("#opclassId").val("multi-multi");
+             $("#opmsgId").html("");
              $("#powerId").val("High");
              $("#commentId").val("");
              $("#expedition").prop("checked", false);
@@ -414,6 +434,7 @@
              $("#AltphoneId").val("");
              $("#AltsentQTHId").val("");
              $("#AltopclassId").val("multi-multi");
+             $("#AltopmsgId").html("");
              $("#AlpowerId").val("High");
              $("#AltcommentId").val("");
              $("#Altexpedition").prop("checked", false);
@@ -463,6 +484,23 @@
               }
               if (data.email) { 
                 $('#AltemailId').val(data.email);
+              }
+              if (data.SentQTH) {
+                 $('#AltsentQTHId').val(data.SentQTH);
+              }
+              if (data.opclass) {
+                $('#AltopclassId').val(data.opclass);
+              }
+              if (data.power) {
+                $('#AltpowerId').val(data.power);
+              }
+              if (data.opmsg) {
+                $('#AltopmsgId').html(data.opmsg)
+              }
+              if (data.categories) {
+                 $.each(data.categories, function (index, cat) {
+                    $('#Alt'.concat(cat)).prop("checked", true);
+                 });
               }
              $('#cabcontentId').prop("disabled", true);
              console.log("Success 1 done");

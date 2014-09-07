@@ -122,9 +122,26 @@ FCGI.each_cgi { |request|
       asciiContent = convertToEncoding(content, Encoding::US_ASCII)
       logID = db.getID
       log = logCheck.checkLogStr(fileent["name"], logID, asciiContent)
-      if log and log.callsign and log.callsign != "UNKNOWN"
-        callsign = log.callsign
+      $stderr.write("Step 4\n")
+      $stderr.flush
+      if log 
+        $stderr.write("Step 5\n")
+        $stderr.flush
+        $stderr.write("id = #{logID}\n")
+        $stderr.flush
+        $stderr.write("valid = #{log.validqso}\n")
+        $stderr.flush
+        $stderr.write("maxqso = #{log.maxqso}\n")
+        $stderr.flush
+        db.addQSOCount(logID, log.maxqso, log.validqso)
+        $stderr.write("Step 5a\n")
+        $stderr.flush
+        if log.callsign and log.callsign != "UNKNOWN"
+          callsign = log.callsign
+        end
       end
+        $stderr.write("Step 5b\n")
+        $stderr.flush
       if not callsign
         callsign = "UNKNOWN"
       end
@@ -132,12 +149,16 @@ FCGI.each_cgi { |request|
       asciiFilename = saveLog(asciiContent, callsign, "ascii", timestamp, Encoding::US_ASCII)
       saveLog(encodedContent.encoding.to_s, callsign, "encoding", timestamp,
               Encoding::US_ASCII)
+        $stderr.write("Step 5c\n")
+        $stderr.flush
       if untouchedFilename and asciiFilename
         db.addLog(logID, callsign, fileent["name"], untouchedFilename, asciiFilename,
                           encodedContent.encoding.to_s,
                           timestamp, Digest::SHA1.hexdigest(content).to_s)
       end
 
+      $stderr.write("Step 6\n")
+      $stderr.flush
       if log
         jsonout = log.to_json
       else
@@ -162,8 +183,11 @@ FCGI.each_cgi { |request|
       asciiContent = convertToEncoding(content, Encoding::US_ASCII)
       logID = db.getID
       log = logCheck.checkLogStr("", logID, asciiContent)
-      if log and log.callsign and log.callsign != "UNKNOWN"
-        callsign = log.callsign
+      if log 
+        db.addQSOCount(id, log.maxqso, log.validqso)
+        if log.callsign and log.callsign != "UNKNOWN"
+          callsign = log.callsign
+        end
       end
       if not callsign
         callsign = "UNKNOWN"

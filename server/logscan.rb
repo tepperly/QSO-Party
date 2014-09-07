@@ -116,6 +116,19 @@ class CQPLog
       "\nWarnings: " + @warnings.join("\n") + "\nErrors: " + @errors.join("\n") + "\n"
   end
 
+  def calcOpMessage
+    if @numops == :single
+      if @assisted
+        if (@numtrans == :two) or (@numtrans == :unlimited)
+          return "Single-op assisted more than one transceiver maps to Multi-multi"
+        else
+          return "Single-op assisted maps to Multi-single"
+        end
+      end
+    end
+    nil
+  end
+  
   def calcOpClass
     case @numops
     when :single
@@ -129,7 +142,7 @@ class CQPLog
         return "single"
       end
     when :multi
-      if (not @numtrans) or (@numtrans = :one)
+      if (not @numtrans) or (@numtrans == :one)
         return "multi-single"
       else
         return "multi-multi"
@@ -140,7 +153,7 @@ class CQPLog
       return "multi-multi"
     end
   end
-
+  
   def to_json
     result = Hash.new
     result["callsign"] = (@callsign ? CGI.escapeHTML(@callsign) : "UNKNOWN")
@@ -148,6 +161,7 @@ class CQPLog
     result["MaxQSO"] = @maxqso
     result["ParsableQSO"] = @validqso
     result["opclass"] = calcOpClass
+    result["opmsg"] = calcOpMessage
     result["categories"] = @categories.keys.sort
     if @email
       result["email"] = CGI.escapeHTML(@email)
