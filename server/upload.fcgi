@@ -50,7 +50,7 @@ end
 def saveLog(content, fileprefix, filesuffix, time, encoding=nil)
   fileprefix = fileprefix.gsub(/[^A-Za-z0-9]/, "_")
   filename = nil
-  converted = convertToEncoding(content)
+  converted = convertToEncoding(content, encoding)
   encoding = converted.encoding
   tries = 0
   success = false
