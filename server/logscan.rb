@@ -141,6 +141,18 @@ class CQPLog
     end
   end
 
+  def powerStr
+    case @power
+    when :low
+      return "Low"
+    when :high
+      return "High"
+    when :QRP
+      return "QRP"
+    end
+    nil
+  end
+
   def to_json
     result = Hash.new
     result["callsign"] = (@callsign ? CGI.escapeHTML(@callsign) : "UNKNOWN")
@@ -148,6 +160,9 @@ class CQPLog
     result["MaxQSO"] = @maxqso
     result["ParsableQSO"] = @validqso
     result["opclass"] = calcOpClass
+    if @power
+      result["power"] = powerStr
+    end
     result["categories"] = @categories.keys.sort
     if @email
       result["email"] = CGI.escapeHTML(@email)
