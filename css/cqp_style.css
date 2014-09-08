@@ -14,7 +14,7 @@ h1 {
     padding: 0 2px 0 2px;
     overflow: auto;
     height: 170px;
-    width: 200px;
+    width: 27%;
     float: left;
 }
 
@@ -31,7 +31,7 @@ h1 {
     margin: 0 2px 0 2px;
     overflow: auto;
     height: 170px;
-    width: 150px;
+    width: 15%;
     float: left;
 }
 
@@ -46,7 +46,7 @@ div.QSOReport h2, div.QCallReport h2 {
 }
 
 .QSOSummCol {
-    width: 170px;
+    width: 24%;
     margin-right: 10px;
     float: left;
 }

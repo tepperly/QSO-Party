@@ -362,9 +362,9 @@ function clearTabOne() {
   $("#yl").prop("checked", false);
   $("#school").prop("checked", false);
   $("#newcontester").prop("checked", false);
-  $("#doneMsg").css("visibility", "visible");
   $('#step-1').fadeTo(100, 1.0);
   $('#fileupload').fileupload("enable");
+  $("#doneMsg").css("visibility", "hidden");
   $('#step-2').fadeTo(100, 0.4);
   $('.jForm').prop("disabled", true);
   $('#step-3').fadeTo(100, 0.4);
@@ -398,7 +398,7 @@ function clearTabTwo() {
   $("#Altyl").prop("checked", false);
   $("#Altschool").prop("checked", false);
   $("#Altnewcontester").prop("checked", false);
-  $("#AltdoneMsg").css("visibility", "visible");
+  $("#AltdoneMsg").css("visibility", "hidden");
   $('#step-1a').fadeTo(100, 1.0);
   $('#fileupload').fileupload("enable");
   $('#step-2a').fadeTo(100, 0.4);
@@ -486,14 +486,16 @@ function clearTabTwo() {
                   $('#CallErrorsID').append('<p class="badcall">' + callsign + "</p>\n");
                });
             }
-            if (data.result.errors) {
+            if (data.result.errors && data.result.errors.length > 0) {
+               $('#QSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n")
                $.each(data.result.errors, function (index, errval) {
                   $('#QSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
                                             errval.line.toString() + ':</span> <span class="errmsg">' +
                                             errval.msg + "</span></p>\n");
                });
             }
-            if (data.result.warnings) {
+            if (data.result.warnings && data.result.warnings.length > 0) {
+               $('#QSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n")
                $.each(data.result.warnings, function (index, errval) {
                   $('#QSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
                                             errval.line.toString() + ':</span> <span class="errmsg">' +
@@ -560,6 +562,7 @@ function clearTabTwo() {
           success: function(data) {
              console.log("Success 3");
              clearTabOne();
+             $("#doneMsg").css("visibility", "visible");
           }
       });
       ev.preventDefault();
@@ -582,6 +585,7 @@ function clearTabTwo() {
           success: function(data) {
              console.log("Success 2");
              clearTabTwo();
+             $("#doneMsg").css("visibility", "visible");
           },
           error: function(xhr, tstatus, errthrn)  {
              console.log("Error 2");
@@ -682,14 +686,16 @@ function clearTabTwo() {
                    $('#AltCallErrorsID').append('<p class="badcall">' + callsign + "</p>\n");
                 });
              }
-             if (data.errors) {
+             if (data.errors && data.errors.length > 0) {
+                 $('#AltQSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n")
                  $.each(data.errors, function (index, errval) {
                    $('#AltQSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
                                              errval.line.toString() + ':</span> <span class="errmsg">' +
                                              errval.msg + "</span></p>\n");
                 });
              }
-             if (data.warnings) {
+             if (data.warnings && data.warnings.length > 0) {
+                 $('#AltQSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n")
                 $.each(data.warnings, function (index, errval) {
                    $('#AltQSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
                                              errval.line.toString() + ':</span> <span class="errmsg">' +
