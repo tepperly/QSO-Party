@@ -107,7 +107,7 @@ div.QSOReport h2, div.QCallReport h2 {
 .badcall, .logerr, .logwarn, .multerr, .multwarn {
     font-family: "Courier New", "Lucida Console", monospace;
     font-style: normal;
-    font-weight: medium;
+    font-weight: normal;
     margin: 0 0 0 0 ! important;
     padding: 0 0 0 0;
     line-height: 105%;

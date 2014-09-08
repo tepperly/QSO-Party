@@ -96,7 +96,7 @@ class CallsignReport
 end
 
 ldb = LogDatabase.new
-FCGI.each_cgi("html4") { |cgi|
+FCGI.each_cgi("html4Tr") { |cgi|
   csr = CallsignReport.new(cgi, ldb)
   csr.report
 }
