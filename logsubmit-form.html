@@ -35,7 +35,7 @@
         <i class="glyphicon glyphicon-plus"></i>
         <span>Drag and drop Cabrillo file here or click to upload...</span>
         <!-- The file input field used as target for the file upload widget -->
-	<input id="fileupload" type="file" name="cabrillofile" multiple="multiple">
+	<input id="fileupload" type="file" name="cabrillofile">
       </span>
       <br />
       <div id="progress" class="progress">
@@ -46,7 +46,23 @@
       <h1>Step 2: Review Cabrillo file</h1>
       <p>If there are errors, please fix the problems in your Cabrillo
       file on your computer and then upload the fixed Cabrillo
-      file.</p>
+      file using the "Clear &amp; Reload" button. Otherwise, move on the Step 3.</p>
+      <div class="QSOSummCol">
+        <table class="QSOSummary" summary="Summary contest entry statistics">
+	  <caption class="QSOSumCap">Summary Statistics</caption>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">QSO lines:</th><td class="QSOSumData" id="maxQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Readable QSOs:</th><td class="QSOSumData" id="validQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Errors:</th><td class="QSOSumData" id="numErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Warnings:</th><td class="QSOSumData" id="numWarningsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier errors:</th><td class="QSOSumData" id="numMultErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier aliases:</th><td class="QSOSumData" id="numMultAliasesId">&nbsp;</td></tr>
+	</table>
+	<input id="ReloadID" type="button" name="Reupload" class="cqpbutton" value="Clear &amp; Reupload"></input>
+      </div>
+      <div class="QSOReport"><h2>Error &amp; Warnings</h2><div id="QSOErrorsID"></div></div>
+      <div class="QSOReport"><h2>Multiplier Issues</h2><div id="MultErrorsID"></div></div>
+      <div class="QCallReport"><h2>Bad Callsigns</h2><div id="CallErrorsID"></div></div>
+      <div class="clear"></div>
     </div>
     <div id="step-3">
       <h1>Step 3: Provide Supplemental information</h1>
@@ -115,7 +131,7 @@
 	<label for="commentId">Comments:</label><br>
 	<textarea name="comments" id="commentId" cols="80" 
 		  rows="5" class="jForm"></textarea><br>
-        <button type="submit" id="submit" class="jForm">Submit</button>
+        <input type="submit" id="submit" class="jForm cqpbutton"></input>
 	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
@@ -135,14 +151,30 @@
 	<label for="cabcontentId">Paste your log here:</label><br>
 	<textarea name="cabcontent" id="cabcontentId" cols="100" wrap="soft"
 		  rows="5" ></textarea><br>
-	<button type="submit" id="cabsubmit">Submit</button>
+	<input type="submit" id="cabsubmit" class="cqpbutton"></input>
       </form>
     </div>
     <div id="step-2a">
       <h1>Step 2: Review Cabrillo file</h1>
       <p>If there are errors, please fix the problems in your Cabrillo
       file on your computer and then upload the fixed Cabrillo
-      file.</p>
+      file using the "Clear &amp; Reload" button. Otherwise, move on the Step 3.</p>
+      <div class="QSOSummCol">
+        <table class="QSOSummary" summary="Summary contest entry statistics">
+	  <caption class="QSOSumCap">Summary Statistics</caption>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">QSO lines:</th><td class="QSOSumData" id="AltmaxQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Readable QSOs:</th><td class="QSOSumData" id="AltvalidQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Errors:</th><td class="QSOSumData" id="AltnumErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Warnings:</th><td class="QSOSumData" id="AltnumWarningsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier errors:</th><td class="QSOSumData" id="AltnumMultErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier aliases:</th><td class="QSOSumData" id="AltnumMultAliasesId">&nbsp;</td></tr>
+	</table>
+	<input id="AltReloadID" type="button" name="Reupload" class="cqpbutton" value="Clear &amp; Reupload"></input>
+      </div>
+      <div class="QSOReport"><h2>Error &amp; Warnings</h2><div id="AltQSOErrorsID"></div></div>
+      <div class="QSOReport"><h2>Multiplier Issues</h2><div id="AltMultErrorsID"></div></div>
+      <div class="QCallReport"><h2>Bad Callsigns</h2><div id="AltCallErrorsID"></div></div>
+      <div class="clear"></div>
     </div>
     <div id="step-3a">
       <h1>Step 3: Provide Supplemental information</h1>
@@ -210,7 +242,7 @@
 	<label for="AltcommentId">Comments:</label><br>
 	<textarea name="comments" id="AltcommentId" cols="80"
 		  rows="5" class="jForma"></textarea><br>
-        <button type="submit" id="Altsubmit" class="jForma">Submit</button>
+        <input type="submit" id="Altsubmit" class="jForma cqpbutton"></input>
 	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
@@ -291,8 +323,8 @@
     <label for="ALLcommentId">Comments:</label><br>
     <textarea name="comments" id="ALLcommentId" cols="80"
 	      rows="5" class="jFormb"></textarea><br>
-    <button type="submit" id="ALLsubmit" class="jFormb">Submit</button>
-    <button type="reset" id="ALLreset" value="Reset" class="jFormb">Reset</button>
+    <input type="submit" id="ALLsubmit" class="jFormb"></input>
+    <input type="reset" id="ALLreset" value="Reset" class="jFormb"></input>
     <p>* Indicates <strong>required</strong> fields.
   </form>
     <div id="ALLreminder" >
@@ -304,16 +336,80 @@
 
  
 <script  type="text/javascript">
+function clearTabOne() {
+  $("#logDBId").val("");
+  $("#callsignId").val("");
+  $("#emailId").val("");
+  $("#confirmId").val("");
+  $("#phoneId").val("");
+  $("#sentQTHId").val("");
+  $("#opclassId").val("multi-multi");
+  $("#opmsgId").html("");
+  $('#maxQSOId').html("&nbsp;");
+  $('#validQSOId').html("&nbsp;");
+  $('#numErrorsId').html("&nbsp;");
+  $('#numWarningsId').html("&nbsp;");
+  $('#numMultAliasesId').html("&nbsp;");
+  $('#numMultErrorsId').html("&nbsp;");
+  $('#CallErrorsID').text("");
+  $('#MultErrorsID').text("");
+  $('#QSOErrorsID').text("");
+  $("#powerId").val("High");
+  $("#commentId").val("");
+  $("#expedition").prop("checked", false);
+  $("#youth").prop("checked", false);
+  $("#mobile").prop("checked", false);
+  $("#yl").prop("checked", false);
+  $("#school").prop("checked", false);
+  $("#newcontester").prop("checked", false);
+  $("#doneMsg").css("visibility", "visible");
+  $('#step-1').fadeTo(100, 1.0);
+  $('#fileupload').fileupload("enable");
+  $('#step-2').fadeTo(100, 0.4);
+  $('.jForm').prop("disabled", true);
+  $('#step-3').fadeTo(100, 0.4);
+  $('#progress .progress-bar').css(
+      'width', '0%' );
+}
+
+function clearTabTwo() {
+  $("#AltlogDBId").val("");
+  $("#AltcallsignId").val("");
+  $("#AltemailId").val("");
+  $("#AltconfirmId").val("");
+  $("#AltphoneId").val("");
+  $("#AltsentQTHId").val("");
+  $("#AltopclassId").val("multi-multi");
+  $("#AltopmsgId").html("");
+  $('#AltmaxQSOId').html("&nbsp;");
+  $('#AltvalidQSOId').html("&nbsp;");
+  $('#AltnumErrorsId').html("&nbsp;");
+  $('#AltnumWarningsId').html("&nbsp;");
+  $('#AltnumMultAliasesId').html("&nbsp;");
+  $('#AltnumMultErrorsId').html("&nbsp;");
+  $('#AltCallErrorsID').text("");
+  $('#AltMultErrorsID').text("");
+  $('#AltQSOErrorsID').text("");
+  $("#AlpowerId").val("High");
+  $("#AltcommentId").val("");
+  $("#Altexpedition").prop("checked", false);
+  $("#Altyouth").prop("checked", false);
+  $("#Altmobile").prop("checked", false);
+  $("#Altyl").prop("checked", false);
+  $("#Altschool").prop("checked", false);
+  $("#Altnewcontester").prop("checked", false);
+  $("#AltdoneMsg").css("visibility", "visible");
+  $('#step-1a').fadeTo(100, 1.0);
+  $('#fileupload').fileupload("enable");
+  $('#step-2a').fadeTo(100, 0.4);
+  $('.jForma').prop("disabled", true);
+  $('#step-3a').fadeTo(100, 0.4);
+}
+ 
   $(function () {
     var urlval = "server/upload.fcgi";
     $('#tabs').show();
     $('#AllInOne').hide();
-    $('#step-2').fadeTo(100, 0.4);
-    $('.jForm').prop("disabled", true);
-    $('#step-3').fadeTo(100, 0.4);
-    $('#step-2a').fadeTo(100, 0.4);
-    $('.jForma').prop("disabled", true);
-    $('#step-3a').fadeTo(100, 0.4);
     $('#fileupload').fileupload({
         url: urlval,
         dataType: 'json',
@@ -348,6 +444,76 @@
                   $('#'.concat(cat)).prop("checked", true);
                });
             }
+            if (!(typeof data.result.MaxQSO === 'undefined')) {
+              $('#maxQSOId').text(data.result.MaxQSO.toString());
+            }
+            else {
+              $('#maxQSOId').html("&nbsp;");
+            }
+            if (!(typeof data.result.ParseableQSO === 'undefined')) {
+              $('#validQSOId').text(data.result.ParseableQSO);
+            }
+            else {
+              $('#validQSOId').html("&nbsp;");
+            }
+            if (data.result.errors) { 
+              $('#numErrorsId').text(data.result.errors.length.toString());
+            }
+            else {
+              $('#numErrorsId').html("&nbsp;");
+            }
+            if (data.result.warnings) { 
+              $('#numWarningsId').text(data.result.warnings.length.toString());
+            }
+            else {
+              $('#numWarningsId').html("&nbsp;");
+            }
+            $('#numMultAliasesId').html("&nbsp;");
+            if (data.result.multipliers) {
+              if (data.result.multipliers.warnings) {
+                $('#numMultAliasesId').text(data.result.multipliers.warnings.length.toString());
+              }
+              if (data.result.multipliers.errors) {
+                $('#numMultErrorsId').text(data.result.multipliers.errors.length.toString());
+              }
+            }
+            $('#CallErrorsID').text("");
+            $('#MultErrorsID').text("");
+            $('#QSOErrorsID').text("");
+            if (data.result.badcallsigns) {
+               $.each(data.result.badcallsigns, function (index, callsign) {
+                  $('#CallErrorsID').append('<p class="badcall">' + callsign + "</p>\n");
+               });
+            }
+            if (data.result.errors) {
+               $.each(data.result.errors, function (index, errval) {
+                  $('#QSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
+                                            errval.line.toString() + ':</span> <span class="errmsg">' +
+                                            errval.msg + "</span></p>\n");
+               });
+            }
+            if (data.result.warnings) {
+               $.each(data.result.warnings, function (index, errval) {
+                  $('#QSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
+                                            errval.line.toString() + ':</span> <span class="errmsg">' +
+                                            errval.msg + "</span></p>\n");
+               });
+            }
+            if (data.result.multipliers) {
+               if (data.result.multipliers.errors && data.result.multipliers.errors.length > 0) {
+                 $('#MultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n")
+                 $.each(data.result.multipliers.errors, function (index, errval) {
+                    $('#MultErrorsID').append('<p class="multerr">' + errval + "</p>\n");
+                 });
+               }
+               if (data.result.multipliers.warnings && data.result.multipliers.warnings.length > 0) {
+                 $('#MultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n")
+                 $.each(data.result.multipliers.warnings, function (index, errval) {
+                    $('#MultErrorsID').append('<p class="multerr"><span class="multalias">' + errval.log +
+                                             '</span> &rarr; <span class="multireal">' + errval.real + "</span></p>\n");
+                 });
+               }
+            }
             $('#step-1').fadeTo(100, 0.4);
             $('#fileupload').fileupload("disable");
             $('#step-2').fadeTo(100, 1.0);
@@ -365,6 +531,16 @@
     }).prop('disabled', !$.support.fileInput)
         .parent().addClass($.support.fileInput ? undefined :
     'disabled');
+    clearTabOne();
+    clearTabTwo();
+    $( '#ReloadID' ).click( function () {
+       console.log("Click");
+       clearTabOne();
+    });
+    $( '#AltReloadID' ).click( function () {
+       console.log("Click");
+       clearTabTwo();
+    });
     $( "#tabs" ).tabs({ active: 0});
     $( "#supplementalForm" ).validate({
        rules: {
@@ -382,30 +558,7 @@
           data: $("#supplementalForm").serialize(),
           success: function(data) {
              console.log("Success 3");
-             $("#logDBId").val("");
-             $("#callsignId").val("");
-             $("#emailId").val("");
-             $("#confirmId").val("");
-             $("#phoneId").val("");
-             $("#sentQTHId").val("");
-             $("#opclassId").val("multi-multi");
-             $("#opmsgId").html("");
-             $("#powerId").val("High");
-             $("#commentId").val("");
-             $("#expedition").prop("checked", false);
-             $("#youth").prop("checked", false);
-             $("#mobile").prop("checked", false);
-             $("#yl").prop("checked", false);
-             $("#school").prop("checked", false);
-             $("#newcontester").prop("checked", false);
-             $("#doneMsg").css("visibility", "visible");
-             $('#step-1').fadeTo(100, 1.0);
-             $('#fileupload').fileupload("enable");
-             $('#step-2').fadeTo(100, 0.4);
-             $('.jForm').prop("disabled", true);
-             $('#step-3').fadeTo(100, 0.4);
-             $('#progress .progress-bar').css(
-                 'width', '0%' );
+             clearTagOne();
           }
       });
       ev.preventDefault();
@@ -427,28 +580,7 @@
           data: $("#AltsupplementalForm").serialize(),
           success: function(data) {
              console.log("Success 2");
-             $("#AltlogDBId").val("");
-             $("#AltcallsignId").val("");
-             $("#AltemailId").val("");
-             $("#AltconfirmId").val("");
-             $("#AltphoneId").val("");
-             $("#AltsentQTHId").val("");
-             $("#AltopclassId").val("multi-multi");
-             $("#AltopmsgId").html("");
-             $("#AlpowerId").val("High");
-             $("#AltcommentId").val("");
-             $("#Altexpedition").prop("checked", false);
-             $("#Altyouth").prop("checked", false);
-             $("#Altmobile").prop("checked", false);
-             $("#Altyl").prop("checked", false);
-             $("#Altschool").prop("checked", false);
-             $("#Altnewcontester").prop("checked", false);
-             $("#AltdoneMsg").css("visibility", "visible");
-             $('#step-1a').fadeTo(100, 1.0);
-             $('#fileupload').fileupload("enable");
-             $('#step-2a').fadeTo(100, 0.4);
-             $('.jForma').prop("disabled", true);
-             $('#step-3a').fadeTo(100, 0.4);
+             clearTabTwo();
           },
           error: function(xhr, tstatus, errthrn)  {
              console.log("Error 2");
@@ -478,30 +610,100 @@
              $.each(data.files, function (index, file) {
                 console.log("ID = " + file.id)
                 $('#AltlogDBId').val(file.id);
-              });
-              if (data.callsign) {
-                $('#AltcallsignId').val(data.callsign);
-              }
-              if (data.email) { 
-                $('#AltemailId').val(data.email);
-              }
-              if (data.SentQTH) {
-                 $('#AltsentQTHId').val(data.SentQTH);
-              }
-              if (data.opclass) {
-                $('#AltopclassId').val(data.opclass);
-              }
-              if (data.power) {
-                $('#AltpowerId').val(data.power);
-              }
-              if (data.opmsg) {
-                $('#AltopmsgId').html(data.opmsg)
-              }
-              if (data.categories) {
-                 $.each(data.categories, function (index, cat) {
-                    $('#Alt'.concat(cat)).prop("checked", true);
-                 });
-              }
+             });
+             if (data.callsign) {
+               $('#AltcallsignId').val(data.callsign);
+             }
+             if (data.email) { 
+               $('#AltemailId').val(data.email);
+             }
+             if (data.SentQTH) {
+                $('#AltsentQTHId').val(data.SentQTH);
+             }
+             if (data.opclass) {
+               $('#AltopclassId').val(data.opclass);
+             }
+             if (data.power) {
+               $('#AltpowerId').val(data.power);
+             }
+             if (data.opmsg) {
+               $('#AltopmsgId').html(data.opmsg)
+             }
+             if (data.categories) {
+                $.each(data.categories, function (index, cat) {
+                   $('#Alt'.concat(cat)).prop("checked", true);
+                });
+             }
+             if (!(typeof data.MaxQSO === 'undefined')) {
+               $('#AltmaxQSOId').text(data.MaxQSO.toString());
+             }
+             else {
+               $('#AltmaxQSOId').html("&nbsp;");
+             }
+             if (!(typeof data.ParseableQSO === 'undefined')) {
+               $('#AltvalidQSOId').text(data.ParseableQSO);
+             }
+             else {
+               $('#AltvalidQSOId').html("&nbsp;");
+             }
+             if (data.errors) { 
+               $('#AltnumErrorsId').text(data.errors.length.toString());
+             }
+             else {
+               $('#AltnumErrorsId').html("&nbsp;");
+             }
+             if (data.warnings) { 
+               $('#AltnumWarningsId').text(data.warnings.length.toString());
+             }
+             else {
+               $('#AltnumWarningsId').html("&nbsp;");
+             }
+             $('#AltnumMultAliasesId').html("&nbsp;");
+             if (data.multipliers) {
+               if (data.multipliers.warnings) {
+                 $('#AltnumMultAliasesId').text(data.multipliers.warnings.length.toString());
+               }
+               if (data.multipliers.errors) {
+                 $('#AltnumMultErrorsId').text(data.multipliers.errors.length.toString());
+               }
+             }
+             $('#AltCallErrorsID').text("");
+             $('#AltMultErrorsID').text("");
+             $('#AltQSOErrorsID').text("");
+             if (data.badcallsigns) {
+                $.each(data.badcallsigns, function (index, callsign) {
+                   $('#AltCallErrorsID').append('<p class="badcall">' + callsign + "</p>\n");
+                });
+             }
+             if (data.errors) {
+                 $.each(data.errors, function (index, errval) {
+                   $('#AltQSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
+                                             errval.line.toString() + ':</span> <span class="errmsg">' +
+                                             errval.msg + "</span></p>\n");
+                });
+             }
+             if (data.warnings) {
+                $.each(data.warnings, function (index, errval) {
+                   $('#AltQSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
+                                             errval.line.toString() + ':</span> <span class="errmsg">' +
+                                             errval.msg + "</span></p>\n");
+                });
+             }
+             if (data.multipliers) {
+                if (data.multipliers.errors && data.multipliers.errors.length > 0) {
+                  $('#AltMultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n")
+                  $.each(data.multipliers.errors, function (index, errval) {
+                     $('#AltMultErrorsID').append('<p class="multerr">' + errval + "</p>\n");
+                  });
+                }
+                if (data.multipliers.warnings && data.multipliers.warnings.length > 0) {
+                  $('#AltMultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n")
+                  $.each(data.multipliers.warnings, function (index, errval) {
+                     $('#AltMultErrorsID').append('<p class="multerr"><span class="multalias">' + errval.log +
+                                              '</span> &rarr; <span class="multireal">' + errval.real + "</span></p>\n");
+                  });
+                }
+             }
              $('#cabcontentId').prop("disabled", true);
              console.log("Success 1 done");
           },

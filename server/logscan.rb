@@ -171,8 +171,9 @@ class CQPLog
     result["callsign"] = (@callsign ? CGI.escapeHTML(@callsign) : "UNKNOWN")
     result["files"] = [ { "name" => CGI.escapeHTML(@filename), "id" => @id }, ]
     result["MaxQSO"] = @maxqso
-    result["ParsableQSO"] = @validqso
+    result["ParseableQSO"] = @validqso
     result["opclass"] = calcOpClass
+    result["badcallsigns"] = @badcallsigns.keys.sort
     result["opmsg"] = calcOpMessage
     if @power
       result["power"] = powerStr

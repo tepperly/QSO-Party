@@ -7,6 +7,88 @@ h1 {
     margin-bottom: 10px;
 }
 
+.QSOReport {
+    border-style: solid;
+    border-width: 2px;
+    margin: 0 2px 0 2px;
+    padding: 0 2px 0 2px;
+    overflow: auto;
+    height: 170px;
+    width: 200px;
+    float: left;
+}
+
+.cqpbutton {
+    color: white;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+
+.QCallReport {
+    border-style: solid;
+    border-width: 2px;
+    padding: 0 2px 0 2px;
+    margin: 0 2px 0 2px;
+    overflow: auto;
+    height: 170px;
+    width: 150px;
+    float: left;
+}
+
+div.QSOReport h2, div.QCallReport h2 {
+    font-family: "Trebuchet MS", Verdana, Sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0 0 0 0;
+}
+
+.QSOSummCol {
+    width: 170px;
+    margin-right: 10px;
+    float: left;
+}
+
+.QSOSummary {
+    width: 100%;
+}
+
+.QSOSumCap {
+    text-align: center;
+    font-family: "Trebuchet MS", Verdana, Sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0 0 0 0;
+}
+
+.QSOSumData {
+    width: 20%;
+    padding: 0 4px 0 4px;
+    font-family: Arial, Verdana, San-serif;
+    font-style: normal;
+    font-size: 12px;
+    padding: 0px;
+}
+
+.QSOSumHead {
+    width: 80%;
+    font-family: Arial, Verdana, San-serif;
+    font-style: normal;
+    font-size: 12px;
+    padding: 0 4px 0 4px;
+    text-align: right;
+    font-weight: bold;
+}
+
+.clear {
+    clear: both;
+}
+
 .catCol {
     width: 200px;
     height: 25px;
@@ -20,4 +102,23 @@ h1 {
 
 #cabcontentId, #ALLcabcontentId {
     font-family: "Courier New", "Lucida Console", monospace;
+}
+
+.badcall, .logerr, .logwarn, .multerr, .multwarn {
+    font-family: "Courier New", "Lucida Console", monospace;
+    font-style: normal;
+    font-weight: medium;
+    margin: 0 0 0 0 ! important;
+    padding: 0 0 0 0;
+    line-height: 105%;
+    white-space: nowrap;
+}
+.miniheading {
+    font-family: "Courier New", "Lucida Console", monospace;
+    font-style: normal;
+    font-weight: bold;
+    margin: 0 0 0 0 ! important;
+    padding: 0 0 0 0;
+    line-height: 105%;
+    white-space: nowrap;
 }
