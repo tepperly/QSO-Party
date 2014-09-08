@@ -247,7 +247,7 @@ class LineChecker
       rest = line[startIndex..-1]
     end
     if rest.length > 0
-      @checkobj.checkStr(rest, advanceCount(startLineNum, line[0,startIndex]), log)
+      @checkobj.checkStr(rest, startLineNum + line[0..(startIndex-1)].scan(EOLREGEX).size, log)
     end
     advanceCount(startLineNum, line)
   end
@@ -1109,6 +1109,10 @@ class QSOTag < StandardNearMiss
                sentcall, sentnum, sentqth,
                recvdcall, recvdnum, recvdqth,
                transnum)
+    if sentcall and (not log.callsign) and sentcall.length > 0 
+      log.callsign = sentcall.upcase
+    end
+      
     valid = true
     valid = valid and checkFreqMode(log, lineNum, freq, mode)
     valid = valid and checkDateTime(log, lineNum, date, time)

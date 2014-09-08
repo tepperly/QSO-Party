@@ -404,6 +404,7 @@ function clearTabTwo() {
   $('#step-2a').fadeTo(100, 0.4);
   $('.jForma').prop("disabled", true);
   $('#step-3a').fadeTo(100, 0.4);
+  $('#cabcontentId').prop("disabled", false);
 }
  
   $(function () {
@@ -558,7 +559,7 @@ function clearTabTwo() {
           data: $("#supplementalForm").serialize(),
           success: function(data) {
              console.log("Success 3");
-             clearTagOne();
+             clearTabOne();
           }
       });
       ev.preventDefault();
@@ -600,17 +601,23 @@ function clearTabTwo() {
           dataType: "json",
           data: $("#cutnpaste").serialize(),
           success: function(data) {
+             console.log(data);
+             if (data.files) {
+               $.each(data.files, function (index, file) {
+                  console.log("ID = " + file.id)
+                  $('#AltlogDBId').val(file.id);
+               });
+             }
+             else {
+               console.log("Insufficient JSON");
+               return 1;
+             }
              console.log("Success 1");
              $('#step-1a').fadeTo(100, 0.4);
              $('#cabcontentId').val("");
              $('#step-2a').fadeTo(100, 1.0);
              $('.jForma').prop("disabled", false);
              $('#step-3a').fadeTo(100, 1.0);
-             console.log(data);
-             $.each(data.files, function (index, file) {
-                console.log("ID = " + file.id)
-                $('#AltlogDBId').val(file.id);
-             });
              if (data.callsign) {
                $('#AltcallsignId').val(data.callsign);
              }

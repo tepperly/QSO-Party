@@ -165,23 +165,10 @@ FCGI.each_cgi { |request|
       asciiContent = convertToEncoding(content, Encoding::US_ASCII)
       logID = db.getID
       log = logCheck.checkLogStr("", logID, asciiContent)
-      $stderr.write("Step 3\n")
-      $stderr.flush()
       if log 
-        $stderr.write("Step 4\n")
-        $stderr.write(log.to_s)
-        $stderr.flush()
         if log.maxqso and log.validqso
-          begin
-            db.addQSOCount(logID, log.maxqso, log.validqso)
-          rescue => e
-            $stderr.write(e.message + "\n")
-            $stderr.write(e.backtrace.join("\n"))
-            $stderr.flush()
-          end
+          db.addQSOCount(logID, log.maxqso, log.validqso)
         end
-        $stderr.write("Step 5\n")
-        $stderr.flush()
         if log.callsign and log.callsign != "UNKNOWN"
           callsign = log.callsign
         end
