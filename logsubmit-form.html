@@ -61,7 +61,7 @@
       </div>
       <div class="QSOReport"><h2>Error &amp; Warnings</h2><div id="QSOErrorsID"></div></div>
       <div class="QSOReport"><h2>Multiplier Issues</h2><div id="MultErrorsID"></div></div>
-      <div class="QCallReport"><h2>Bad Callsigns</h2><div id="CallErrorsID"></div></div>
+      <div class="QCallReport"><h2>Irregular Callsigns</h2><div id="CallErrorsID"></div></div>
       <div class="clear"></div>
     </div>
     <div id="step-3">
@@ -74,7 +74,7 @@
 	<input type="email" name="email" id="emailId" class="jForm"><br>
 	<label for="confirmId" class="inLabel">Confirm Email*:</label>
 	<input type="email" name="confirm" id="confirmId" class="jForm"><br >
-	<label for="phoneId" class="inLabel">Phone Number*:</label>
+	<label for="phoneId" class="inLabel">Phone Number:</label>
 	<input type="text" name="phone" id="phoneId" class="jForm"><br >
 	<label for="sentQTHId" class="inLabel">Sent QTH:</label>
 	<input type="text" name="sentQTH" id="sentQTHId" class="jForm"><br >
@@ -173,7 +173,7 @@
       </div>
       <div class="QSOReport"><h2>Error &amp; Warnings</h2><div id="AltQSOErrorsID"></div></div>
       <div class="QSOReport"><h2>Multiplier Issues</h2><div id="AltMultErrorsID"></div></div>
-      <div class="QCallReport"><h2>Bad Callsigns</h2><div id="AltCallErrorsID"></div></div>
+      <div class="QCallReport"><h2>Irregular Callsigns</h2><div id="AltCallErrorsID"></div></div>
       <div class="clear"></div>
     </div>
     <div id="step-3a">
@@ -186,7 +186,7 @@
 	<input type="email" name="email" id="AltemailId" class="jForma"><br>
 	<label for="AltconfirmId" class="inLabel">Confirm Email*:</label>
 	<input type="email" name="confirm" id="AltconfirmId" class="jForma"><br >
-	<label for="AltphoneId" class="inLabel">Phone Number*:</label>
+	<label for="AltphoneId" class="inLabel">Phone Number:</label>
 	<input type="text" name="phone" id="AltphoneId" class="jForma"><br >
 	<label for="AltsentQTHId" class="inLabel">Sent QTH:</label>
 	<input type="text" name="sentQTH" id="AltsentQTHId" class="jForma"><br >
@@ -268,7 +268,7 @@
     <input type="email" name="email" id="ALLemailId" class="jFormb"><br>
     <label for="ALLconfirmId" class="inLabel">Confirm Email*:</label>
     <input type="email" name="confirm" id="ALLconfirmId" class="jFormb"><br >
-    <label for="ALLphoneId" class="inLabel">Phone Number*:</label>
+    <label for="ALLphoneId" class="inLabel">Phone Number:</label>
     <input type="text" name="phone" id="ALLphoneId" class="jFormb"><br >
     <label for="ALLsentQTHId" class="inLabel">Sent QTH:</label>
     <input type="text" name="sentQTH" id="ALLsentQTHId" class="jFormb"><br >
@@ -548,6 +548,7 @@ function clearTabTwo() {
     $( "#tabs" ).tabs({ active: 0});
     $( "#supplementalForm" ).validate({
        rules: {
+         callsign: "required",
          email: "required",
          confirm: {
            equalTo: "#emailId"
@@ -556,20 +557,24 @@ function clearTabTwo() {
      });
     $("#supplementalForm" ).submit(function(ev) {
       var urlval = "server/upload.fcgi";
-      $.ajax({
-          type: "POST",
-          url : urlval,
-          data: $("#supplementalForm").serialize(),
-          success: function(data) {
-             console.log("Success 3");
-             clearTabOne();
-             $("#doneMsg").css("visibility", "visible");
-          }
-      });
+      var checker = $('#supplementalForm').validate();
+      if (checker.form()) {
+        $.ajax({
+            type: "POST",
+            url : urlval,
+            data: $("#supplementalForm").serialize(),
+            success: function(data) {
+               console.log("Success 3");
+               clearTabOne();
+               $("#doneMsg").css("visibility", "visible");
+            }
+        });
+      }
       ev.preventDefault();
     });
     $( "#AltsupplementalForm" ).validate({
        rules: {
+         callsign: "required",
          email: "required",
          confirm: {
            equalTo: "#AltemailId"
@@ -578,23 +583,26 @@ function clearTabTwo() {
      });
     $('#AltsupplementalForm').submit(function(ev) {
       var urlval = "server/upload.fcgi";
-      $.ajax({
-          type: "POST",
-          dataType: "json",
-          url : urlval,
-          data: $("#AltsupplementalForm").serialize(),
-          success: function(data) {
-             console.log("Success 2");
-             clearTabTwo();
-             $("#doneMsg").css("visibility", "visible");
-          },
-          error: function(xhr, tstatus, errthrn)  {
-             console.log("Error 2");
-             console.log(xhr.responseText);
-             console.log(tstatus);
-             console.log(errthrn);
-          }
-      });
+      var checker = $('#AltsupplementalForm').validate();
+      if (checker.form()) {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url : urlval,
+            data: $("#AltsupplementalForm").serialize(),
+            success: function(data) {
+               console.log("Success 2");
+               clearTabTwo();
+               $("#doneMsg").css("visibility", "visible");
+            },
+            error: function(xhr, tstatus, errthrn)  {
+               console.log("Error 2");
+               console.log(xhr.responseText);
+               console.log(tstatus);
+               console.log(errthrn);
+            }
+        });
+      }
       ev.preventDefault();
     });
 
