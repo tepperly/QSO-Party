@@ -128,16 +128,18 @@ class LogDatabase
 
   def callsignsRcvd
     result = [ ]
+    lastdate = nil
     field = 'callsign_confirm'
     connect
     if @connection
       res = @connection.query("select distinct #{field} from CQPLog where completed order by callsign_confirm asc;")
       res.each { |row|
         sign = row[field]
-        result << sign unless "UNKNOWN" == sign
+        result << sign unless ("UNKNOWN" == sign or "" == sign)
       }
+      date = getOne("select max(uploadtime) from CQPLog where completed;")
     end
-    result
+    return result, date
   end
 
   def getEntry(id)

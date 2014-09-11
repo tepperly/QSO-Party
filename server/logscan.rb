@@ -10,7 +10,7 @@
 # 	levenshtein
 
 require 'time'
-require 'cgi'
+# require 'cgi'
 require 'levenshtein'
 require 'json'
 
@@ -46,12 +46,12 @@ class LineIssue
   end
 
   def to_hash
-    { "line" => @lineNum, "msg" => CGI.escapeHTML(@description) }
+    { "line" => @lineNum, "msg" => @description }
   end
 end
 
 class CQPLog
-  def initialize(id, filename)
+  def initialize(id, filename, multregex)
     @id = id
     @filename = filename
     @version = nil              # Cabrillo version
@@ -77,6 +77,7 @@ class CQPLog
     @qsos = [ ]
     @warnings = [ ]
     @errors = [ ]
+    @multtest = multregex
   end
 
   def numOpsInconsistent?
@@ -168,8 +169,8 @@ class CQPLog
 
   def to_json
     result = Hash.new
-    result["callsign"] = (@callsign ? CGI.escapeHTML(@callsign) : "UNKNOWN")
-    result["files"] = [ { "name" => CGI.escapeHTML(@filename), "id" => @id }, ]
+    result["callsign"] = (@callsign ? @callsign : "UNKNOWN")
+    result["files"] = [ { "name" => @filename, "id" => @id }, ]
     result["MaxQSO"] = @maxqso
     result["ParseableQSO"] = @validqso
     result["opclass"] = calcOpClass
@@ -180,14 +181,14 @@ class CQPLog
     end
     result["categories"] = @categories.keys.sort
     if @email
-      result["email"] = CGI.escapeHTML(@email)
+      result["email"] = @email
     end
-    result["SentQTH"] = @sentqth.keys.sort.map { |qth| CGI.escapeHTML(qth) }
+    result["SentQTH"] = @sentqth.keys.find_all { |sq| @multtest.match(sq) }.sort.map { |qth| qth }
     result["warnings"] = @warnings.map { |w| w.to_hash }
     result["errors"] = @errors.map { |w| w.to_hash }
-    result["multipliers"] = { "errors" => @badmultipliers.keys.sort.map { |m| CGI.escapeHTML(m) },
-      "warnings" => @warnmultipliers.keys.sort.map { |m| { "log" => CGI.escapeHTML(m), 
-          "real" => CGI.escapeHTML(@warnmultipliers[m]) } } }
+    result["multipliers"] = { "errors" => @badmultipliers.keys.sort.map { |m| m },
+      "warnings" => @warnmultipliers.keys.sort.map { |m| { "log" => m, 
+          "real" => @warnmultipliers[m] } } }
     result
   end
 end
@@ -226,16 +227,16 @@ class LineChecker
   def sample(line)
     eol = line.index(EOLREGEX)
     if eol
-      limit = [20, line.length, eol].min
+      limit = [line.length, eol].min
     else
-      limit = [20, line.length].min
+      limit = line.length
     end
     " '" + line[0, limit] + "'"
   end
 
   def eolCheck(subline, log, startLineNum)
     if EOLREGEX.match(subline)
-      log.warnings << LineIssue.new(startLineNum, "Unexpected end-of-line in tag (usually cause by line wrap)", false)
+      log.warnings << LineIssue.new(startLineNum, "Unexpected end-of-line in tag (usually caused by line wrap)", false)
     end
   end
 
@@ -254,7 +255,7 @@ class LineChecker
 
   def syntaxCheck(line, log, startLineNum)
     if m = LOOSETAGREGEX.match(line)
-      log.errors << LineIssue.new(startLineNum, "Unknown tag '" + m[1] + "'", true)
+      log.errors << LineIssue.new(startLineNum, "Unknown tag '" + m[1] + "' in line: " + sample(line), true)
     else
       log.errors << LineIssue.new(startLineNum, "Line doesn't start with tag:" + sample(line) , true )
     end
@@ -327,14 +328,18 @@ class StandardNearMiss < LineChecker
     ind
   end
 
+  def properSyntax
+    ""
+  end
+
   def syntaxCheck(line, log, startLineNum)
     if m = @strictregex.match(line)
       eolIndex = endOfLineIndex(line)
       if eolIndex and (m.end(0) < eolIndex) # regular expression matched less than a lines worth
         if @error
-          log.errors << LineIssue.new(startLineNum, "Incorrect #{@name} line.", @error)
+          log.errors << LineIssue.new(startLineNum, "Incorrect #{@name} line expected " + properSyntax, @error)
         else
-          log.warnings << LineIssue.new(startLineNum, "Incorrect #{@name} line.", @error)
+          log.warnings << LineIssue.new(startLineNum, "Incorrect #{@name} line expected " + properSyntax, @error)
         end
       else
         tagMatch(m, log, startLineNum)
@@ -346,9 +351,9 @@ class StandardNearMiss < LineChecker
       end
     else
       if @error
-        log.errors << LineIssue.new(startLineNum, "Incorrect #{@name} line.", @error)
+        log.errors << LineIssue.new(startLineNum, "Incorrect #{@name} line expected " + properSyntax, @error)
       else
-        log.warnings << LineIssue.new(startLineNum, "Incorrect #{@name} line.", @error)
+        log.warnings << LineIssue.new(startLineNum, "Incorrect #{@name} line expected " + properSyntax, @error)
       end
       if m = EOLREGEX.match(line)
         return checkTheRest(line, m.end(0), log, startLineNum)
@@ -370,6 +375,10 @@ class StartLogTag < StandardNearMiss
     @tagregex = TAGREGEX
     @strictregex = WHOLETAG
     @error = false
+  end
+
+  def properSyntax
+    "START-OF-LOG: (2.0|3.0)"
   end
 
   def tagMatch(match, log, linenum)
@@ -397,6 +406,10 @@ class EndLogTag < StandardNearMiss
     @tagregex = TAGREGEX
     @strictregex = WHOLETAG
     @error = false
+  end
+
+  def properSyntax
+    "END-OF-LOG:"
   end
 
   def stateTransition(log, linenum)
@@ -430,6 +443,10 @@ class CallsignTag < HeaderTag
     @error = true
   end
 
+  def properSyntax
+    "CALLSIGN: callsign"
+  end
+
   def tagMatch(match, log, linenum)
     log.callsign = match[1].upcase
   end
@@ -440,6 +457,10 @@ class CatAssistedTag < HeaderTag
   TAG="CATEGORY-ASSISTED"
   TAGREGEX=/\Acategory-assisted:/i
   WHOLETAG=/\Acategory-assisted:\s*((non-|un)?assisted)\s*/i
+
+  def properSyntax
+    "CATEGORY-ASSISTED: (ASSISTED|NON-ASSISTED)"
+  end
 
   def initialize
     super
@@ -462,6 +483,10 @@ class CatBandTag < HeaderTag
   TAGREGEX=/\Acategory-band:/i
   WHOLETAG=/\Acategory-band:\s*(all|(160|80|40|20|15|10|6|2)m|222|432|902|(1\.2|2\.3|3\.4|5\.7|10|24|47|75|119|142|241)g|light)\s*/i
 
+  def properSyntax
+    "CATEGORY-BAND: (ALL|160M|80M|40M|20M|15M|10M|6M|2M|222|432|902|1.2G|2.3G|3.4G|5.7G|10G|24G|47G|75G|119G|142G|241G|Light)"
+  end
+
   def initialize
     super
     @name = TAG
@@ -479,6 +504,10 @@ class CatDXPTag < HeaderTag
   TAG="CATEGORY-DXPEDITION"
   TAGREGEX=/\Acategory-dxpedition:/i
   WHOLETAG=/\Acategory-dxpedition:\s*(.*)\s*/i
+
+  def properSyntax
+    "CATEGORY-DXPEDITION: [dxpedition-status]"
+  end
 
   def initialize
     super
@@ -512,6 +541,10 @@ class CatOperatorTag < HeaderTag
   TAGREGEX=/\Acategory-operator:/i
   WHOLETAG=/\Acategory-operator:\s*((single|multi)-op|checklog)\s*/i
 
+  def properSyntax
+    "CATEGORY-OPERATOR: (SINGLE-OP|MULTI-OP|CHECKLOG)"
+  end
+
   def initialize
     super
     @name = TAG
@@ -539,6 +572,10 @@ class CatPowerTag < HeaderTag
   TAG="CATEGORY-POWER"
   TAGREGEX=/\Acategory-power:/i
   WHOLETAG=/\Acategory-power:\s*(high|low|qrp)\s*/i
+
+  def properSyntax
+    "CATEGORY-POWER: (HIGH|LOW|QRP)"
+  end
 
   def initialize
     super
@@ -575,6 +612,10 @@ class CatStationTag < HeaderTag
     @error = false
   end
 
+  def properSyntax
+    "CATEGORY-STATION: (FIXED|MOBILE|PORTABLE|ROVER|EXPEDITION|HQ|SCHOOL|COUNTY EXPEDITION)"
+  end
+
   def tagMatch(match, log, linenum)
     case match[1].upcase
     when "MOBILE", "ROVER"
@@ -605,6 +646,10 @@ class CategoryTag < HeaderTag
   TAG="CATEGORY"
   TAGREGEX=/\Acategory:/i
   WHOLETAG=/\Acategory:\s+([-a-z0-9]+(\s+[-a-z0-9]+)*)\s*/i
+
+  def properSyntax
+    "CATEGORY: <see Cabrillo 2 spec>"
+  end
 
   def initialize
     super
@@ -683,6 +728,10 @@ class CatTransmitterTag < HeaderTag
   TAGREGEX=/\Acategory-transmitter:/i
   WHOLETAG=/\Acategory-transmitter:\s*(one|two|limited|unlimited|swl)\s*/i
 
+  def properSyntax
+    "CATEGORY-TRANSMITTER: (ONE|TWO|LIMITED|UNLIMITED|SWL)"
+  end
+
   def initialize
     super
     @name = TAG
@@ -701,6 +750,10 @@ class CatOverlayTag < HeaderTag
   TAG="CATEGORY-OVERLAY"
   TAGREGEX=/\Acategory-overlay:/i
   WHOLETAG=/\Acategory-overlay:\s*(classic|rookie|tb-wires|novice-tech|over-50|county-expedition)?\s*/i
+
+  def properSyntax
+    "CATEGORY-OVERLAY: (CLASSIC|ROOKIE|TB-WIRES|NOVICE-TECH|OVER-50|COUNTY-EXPEDITION)"
+  end
 
   def initialize
     super
@@ -723,6 +776,10 @@ class CertificateTag < HeaderTag
   TAGREGEX=/\Acertificate:/i
   WHOLETAG=/\Acertificate:\s*(yes|no)\s*/i
 
+  def properSyntax
+    "CERTIFICATE: (YES|NO)"
+  end
+
   def initialize
     super
     @name = TAG
@@ -737,6 +794,10 @@ class ClaimedScoreTag < HeaderTag
   TAGREGEX=/\Aclaimed-score:/i
   WHOLETAG=/\Aclaimed-score:\s*(\d+)\s*/i
 
+  def properSyntax
+    "CLAIMED-SCORE: <integer>"
+  end
+
   def initialize
     super
     @name = TAG
@@ -750,6 +811,10 @@ class ARRLSectionTag < HeaderTag
   TAG="ARRL-SECTION"
   TAGREGEX=/\Aarrl-section:/i
   WHOLETAG=/\Aarrl-section:\s*([a-z]+(\s+[a-z]+)*)?\s*/i
+
+  def properSyntax
+    "ARRL-SECTION: arrl-section-abbreviation"
+  end
 
   def initialize
     super
@@ -766,6 +831,10 @@ class ClubTag < HeaderTag
   TAGREGEX=/\Aclub(-name)?:/i
   WHOLETAG=/\Aclub(-name)?:\s*(([a-z0-9][a-z0-9\/\.]*(\s+(&|[a-z0-9][a-z0-9\/\.]*))*))?\s*/i
 
+  def properSyntax
+    "CLUB: club-name"
+  end
+
   def initialize
     super
     @name = TAG
@@ -779,6 +848,10 @@ class IOTATag < HeaderTag
   TAG="IOTA-ISLAND-NAME"
   TAGREGEX=/\Aiota-island-name:/i
   WHOLETAG=/\Aiota-island-name:\s*(([a-z0-9][a-z0-9\/\.]*(\s+(&|[a-z0-9][a-z0-9\/\.]*))*))?\s*/i
+
+  def properSyntax
+    "IOTA-ISLAND-NAME: text"
+  end
 
   def initialize
     super
@@ -794,6 +867,10 @@ class ContestTag < HeaderTag
   TAGREGEX=/\Acontest:/i
   WHOLETAG=/\Acontest:\s*(ca-qso-party|cqp|nccc-cqp|california\s+qso\s+party)\s*/i
 
+  def properSyntax
+    "CONTEST: (CA-QSO-PARTY|CQP|NCCC-CQP|CALIFORNIA QSO PARTY)"
+  end
+
   def initialize
     super
     @name = TAG
@@ -807,6 +884,10 @@ class CreatedByTag < HeaderTag
   TAG="CREATED-BY"
   TAGREGEX=/\Acreated-by:/i
   WHOLETAG=/\Acreated-by:\s*(.+)\s*/i
+
+  def properSyntax
+    "CREATED-BY: name of software"
+  end
 
   def initialize
     super
@@ -836,6 +917,10 @@ class EmailTag < HeaderTag
   TAGREGEX=/\Aemail:/i
   WHOLETAG=/\Aemail:\s*((([A-Za-z0-9]+_+)|([A-Za-z0-9]+\-+)|([A-Za-z0-9]+\.+)|([A-Za-z0-9]+\++))*[A-Z‌​a-z0-9]+@((\w+\-+)|(\w+\.))*\w{1,63}\.[a-zA-Z]{2,6})\s*/i
 
+  def properSyntax
+    "EMAIL: valid-email-address"
+  end
+
   def tagMatch(match, log, linenum)
     log.email = match[1]
   end
@@ -853,6 +938,10 @@ class LocationTag < HeaderTag
   TAG="LOCATION"
   TAGREGEX=/\Alocation:/i
   WHOLETAG=/\Alocation:\s*([a-z]+(\s+[a-z]+)*)\s*/i
+
+  def properSyntax
+    "LOCATION: state-province-or-CA-county-abbreviation"
+  end
 
   def tagMatch(match, log, linenum)
     if match[1].length > 0
@@ -874,6 +963,10 @@ class NameTag < HeaderTag
   TAGREGEX=/\Aname:/i
   WHOLETAG=/\Aname:\s*([a-z0-9][a-z0-9\/\.]*(((\s*,\s*|\s+)(&|[a-z0-9][a-z0-9\/\.]*))*))\s*/i
 
+  def properSyntax
+    "NAME: text"
+  end
+
   def tagMatch(match, log, linenum)
     log.name = match[1]
   end
@@ -892,6 +985,10 @@ class AddressTag < HeaderTag
   TAGREGEX=/\Aaddress:/i
   ADDRWITHEMAIL=/\Aaddress:\s*\(e-mail\)\s*((([A-Za-z0-9]+_+)|([A-Za-z0-9]+\-+)|([A-Za-z0-9]+\.+)|([A-Za-z0-9]+\++))*[A-Z‌​a-z0-9]+@((\w+\-+)|(\w+\.))*\w{1,63}\.[a-zA-Z]{2,6})\s*/i
   WHOLETAG=/\Aaddress:\s*(.+)\s*/i
+
+  def properSyntax
+    "ADDRESS: text"
+  end
 
   def initialize
     super
@@ -928,6 +1025,10 @@ class AddressStateTag < HeaderTag
   TAGREGEX=/\Aaddress-state-province:/i
   WHOLETAG=/\Aaddress-state-province:\s*(.+)\s*/i
 
+  def properSyntax
+    "ADDRESS-STATE-PROVINCE: text"
+  end
+
   def initialize
     super
     @name = TAG
@@ -956,6 +1057,10 @@ class AddressCountryTag < HeaderTag
   TAGREGEX=/\Aaddress-country:/i
   WHOLETAG=/\Aaddress-country:\s*(.+)\s*/i
 
+  def properSyntax
+    TAG + ": text"
+  end
+
   def initialize
     super
     @name = TAG
@@ -969,6 +1074,10 @@ class OperatorsTag < HeaderTag
   TAG="OPERATORS"
   TAGREGEX=/\Aoperators:/i
   WHOLETAG=/\Aoperators:\s*(@?([a-z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[a-z0-9]{1,4})?((\s*,\s*|\s+)@?([a-z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[a-z0-9]{1,4})?)*)?\s*/i
+
+  def properSyntax
+    TAG + ": space-seperated-list-of-callsigns"
+  end
 
   def tagMatch(match, log, linenum)
     if match[1] and (match[1].length > 0)
@@ -995,6 +1104,10 @@ class OfftimeTag < HeaderTag
   TAGREGEX=/\Aofftime:/i
   WHOLETAG=/\Aofftime:(\s+\d{4}-\d{2}-\d{2}\s+\d{4}){2}\s*/i
 
+  def properSyntax
+    TAG + ": yyyy-mm-dd hhmm yyyy-mm-dd hhmm (begin and end time)"
+  end
+
   def initialize
     super
     @name = TAG
@@ -1008,6 +1121,10 @@ class SoapboxTag < HeaderTag
   TAG="SOAPBOX"
   TAGREGEX=/\Asoapbox:/i
   WHOLETAG=/\Asoapbox:\s*(.*)\s*/im
+
+  def properSyntax
+    TAG + ": text"
+  end
 
   def tagMatch(match, log, linenum)
     if not log.comments
@@ -1044,20 +1161,14 @@ class QSOTag < StandardNearMiss
     @name = TAG
     @tagregex= TAGREGEX
     @error = true
-    @multipliers = readMultAliases(File.dirname(__FILE__) + "/multipliers.csv")
+    @multipliers = nil
   end
 
-  def readMultAliases(filename)
-    result = Hash.new
-    open(filename, "r:ascii") { |io|
-      io.each_line { |line|
-        if line =~ /^"([^"]*)","([^"]*)"/
-          result[$1] = $2
-        end
-      }
-    }
-    result
+  def properSyntax
+    TAG + ": see robot.cqp.org/cqp/qso_syntax.html"
   end
+
+  attr_writer :multipliers
 
   def checkFreqMode(log, lineNum, freq, mode)
     true
@@ -1125,7 +1236,7 @@ class QSOTag < StandardNearMiss
     if valid
       log.validqso = log.validqso + 1
     else
-      log.errors << LineIssue.new(startLineNum, "QSO line contains some invalid data", true)
+      log.errors << LineIssue.new(startLineNum, "QSO line contains some invalid data: " + sample(line), true)
     end
   end
 
@@ -1161,7 +1272,7 @@ class QSOTag < StandardNearMiss
         return advanceCount(startLineNum, line)
       end
     }
-    log.errors << LineIssue.new(startLineNum, "Incorrect #{TAG} line.", @error)
+    log.errors << LineIssue.new(startLineNum, "Incorrect #{TAG} line: " + sample(line), @error)
     if m = EOLREGEX.match(line)
       return checkTheRest(line, m.end(0), log, startLineNum)
     end
@@ -1208,12 +1319,34 @@ class CheckLog
                  SoapboxTag QSOTag IOTATag LineChecker )
   def initialize
     @checkers = [ ]
+    @multipliers = readMultAliases(File.dirname(__FILE__) + "/multipliers.csv")
+    @multregex = makeMultRegex
     CHECKERS.each { |c|
       chkClass = Object.const_get(c)
       chk = chkClass.new
       chk.checkobj = self
+      if chk.respond_to?(:multipliers=)
+        chk.multipliers = @multipliers
+      end
       @checkers << chk
     }
+  end
+
+  def readMultAliases(filename)
+    result = Hash.new
+    open(filename, "r:ascii") { |io|
+      io.each_line { |line|
+        if line =~ /^"([^"]*)","([^"]*)"/
+          result[$1] = $2
+        end
+      }
+    }
+    result
+  end
+
+  def makeMultRegex
+    vals = @multipliers.values.sort.uniq
+    return Regexp.new('\b(' + vals.join("|") + ')\b', Regexp::IGNORECASE)
   end
 
   def checkLog(filename, id)
@@ -1227,7 +1360,7 @@ class CheckLog
   end
 
   def checkLogStr(filename, id, content)
-    log = CQPLog.new(id, filename)
+    log = CQPLog.new(id, filename, @multregex)
     lineNum = 1
     lines = mySplit(content, END_OF_RECORD)
     log.maxqso = content.scan(/\bqso:\s+/i).size # upper bound on number of QSOs

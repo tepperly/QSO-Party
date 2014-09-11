@@ -97,10 +97,7 @@ def guessEmail(str)
   nil
 end
 
-
-db = LogDatabase.new
-logCheck = CheckLog.new
-FCGI.each_cgi { |request|
+def handleRequest(request, db, logCheck)
   timestamp = Time.new.utc
   logID=nil
   jsonout = { }
@@ -241,4 +238,18 @@ FCGI.each_cgi { |request|
   content = nil
   encodedConent = nil
   request.out("text/javascript") { jsonout.to_json }
+end
+
+
+db = LogDatabase.new
+logCheck = CheckLog.new
+FCGI.each_cgi { |request|
+  begin
+    handleRequest(request, db, logCheck)
+  rescue => e
+    $stderr.write(e.message + "\n")
+    $stderr.write(e.backtrace.join("\n"))
+    $stderr.flush()
+    raise
+  end
 }

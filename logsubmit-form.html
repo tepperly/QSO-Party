@@ -46,7 +46,10 @@
       <h1>Step 2: Review Cabrillo file</h1>
       <p>If there are errors, please fix the problems in your Cabrillo
       file on your computer and then upload the fixed Cabrillo
-      file using the "Clear &amp; Reload" button. Otherwise, move on the Step 3.</p>
+      file using the "Clear &amp; Reload" button. Examples of the preferred
+      QSO line syntax are available <a href="qso_syntax.html">here</a>.
+	Otherwise, move on the Step 3.</p>
+      <div class="circle" id="circleId"></div>
       <div class="QSOSummCol">
         <table class="QSOSummary">
 	  <caption class="QSOSumCap">Summary Statistics</caption>
@@ -158,7 +161,10 @@
       <h1>Step 2: Review Cabrillo file</h1>
       <p>If there are errors, please fix the problems in your Cabrillo
       file on your computer and then upload the fixed Cabrillo
-      file using the "Clear &amp; Reload" button. Otherwise, move on the Step 3.</p>
+      file using the "Clear &amp; Reload" button. Examples of the preferred
+      QSO line syntax are available <a href="qso_syntax.html">here</a>.
+	Otherwise, move on the Step 3.</p>
+      <div class="circle" id="AltcircleId"></div>
       <div class="QSOSummCol">
         <table class="QSOSummary">
 	  <caption class="QSOSumCap">Summary Statistics</caption>
@@ -369,6 +375,7 @@ function clearTabOne() {
   $('#step-2').fadeTo(100, 0.4);
   $('.jForm').prop("disabled", true);
   $('#step-3').fadeTo(100, 0.4);
+  $('#circleId').css('background-color', '#00ff00');
   $('#progress .progress-bar').css(
       'width', '0%' );
 }
@@ -400,12 +407,77 @@ function clearTabTwo() {
   $("#Altschool").prop("checked", false);
   $("#Altnewcontester").prop("checked", false);
   $("#AltdoneMsg").css("visibility", "hidden");
+  $('#AltcircleId').css('background-color', '#00ff00');
   $('#step-1a').fadeTo(100, 1.0);
   $('#fileupload').fileupload("enable");
   $('#step-2a').fadeTo(100, 0.4);
   $('.jForma').prop("disabled", true);
   $('#step-3a').fadeTo(100, 0.4);
   $('#cabcontentId').prop("disabled", false);
+}
+
+
+
+/**
+ * Converts integer to a hexidecimal code, prepad's single 
+ * digit hex codes with 0 to always return a two digit code. 
+ * 
+ * @param {Integer} i Integer to convert 
+ * @returns {String} The hexidecimal code
+ */
+function intToHex(i) {
+    var hex = parseInt(i).toString(16);
+    return (hex.length < 2) ? "0" + hex : hex;
+}   
+
+/**
+ * Return hex color from scalar *value*.
+ *
+ * @param {float} value Scalar value between 0 and 1
+ * @return {String} color
+ */
+function makeColor(value) {
+    // value must be between [0, 510]
+    value = Math.min(Math.max(0,value), 1) * 510;
+    var redValue;
+    var greenValue;
+    if (value < 255) {
+        redValue = 255;
+        greenValue = Math.sqrt(value) * 16;
+        greenValue = Math.round(greenValue);
+    } else {
+        greenValue = 255;
+        value = value - 255;
+        redValue = 256 - (value * value / 255)
+        redValue = Math.round(redValue);
+    }
+   return "#" + intToHex(redValue) + intToHex(greenValue) + "00";
+}
+
+var entityMap = {
+   "&": "&amp;",
+   "<": "&lt;",
+   ">": "&gt;",
+   '"': '&quot;',
+   "'": '&#39;',
+   "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+  return String(string).replace(/[&<>"'\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
+function calcColor(validQ, maxQ, badMults) {
+   if (maxQ == 0) {
+     return "#ff0000";
+   }
+   else {
+     validQ = Math.max(0, validQ - badMults);
+     percent = 4.0*validQ/maxQ - 3.0;
+     return makeColor(percent);
+   }
 }
  
   $(function () {
@@ -424,22 +496,22 @@ function clearTabTwo() {
                 $('#logDBId').val(file.id);
             });
             if (data.result.callsign) {
-              $('#callsignId').val(data.result.callsign);
+              $('#callsignId').val(escapeHtml(data.result.callsign));
             }
             if (data.result.email) { 
-              $('#emailId').val(data.result.email);
+              $('#emailId').val(escapeHtml(data.result.email));
             }
             if (data.result.SentQTH) {
-              $('#sentQTHId').val(data.result.SentQTH.join(" "));
+              $('#sentQTHId').val(escapeHtml(data.result.SentQTH.join(" ")));
             }
             if (data.result.opclass) {
-              $('#opclassId').val(data.result.opclass);
+              $('#opclassId').val(escapeHtml(data.result.opclass));
             }
             if (data.result.opmsg) {
-              $('#opmsgId').html(data.result.opmsg)
+              $('#opmsgId').html(escapeHtml(data.result.opmsg))
             }
             if (data.result.power) {
-              $('#powerId').val(data.result.power);
+              $('#powerId').val(escapeHtml(data.result.power));
             }
             if (data.result.categories) {
                $.each(data.result.categories, function (index, cat) {
@@ -448,12 +520,27 @@ function clearTabTwo() {
             }
             if (!(typeof data.result.MaxQSO === 'undefined')) {
               $('#maxQSOId').text(data.result.MaxQSO.toString());
+              if (0 == data.result.MaxQSO) {
+                $('#circleId').css('background-color', "#ff0000");
+              }
+              else {
+                if (!(typeof data.result.ParseableQSO === 'undefined')) {
+		  var badMults;
+		  if (data.result.multipliers.errors) {
+		    badMults = data.result.multipliers.errors.length;
+		  }
+		  else {
+		    badMults = 0;
+                  }
+                  $('#circleId').css('background-color', calcColor(data.result.ParseableQSO, data.result.MaxQSO, badMults));
+                }
+              }
             }
             else {
               $('#maxQSOId').html("&nbsp;");
             }
             if (!(typeof data.result.ParseableQSO === 'undefined')) {
-              $('#validQSOId').text(data.result.ParseableQSO);
+              $('#validQSOId').text(data.result.ParseableQSO.toString());
             }
             else {
               $('#validQSOId').html("&nbsp;");
@@ -484,37 +571,38 @@ function clearTabTwo() {
             $('#QSOErrorsID').text("");
             if (data.result.badcallsigns) {
                $.each(data.result.badcallsigns, function (index, callsign) {
-                  $('#CallErrorsID').append('<p class="badcall">' + callsign + "</p>\n");
+                  $('#CallErrorsID').append('<p class="badcall">' + escapeHtml(callsign) + "</p>\n");
                });
             }
             if (data.result.errors && data.result.errors.length > 0) {
                $('#QSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n")
                $.each(data.result.errors, function (index, errval) {
                   $('#QSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
-                                            errval.line.toString() + ':</span> <span class="errmsg">' +
-                                            errval.msg + "</span></p>\n");
+                                            escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                            escapeHtml(errval.msg) + "</span></p>\n");
                });
             }
             if (data.result.warnings && data.result.warnings.length > 0) {
                $('#QSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n")
                $.each(data.result.warnings, function (index, errval) {
                   $('#QSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
-                                            errval.line.toString() + ':</span> <span class="errmsg">' +
-                                            errval.msg + "</span></p>\n");
+                                            escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                            escapeHtml(errval.msg) + "</span></p>\n");
                });
             }
             if (data.result.multipliers) {
                if (data.result.multipliers.errors && data.result.multipliers.errors.length > 0) {
                  $('#MultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n")
                  $.each(data.result.multipliers.errors, function (index, errval) {
-                    $('#MultErrorsID').append('<p class="multerr">' + errval + "</p>\n");
+                    $('#MultErrorsID').append('<p class="multerr">' + escapeHtml(errval) + "</p>\n");
                  });
                }
                if (data.result.multipliers.warnings && data.result.multipliers.warnings.length > 0) {
                  $('#MultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n")
                  $.each(data.result.multipliers.warnings, function (index, errval) {
-                    $('#MultErrorsID').append('<p class="multerr"><span class="multalias">' + errval.log +
-                                             '</span> &rarr; <span class="multireal">' + errval.real + "</span></p>\n");
+                    $('#MultErrorsID').append('<p class="multerr"><span class="multalias">' + escapeHtml(errval.log) +
+                                             '</span> &rarr; <span class="multireal">' + 
+					     escapeHtml(errval.real) + "</span></p>\n");
                  });
                }
             }
@@ -632,22 +720,22 @@ function clearTabTwo() {
              $('.jForma').prop("disabled", false);
              $('#step-3a').fadeTo(100, 1.0);
              if (data.callsign) {
-               $('#AltcallsignId').val(data.callsign);
+               $('#AltcallsignId').val(escapeHtml(data.callsign));
              }
              if (data.email) { 
-               $('#AltemailId').val(data.email);
+               $('#AltemailId').val(escapeHtml(data.email));
              }
              if (data.SentQTH) {
-                $('#AltsentQTHId').val(data.SentQTH);
+                $('#AltsentQTHId').val(escapeHtml(data.SentQTH.join(" ")));
              }
              if (data.opclass) {
-               $('#AltopclassId').val(data.opclass);
+               $('#AltopclassId').val(escapeHtml(data.opclass));
              }
              if (data.power) {
-               $('#AltpowerId').val(data.power);
+               $('#AltpowerId').val(escapeHtml(data.power));
              }
              if (data.opmsg) {
-               $('#AltopmsgId').html(data.opmsg)
+               $('#AltopmsgId').html(escapeHtml(data.opmsg));
              }
              if (data.categories) {
                 $.each(data.categories, function (index, cat) {
@@ -656,6 +744,21 @@ function clearTabTwo() {
              }
              if (!(typeof data.MaxQSO === 'undefined')) {
                $('#AltmaxQSOId').text(data.MaxQSO.toString());
+              if (0 == data.MaxQSO) {
+                $('#AltcircleId').css('background-color', "#ff0000");
+              }
+              else {
+                if (!(typeof data.ParseableQSO === 'undefined')) {
+		  var badMults;
+		  if (data.multipliers.errors) {
+		    badMults = data.multipliers.errors.length;
+		  }
+		  else {
+		    badMults = 0;
+                  }
+                  $('#AltcircleId').css('background-color', calcColor(data.ParseableQSO, data.MaxQSO, badMults));
+                }
+              }
              }
              else {
                $('#AltmaxQSOId').html("&nbsp;");
@@ -692,37 +795,38 @@ function clearTabTwo() {
              $('#AltQSOErrorsID').text("");
              if (data.badcallsigns) {
                 $.each(data.badcallsigns, function (index, callsign) {
-                   $('#AltCallErrorsID').append('<p class="badcall">' + callsign + "</p>\n");
+                   $('#AltCallErrorsID').append('<p class="badcall">' + escapeHtml(callsign) + "</p>\n");
                 });
              }
              if (data.errors && data.errors.length > 0) {
                  $('#AltQSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n")
                  $.each(data.errors, function (index, errval) {
                    $('#AltQSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
-                                             errval.line.toString() + ':</span> <span class="errmsg">' +
-                                             errval.msg + "</span></p>\n");
+                                             escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                             escapeHtml(errval.msg) + "</span></p>\n");
                 });
              }
              if (data.warnings && data.warnings.length > 0) {
                  $('#AltQSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n")
                 $.each(data.warnings, function (index, errval) {
                    $('#AltQSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
-                                             errval.line.toString() + ':</span> <span class="errmsg">' +
-                                             errval.msg + "</span></p>\n");
+                                             escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                             escapeHtml(errval.msg) + "</span></p>\n");
                 });
              }
              if (data.multipliers) {
                 if (data.multipliers.errors && data.multipliers.errors.length > 0) {
                   $('#AltMultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n")
                   $.each(data.multipliers.errors, function (index, errval) {
-                     $('#AltMultErrorsID').append('<p class="multerr">' + errval + "</p>\n");
+                     $('#AltMultErrorsID').append('<p class="multerr">' + escapeHtml(errval) + "</p>\n");
                   });
                 }
                 if (data.multipliers.warnings && data.multipliers.warnings.length > 0) {
                   $('#AltMultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n")
                   $.each(data.multipliers.warnings, function (index, errval) {
-                     $('#AltMultErrorsID').append('<p class="multerr"><span class="multalias">' + errval.log +
-                                              '</span> &rarr; <span class="multireal">' + errval.real + "</span></p>\n");
+                     $('#AltMultErrorsID').append('<p class="multerr"><span class="multalias">' + escapeHtml(errval.log) +
+                                              '</span> &rarr; <span class="multireal">' + 
+					      escapeHtml(errval.real) + "</span></p>\n");
                   });
                 }
              }

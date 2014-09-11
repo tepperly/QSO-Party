@@ -36,7 +36,7 @@ class CallsignReport
     table
   end
 
-  def generateHTML(table, num)
+  def generateHTML(table, num, lastupload)
     count = 0
     @request.out() {
       html = @request.html() { 
@@ -62,7 +62,7 @@ class CallsignReport
           @request.h1() { "CQP 2014 Logs Received" } +
           @request.p() { "The call signs for all logs received are
     shown below. Please ensure any log you've submitted is shown
-    here." } +
+    here. If it isn't, return to the " + @request.a("href" => "/cqp/logsubmit-form.html") { "log submittal page" } + " to upload again." } +
           @request.table(){
             @request.tbody()  {
               (0..(table[0].length-1)).inject("") { |str, j|
@@ -81,7 +81,7 @@ class CallsignReport
             }
           } +
           @request.p() { "Data based on #{num} logs received before: " +
-            @timestamp.to_s + "." }
+            @timestamp.to_s + ". Last upload occurred at " + lastupload.to_s  + "." }
         }
       }
       CGI::pretty( html)
@@ -89,9 +89,9 @@ class CallsignReport
   end
 
   def report
-    callsigns = @db.callsignsRcvd()
+    callsigns, rdate = @db.callsignsRcvd()
     table = splitIntoColumns(callsigns)
-    generateHTML(table, callsigns.length)
+    generateHTML(table, callsigns.length, rdate)
   end
 end
 

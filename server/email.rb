@@ -78,6 +78,9 @@ not close enough to the CQP Cabrillo format for our software to
 read.  To correct incorrect data, please edit and resubmit 
 your log.
 
+Check the Logs Received page to be sure your log is listed.
+Here is the link: http://robot.cqp.org/.
+
 73,
 
 Tom NS6T

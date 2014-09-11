@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CQP Log QSO Syntax</title>
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 40x40 64x64 128x128" type="image/vnd.microsoft.icon">
+
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+  <link rel="stylesheet" href="css/cqp_style.css">
+
+</head>
+<body>
+<img  src="images/cqplogo80075.jpg" alt="California QSO Party" > 
+<p>The CQP takes Cabrillo files using either version 2.0 or
+<a href="http://wwrof.org/cabrillo/cabrillo-specification-v3/">version 3.0</a>. 
+The ideal QSO line syntax is as follows:</p>
+<pre>           MO                 -----SENDER'S INFO---- ----RECEIVER'S INFO----
+QSO: FREQ  DE DATE       TIME CALLSIGN     SER# QTH  CALL      SER#     QTH
+QSO: 14250 PH 2014-10-04 1600 W1AW/6       0001 SCLA NS6T         1     ALAM
+</pre>
+<p>The exact amount of space between fields is not crucial. Ideally the
+sent QTH and received QTH should be one of the official 58 4-character
+California county abbreviations, the official 58 2-character
+US state and Canadian province abbreviations, or DX &mdash; all in the
+<a href="http://cqp.org/cqp_multipliers.html">online list</a>.</p>
+
+<p>We also support having an extra column at the end of the line for the
+transceiver number.</p>
+<pre>           MO                 -----SENDER'S INFO---- ----RECEIVER'S INFO----  Trans
+QSO: FREQ  DE DATE       TIME CALLSIGN     SER# QTH  CALL      SER#     QTH     #
+QSO: 14250 PH 2014-10-04 1600 W1AW/6       0001 SCLA NS6T         1     ALAM    1
+</pre>
+</body>
+</html>
