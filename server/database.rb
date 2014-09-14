@@ -39,7 +39,8 @@ class LogDatabase
       if @connection 
         @connection.query("create database if not exists CQPUploads character set = 'utf8';")
         @connection.query("use CQPUploads;")
-        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), userfilename varchar(1024), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned, index callindex (callsign asc));")
+        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), userfilename varchar(1024), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned, source enum('unknown', 'email', 'form1', 'form2', 'form3'), index callindex (callsign asc));")
+        @connection.query("create table if not exists CQPError (id int auto_increment primary key, message varchar(256), traceback varchar(1024), timestamp datetime);")
       end
     else
       @connection.query("use CQPUploads;")  # useful for database reconnects
@@ -75,11 +76,15 @@ class LogDatabase
     id
   end
 
-  def addLog(id, callsign, userfile, origfile, asciifile, encoding, timestamp, digest)
+  def addLog(id, callsign, userfile, origfile, asciifile, encoding, timestamp, digest, source)
     connect
     if @connection
       if id
-        @connection.query("update CQPLog set callsign='#{Mysql2::Client::escape(callsign)}', userfilename='#{Mysql2::Client::escape(userfile)}', originalfile='#{Mysql2::Client::escape(origfile)}', asciifile='#{Mysql2::Client::escape(asciifile)}', logencoding='#{Mysql2::Client::escape(encoding)}', uploadtime='#{timestamp.strftime(DBTIMEFORMAT)}', origdigest='#{Mysql2::Client::escape(digest)}' where id = #{id.to_i} limit 1;")
+        id = id.to_i
+        if not %w( email form1 form2 form3 ).index(source)
+          source = "unknown"
+        end
+        @connection.query("update CQPLog set callsign='#{Mysql2::Client::escape(callsign)}', userfilename='#{Mysql2::Client::escape(userfile)}', originalfile='#{Mysql2::Client::escape(origfile)}', asciifile='#{Mysql2::Client::escape(asciifile)}', logencoding='#{Mysql2::Client::escape(encoding)}', uploadtime='#{timestamp.strftime(DBTIMEFORMAT)}', origdigest='#{Mysql2::Client::escape(digest)}', source='#{source}' where id = #{id.to_i} limit 1;")
         return id
       end
     end
@@ -96,10 +101,14 @@ class LogDatabase
     filename
   end
 
-  def addExtra(id,callsign, email, opclass, power, sentqth, phone, comments, county, youth, mobile, female, school, newcontester)
+  def addExtra(id,callsign, email, opclass, power, sentqth, phone, comments, county, youth, mobile, female, school, newcontester, source)
     connect
     if @connection
-      queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign)}', opclass='#{Mysql2::Client::escape(opclass)}', power='#{Mysql2::Client::escape(power)}', emailaddr='#{Mysql2::Client::escape(email)}', sentqth='#{Mysql2::Client::escape(sentqth)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1 where id = #{id.to_i} limit 1;"
+      id = id.to_i
+      if not %w( email form1 form2 form3 ).index(source)
+        source = "unknown"
+      end
+      queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign)}', opclass='#{Mysql2::Client::escape(opclass)}', power='#{Mysql2::Client::escape(power)}', emailaddr='#{Mysql2::Client::escape(email)}', sentqth='#{Mysql2::Client::escape(sentqth)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1, source='#{source}' where id = #{id.to_i} limit 1;"
 #      $outfile.write(queryStr + "\n");
       @connection.query(queryStr)
       true
@@ -107,10 +116,18 @@ class LogDatabase
       false
     end
   end
+  
+  def addException(e)
+    connect
+    if @connection
+      @connection.query("insert into CQPError (message, traceback, timestamp) values ('#{Mysql2::Client::escape(e.message)}', '#{Mysql2::Client::escape(e.backtrace.join("\n"))}', NOW());")
+    end
+  end
 
   def addQSOCount(id, maxq, validq)
     connect
     if @connection
+      id = id.to_i
       @connection.query("update CQPLog set maxqso=#{maxq.to_i}, parseqso=#{validq.to_i} where id = #{id.to_i} limit 1;")
     end
   end
@@ -159,5 +176,18 @@ class LogDatabase
 
   def translateClass(str)
     @mapping[str]
+  end
+
+  def allEntries
+    connect
+    result = nil
+    if @connection
+      result = [ ]
+      res = @connection.query("select l1.id from CQPLog l1 left outer join CQPLog l2 on (l1.callsign = l2.callsign and l1.uploadtime < l2.uploadtime) where l2.id is null and l1.completed order by l1.callsign asc;");
+      res.each(:as => :array) { |row|
+        result << row[0].to_i
+      }
+    end
+    result
   end
 end

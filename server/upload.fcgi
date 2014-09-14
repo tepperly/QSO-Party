@@ -14,6 +14,7 @@ require_relative 'logscan'
 require_relative 'patchlog'
 require_relative 'email'
 require_relative 'logscan'
+require_relative 'loghtml'
 
 CALLSIGN = /^\s*callsign\s*:\s*(\S+)\s*$/i
 LOGDIR="/usr/local/cqplogs"
@@ -100,8 +101,10 @@ end
 def handleRequest(request, db, logCheck)
   timestamp = Time.new.utc
   logID=nil
+  source = nil
   jsonout = { }
   if request.multipart?
+    source = "form1"
     if request.has_key?("cabrillofile")
       jsonout["files"] = [ ]
       fileent = { }
@@ -135,7 +138,8 @@ def handleRequest(request, db, logCheck)
       if untouchedFilename and asciiFilename
         db.addLog(logID, callsign, fileent["name"], untouchedFilename, asciiFilename,
                           encodedContent.encoding.to_s,
-                          timestamp, Digest::SHA1.hexdigest(content).to_s)
+                          timestamp, Digest::SHA1.hexdigest(content).to_s,
+                  source)
       end
 
       if log
@@ -153,6 +157,9 @@ def handleRequest(request, db, logCheck)
       end
     end
   else
+    if request.has_key?("source")
+      source = request["source"]
+    end
     if request.has_key?("cabcontent")
       jsonout["files"] = [ ]
       fileent = { }
@@ -180,7 +187,8 @@ def handleRequest(request, db, logCheck)
       if untouchedFilename and asciiFilename
         db.addLog(logID, callsign, "", untouchedFilename, asciiFilename,
                   encodedContent.encoding.to_s,
-                  timestamp, Digest::SHA1.hexdigest(content.clone.force_encoding(Encoding::ASCII_8BIT)).to_s)
+                  timestamp, Digest::SHA1.hexdigest(content.clone.force_encoding(Encoding::ASCII_8BIT)).to_s,
+                  source)
       end
       if log
         jsonout = log.to_json
@@ -209,7 +217,8 @@ def handleRequest(request, db, logCheck)
                   request["comments"],
                   checkBox(request, "expedition"), checkBox(request, "youth"),
                   checkBox(request, "mobile"), checkBox(request, "female"),
-                  checkBox(request, "school"), checkBox(request, "new"))
+                  checkBox(request, "school"), checkBox(request, "new"), 
+                  source)
       asciiFile = db.getASCIIFile(logID)
       if asciiFile
         attrib = makeAttributes(logID, request["callsign"],
@@ -237,7 +246,11 @@ def handleRequest(request, db, logCheck)
   emailConfirmation(db, logID)
   content = nil
   encodedConent = nil
-  request.out("text/javascript") { jsonout.to_json }
+  if source != "form3"
+    request.out("text/javascript") { jsonout.to_json }
+  else
+    request.out("text/html") { logHtml(log, db.getEntry(logID)) }
+  end
 end
 
 
@@ -250,6 +263,7 @@ FCGI.each_cgi { |request|
     $stderr.write(e.message + "\n")
     $stderr.write(e.backtrace.join("\n"))
     $stderr.flush()
+    db.addException(e)
     raise
   end
 }

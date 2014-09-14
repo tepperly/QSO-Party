@@ -44,16 +44,20 @@
     </div>
     <div id="step-2">
       <h1>Step 2: Review Cabrillo file</h1>
-      <p>If there are errors, please fix the problems in your Cabrillo
-      file on your computer and then upload the fixed Cabrillo
-      file using the "Clear &amp; Reload" button. Examples of the preferred
-      QSO line syntax are available <a href="qso_syntax.html">here</a>.
-	Otherwise, move on the Step 3.</p>
+      <p>
+We're tried to provide some feedback on your log in case there are
+errors. If the number of Readable QSO lines is close to the Total QSO lines and
+the number of Multiplier errors is low, you can probably ignore any 
+warnings or error messages below. If the number of readable QSOs is low or the
+number of multiplier errors is high, you may want to try to edit your log and
+resubmit. Examples of the preferred QSO line syntax are available 
+<a href="qso_syntax.html">here</a>. In any case, we will do our best to fairly score every log.</p>
+<p>To upload again, use the "Clear &amp; Reload" button. Otherwise, move on the Step 3.</p>
       <div class="circle" id="circleId"></div>
       <div class="QSOSummCol">
         <table class="QSOSummary">
 	  <caption class="QSOSumCap">Summary Statistics</caption>
-	  <tr class="QSOSumLine"><th class="QSOSumHead">QSO lines:</th><td class="QSOSumData" id="maxQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Total QSO lines:</th><td class="QSOSumData" id="maxQSOId">&nbsp;</td></tr>
 	  <tr class="QSOSumLine"><th class="QSOSumHead">Readable QSOs:</th><td class="QSOSumData" id="validQSOId">&nbsp;</td></tr>
 	  <tr class="QSOSumLine"><th class="QSOSumHead"># Errors:</th><td class="QSOSumData" id="numErrorsId">&nbsp;</td></tr>
 	  <tr class="QSOSumLine"><th class="QSOSumHead"># Warnings:</th><td class="QSOSumData" id="numWarningsId">&nbsp;</td></tr>
@@ -71,6 +75,7 @@
       <h1>Step 3: Provide Supplemental information</h1>
       <form action="server/upload.fcgi" method="post" id="supplementalForm" accept-charset="UTF-8">
 	<input type="hidden" name="logID" value="-1" id="logDBId" class="jForm">
+	<input type="hidden" name="source" value="form1">
 	<label for="callsignId" class="inLabel">Callsign*:</label>
 	<input type="text" name="callsign" value="" id="callsignId" class="jForm"><br >
 	<label for="emailId" class="inLabel">Email*:</label>
@@ -159,16 +164,20 @@
     </div>
     <div id="step-2a">
       <h1>Step 2: Review Cabrillo file</h1>
-      <p>If there are errors, please fix the problems in your Cabrillo
-      file on your computer and then upload the fixed Cabrillo
-      file using the "Clear &amp; Reload" button. Examples of the preferred
-      QSO line syntax are available <a href="qso_syntax.html">here</a>.
-	Otherwise, move on the Step 3.</p>
+      <p>
+We're tried to provide some feedback on your log in case there are
+errors. If the number of Readable QSO lines is close to the Total QSO lines and
+the number of Multiplier errors is low, you can probably ignore any 
+warnings or error messages below. If the number of readable QSOs is low or the
+number of multiplier errors is high, you may want to try to edit your log and
+resubmit. Examples of the preferred QSO line syntax are available 
+<a href="qso_syntax.html">here</a>. In any case, we will do our best to fairly score every log.</p>
+<p>To upload again, use the "Clear &amp; Reload" button. Otherwise, move on the Step 3.</p>
       <div class="circle" id="AltcircleId"></div>
       <div class="QSOSummCol">
         <table class="QSOSummary">
 	  <caption class="QSOSumCap">Summary Statistics</caption>
-	  <tr class="QSOSumLine"><th class="QSOSumHead">QSO lines:</th><td class="QSOSumData" id="AltmaxQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Total QSO lines:</th><td class="QSOSumData" id="AltmaxQSOId">&nbsp;</td></tr>
 	  <tr class="QSOSumLine"><th class="QSOSumHead">Readable QSOs:</th><td class="QSOSumData" id="AltvalidQSOId">&nbsp;</td></tr>
 	  <tr class="QSOSumLine"><th class="QSOSumHead"># Errors:</th><td class="QSOSumData" id="AltnumErrorsId">&nbsp;</td></tr>
 	  <tr class="QSOSumLine"><th class="QSOSumHead"># Warnings:</th><td class="QSOSumData" id="AltnumWarningsId">&nbsp;</td></tr>
@@ -186,6 +195,7 @@
       <h1>Step 3: Provide Supplemental information</h1>
       <form action="server/upload.fcgi" method="post" id="AltsupplementalForm"  accept-charset="UTF-8">
 	<input type="hidden" name="logID" value="-1" id="AltlogDBId" class="jForma">
+	<input type="hidden" name="source" value="form2">
 	<label for="AltcallsignId" class="inLabel">Callsign*:</label>
 	<input type="text" name="callsign" value="" id="AltcallsignId" class="jForma"><br >
 	<label for="AltemailId" class="inLabel">Email*:</label>
@@ -268,6 +278,7 @@
     <textarea name="cabcontent" id="ALLcabcontentId" cols="100" wrap="soft"
 	      rows="5" ></textarea><br>
     <input type="hidden" name="logID" value="-1" id="ALLlogDBId" class="jFormb">
+    <input type="hidden" name="source" value="form3">
     <label for="ALLcallsignId" class="inLabel">Callsign*:</label>
     <input type="text" name="callsign" value="" id="ALLcallsignId" class="jFormb"><br >
     <label for="ALLemailId" class="inLabel">Email*:</label>

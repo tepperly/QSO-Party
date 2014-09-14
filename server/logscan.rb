@@ -910,6 +910,10 @@ class XCQPTag < HeaderTag
     @strictregex = WHOLETAG
     @error = false
   end
+
+   def properSyntax
+     "X-CQP-TAG: text"
+   end
 end
 
 class EmailTag < HeaderTag
