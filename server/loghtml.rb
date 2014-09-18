@@ -17,62 +17,6 @@ HTML_HEADER=<<HEADER_END
   <HEAD>
     <TITLE>%{callsign} CQP Log Report</TITLE>
     <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <STYLE type="text/css">
-      .logErrors, .logWarnings, .multErrors, .multWarnings, .badcall {
-        font-family: "Courier New", "Lucida Console", monospace;
-        font-style: normal;
-        font-weight: normal;
-        margin: 0 0 0 0 ! important;
-        padding: 0 0 0 0;
-        line-height: 105%%;
-        white-space: nowrap;
-      }
-
-      .SumTable {
-        margin: 2em 0 2em 0;
-        border-style: solid;
-        border-width: 2px;
-        border-color: black;
-      }
-      
-      .DetailHeadOdd {
-        font-family: Arial, Verdana, San-serif;
-        text-align: right;
-      }
-      .DetailHeadEven {
-        font-family: Arial, Verdana, San-serif;
-        text-align: right;
-        background-color: WhiteSmoke;
-      }
-      
-      .DetailDataOdd {
-        font-family: Arial, Verdana, San-serif;
-      }
-      .DetailDataEven {
-        font-family: Arial, Verdana, San-serif;
-        background-color: WhiteSmoke;
-      }
-      
-     .QSOSumCap {
-       text-align: center;
-       font-family: "Trebuchet MS", Verdana, Sans-serif;
-       font-style: normal;
-       font-weight: bold;
-       font-size: 16px;
-       margin-top: 0;
-       margin-bottom: 0;
-       padding: 0 0 0 0;
-    }
-    .SectionHeading {
-        font-family: "Trebuchet MS", Verdana, Sans-serif;
-        font-style: normal;
-        font-weight: bold;
-        font-size: 16px;
-        margin-top: 0;
-        margin-bottom: 0;
-        padding: 0 0 0 0;
-    }
-    </STYLE>
   </HEAD>
 HEADER_END
 
@@ -90,72 +34,72 @@ In any case, we will do our best to fairly score every log.
 INSTRUCTIONS_END
 
 SUMMARY_TABLE=<<SUMMARY_END
-    <TABLE class="SumTable">
-      <CAPTION class="QSOSumCap">CQP %{year} Log Details</CAPTION>
+    <TABLE %{tablestyle}>
+      <CAPTION %{capstyle}>CQP %{year} Log Details</CAPTION>
       <TR>
-         <TH class="DetailHeadOdd">Callsign:</TH>
-         <TD class="DetailDataOdd">%{callsign}</TD>
+         <TH %{headodd}>Callsign:</TH>
+         <TD %{dataodd}>%{callsign}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadEven">Operator class:</TH>
-         <TD class="DetailDataEven">%{opclass}</TD>
+         <TH %{headeven}>Operator class:</TH>
+         <TD %{dataeven}>%{opclass}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadOdd">Power:</TH>
-         <TD class="DetailDataOdd">%{power}</TD>
+         <TH %{headodd}>Power:</TH>
+         <TD %{dataodd}>%{power}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadEven">Sent QTH:</TH>
-         <TD class="DetailDataEven">%{sentqth}</TD>
+         <TH %{headeven}>Sent QTH:</TH>
+         <TD %{dataeven}>%{sentqth}</TD>
       </TR>
 
       <TR>
-         <TH class="DetailHeadOdd">Email:</TH>
-         <TD class="DetailDataOdd">%{email}</TD>
+         <TH %{headodd}>Email:</TH>
+         <TD %{dataodd}>%{email}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadEven">Special categories:</TH>
-         <TD class="DetailDataEven">%{categories}</TD>
+         <TH %{headeven}>Special categories:</TH>
+         <TD %{dataeven}>%{categories}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadOdd">Log ID:</TH>
-         <TD class="DetailDataOdd">%{id}</TD>
+         <TH %{headodd}>Log ID:</TH>
+         <TD %{dataodd}>%{id}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadEven">Received:</TH>
-         <TD class="DetailDataEven">%{uploadtime}</TD>
+         <TH %{headeven}>Received:</TH>
+         <TD %{dataeven}>%{uploadtime}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadOdd">Deadline:</TH>
-         <TD class="DetailDataOdd">%{deadline}</TD>
+         <TH %{headodd}>Deadline:</TH>
+         <TD %{dataodd}>%{deadline}</TD>
       </TR>
     </TABLE>
 
-    <TABLE class="SumTable">
-      <CAPTION class="QSOSumCap">Robot Summary Evaluation</CAPTION>
+    <TABLE %{tablestyle}>
+      <CAPTION %{capstyle}>Robot Summary Evaluation</CAPTION>
       <TR>
-         <TH class="DetailHeadOdd">Total QSO lines:</TH>
-         <TD class="DetailDataOdd">%{maxqso}</TD>
+         <TH %{headodd}>Total QSO lines:</TH>
+         <TD %{dataodd}>%{maxqso}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadEven">Readable QSO lines:</TH>
-         <TD class="DetailDataEven">%{validqso}</TD>
+         <TH %{headeven}>Readable QSO lines:</TH>
+         <TD %{dataeven}>%{validqso}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadOdd">Number syntax errors:</TH>
-         <TD class="DetailDataOdd">%{numerrors}</TD>
+         <TH %{headodd}>Number syntax errors:</TH>
+         <TD %{dataodd}>%{numerrors}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadEven">Number syntax warnings:</TH>
-         <TD class="DetailDataEven">%{numwarnings}</TD>
+         <TH %{headeven}>Number syntax warnings:</TH>
+         <TD %{dataeven}>%{numwarnings}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadOdd">Multiplier errors:</TH>
-         <TD class="DetailDataOdd">%{multerrors}</TD>
+         <TH %{headodd}>Multiplier errors:</TH>
+         <TD %{dataodd}>%{multerrors}</TD>
       </TR>
       <TR>
-         <TH class="DetailHeadEven">Multiplier warnings:</TH>
-         <TD class="DetailDataEven">%{multwarnings}</TD>
+         <TH %{headeven}>Multiplier warnings:</TH>
+         <TD %{dataeven}>%{multwarnings}</TD>
       </TR>
     </TABLE>
 SUMMARY_END
@@ -169,13 +113,13 @@ TRAILER=<<TRAILER_END
 </html>
 TRAILER_END
 
-def issueText(desc, issues)
+def issueText(desc, issues, attr)
   result = ""
   if issues.length > 0
     result << "     <DIV class=\"#{desc}Section\">\n"
-    result << "       <H1 class=\"SectionHeading\">#{desc} Messages</H1>\n"
+    result << "       <H1 #{attr[:headingstyle]}>#{desc} Messages</H1>\n"
     issues.each { |issue|
-      result << "      <p class=\"log#{desc}\"><span class=\"linenum\">Line " 
+      result << "      <p #{attr[("log" + desc).to_sym]}><span class=\"linenum\">Line " 
       result << issue.lineNum.to_s 
       result << ":</span> <span class=\"errmsg\">"
       result << CGI::escapeHTML(issue.description)
@@ -186,26 +130,26 @@ def issueText(desc, issues)
   result
 end
 
-def multiplierErrors(issues)
+def multiplierErrors(issues, attr)
   result = ""
   if issues.length > 0
     result << "     <DIV class=\"MultErrSection\">\n"
-    result << "       <H1 class=\"SectionHeading\">Unknown Multipliers</H1>\n"
+    result << "       <H1 #{attr[:headingstyle]}>Unknown Multipliers</H1>\n"
     issues.keys.sort.each { |issue|
-      result << "      <p class=\"multErrors\">#{CGI::escapeHTML(issue)}</p>\n"
+      result << "      <p #{attr[:multErrors]}>#{CGI::escapeHTML(issue)}</p>\n"
     }
     result << "     </DIV>\n"
   end
   result
 end
   
-def multiplierWarnings(issues)
+def multiplierWarnings(issues, attr)
   result = ""
   if issues.length > 0
     result << "     <DIV class=\"MultErrSection\">\n"
-    result << "       <H1 class=\"SectionHeading\">Multipliers Usings Aliases</H1>\n"
+    result << "       <H1 #{attr[:headingstyle]}>Multipliers Usings Aliases</H1>\n"
     issues.keys.sort.each { |log|
-      result << "      <p class=\"multErrors\"><span class=\"multalias\">#{CGI::escapeHTML(log)}</span> &rarr; "
+      result << "      <p #{attr[:multWarnings]}><span class=\"multalias\">#{CGI::escapeHTML(log)}</span> &rarr; "
       result << "<span class=\"multreal\">#{CGI::escapeHTML(issues[log])}</span></p>\n"
     }
     result << "     </DIV>\n"
@@ -213,13 +157,13 @@ def multiplierWarnings(issues)
   result
 end
 
-def irregCallsigns(list)
+def irregCallsigns(list, attr)
   result = ""
   if list.length > 0 
     result << "     <DIV class=\"CallsignSection\">\n"
-    result << "       <H1 class=\"SectionHeading\">Irregular Callsigns</H1>\n"
+    result << "       <H1 #{attr[:headingstyle]}>Irregular Callsigns</H1>\n"
     list.keys.sort.each { |callsign|
-      result << "        <p class=\"badcall\">#{CGI::escapeHTML(callsign)}</p>\n"
+      result << "        <p #{attr[:badcall]}>#{CGI::escapeHTML(callsign)}</p>\n"
     }
     result << "     </DIV>\n"
   end
@@ -253,12 +197,32 @@ def logHtml(log, dbent)
   attr[:multwarnings] = log.warnmultipliers.length
   attr[:sentqth] = CGI::escapeHTML(dbent["sentqth"])
 
+  # CSS stuff
+  attr[:capstyle] = "style=\"text-align: center; font-family: 'Trebuchet MS', Verdana, Sans-serif; font-style: normal; font-weight: bold; font-size: 16px; margin-top: 0;  margin-bottom: 0; padding: 0 0 0 0;\""
+
+  attr[:logErrors] = "style=\"font-family: 'Courier New', 'Lucida Console', monospace; font-style: normal; font-weight: normal; margin: 0 0 0 0 ! important; padding: 0 0 0 0; line-height: 105%; white-space: nowrap;\""
+  attr[:logWarnings] = attr[:logErrors]
+  attr[:multErrors] = attr[:logErrors]
+  attr[:multWarnings] = attr[:logErrors]
+  attr[:badcall] = attr[:logErrors]
+
+  attr[:headingstyle] = "style=\"font-family: 'Trebuchet MS', Verdana, Sans-serif; font-style: normal; font-weight: bold; font-size: 16px; margin-top: 0; margin-bottom: 0; padding: 0 0 0 0;\""
+
+
+  attr[:tablestyle] = "style=\"margin: 2em 0 2em 0; border-style: solid; border-width: 2px; border-color: black;\""
+  attr[:headeven] = "style=\"font-family: Arial, Verdana, San-serif; text-align: right; background-color: WhiteSmoke;\""
+  attr[:headodd] = "style=\"font-family: Arial, Verdana, San-serif; text-align: right; background-color: white;\""
+  attr[:dataeven] = "style=\"font-family: Arial, Verdana, San-serif; background-color: WhiteSmoke;\""
+  attr[:dataodd] = "style=\"font-family: Arial, Verdana, San-serif; background-color: white;\""
+
 
   return (HTML_HEADER % attr) + (BODY % attr) + 
     (SUMMARY_TABLE % attr) + (INSTRUCTIONS % attr) + 
-    issueText("Errors", log.errors) +
-    issueText("Warnings", log.warnings) + multiplierErrors(log.badmultipliers) +
-    multiplierWarnings(log.warnmultipliers) + irregCallsigns(log.badcallsigns) +
+    issueText("Errors", log.errors, attr) +
+    issueText("Warnings", log.warnings, attr) +
+    multiplierErrors(log.badmultipliers, attr) +
+    multiplierWarnings(log.warnmultipliers, attr) + 
+    irregCallsigns(log.badcallsigns, attr) +
     (TRAILER % attr)
 end
 

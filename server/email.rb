@@ -31,6 +31,7 @@ class OutgoingEmail
       attachments.each { |file|
         attachstr = attachstr + "Content-Type: #{file['mime']}\nContent-Transfer-Encoding: base64\nContent-Disposition: attachment; filename=\"#{file['filename']}\"\n\n#{Base64.encode64(file['content'])}\n--#{boundary}\n"
       }
+      attachstr = attachstr + "--"
     else 
       header = header + "Content-Type: text/plain; charset=utf-8\n"
       attachstr = ""
@@ -44,7 +45,7 @@ class OutgoingEmail
     header = "From: #{CQPConfig::EMAIL_NAME} <#{CQPConfig::EMAIL_ADDRESS}>\nTo: #{recipient}\nSubject: #{subject}\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
     boundary = "mime_part_boundary_" + ("%08X" % rand(0xffffffff)) + "_" + ("%08X" % rand(0xffffffff))
     header = header + "Content-Type: multipart/alternative;\n    boundary=#{boundary}\n--#{boundary}\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n\n"
-    htmlstr = "--#{boundary}\nContent-Type: text/html; charset=UTF-8\nContent-Transfer-Encoding: base64\n\n#{Base64.encode64(htmlBody)}\n--#{boundary}\n"
+    htmlstr = "--#{boundary}\nContent-Type: text/html; charset=UTF-8\nContent-Transfer-Encoding: base64\n\n#{Base64.encode64(htmlBody)}\n--#{boundary}--\n"
     txtBody = txtBody.encode(Encoding::UTF_8)
     @smtp.send_message(header + txtBody + htmlstr, CQPConfig::EMAIL_ADDRESS, [ recipient ])
     @smtp.finish

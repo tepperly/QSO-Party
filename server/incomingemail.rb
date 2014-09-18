@@ -188,7 +188,7 @@ msgs.each { |uid|
   else
     
     print "Mail is single part\n"
-    print "Content type: " + mail.content_type + "\n"
+    print "Content type: " + mail.content_type.to_s + "\n"
     print "Type params: " + mail.content_type_parameters.to_s + "\n"
     print "Bodying encoding: " + mail.body.decoded.encoding.to_s + "\n"
   end
