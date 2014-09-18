@@ -39,6 +39,16 @@ class OutgoingEmail
     @smtp.send_message(header + body + attachstr, CQPConfig::EMAIL_ADDRESS, [ recipient ])
     @smtp.finish
   end
+
+  def sendEmailAlt(recipient, subject, txtBody, htmlBody)
+    header = "From: #{CQPConfig::EMAIL_NAME} <#{CQPConfig::EMAIL_ADDRESS}>\nTo: #{recipient}\nSubject: #{subject}\nMIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\n"
+    boundary = "mime_part_boundary_" + ("%08X" % rand(0xffffffff)) + "_" + ("%08X" % rand(0xffffffff))
+    header = header + "Content-Type: multipart/alternative;\n    boundary=#{boundary}\n--#{boundary}\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n\n"
+    htmlstr = "--#{boundary}\nContent-Type: text/html; charset=UTF-8\nContent-Transfer-Encoding: base64\n\n#{Base64.encode64(htmlBody)}\n--#{boundary}\n"
+    txtBody = txtBody.encode(Encoding::UTF_8)
+    @smtp.send_message(header + txtBody + htmlstr, CQPConfig::EMAIL_ADDRESS, [ recipient ])
+    @smtp.finish
+  end
 end
 
 def confEmail(db, entry)

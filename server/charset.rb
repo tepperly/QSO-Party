@@ -44,3 +44,15 @@ def guessEncoding(str)
     str.encoding
   end
 end
+
+def convertToEncoding(content, encoding)
+  if (not encoding) or (content.encoding == encoding)
+    converted = content
+  else
+    # basically replace things that can't be encoded
+    converted = content.encode(encoding, :invalid => :replace, 
+                               :undef => :replace)
+  end
+  converted
+end
+

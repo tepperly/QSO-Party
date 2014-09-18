@@ -66,7 +66,7 @@ class CQPLog
     @assisted = nil
     @numops = nil               # single, multi, or checklog
     @power = nil                # high, low, or QRP
-    @categories = { }           # fixed, mobile, portable, rover, expedition, hq, school
+    @categories = { }           # mobile, expedition, school, youth, yl, newcontester
     @numtrans = nil             # number of transmitters (one, two, limited, unlimited, swl
     @maxqso = nil
     @validqso = 0
@@ -78,6 +78,30 @@ class CQPLog
     @warnings = [ ]
     @errors = [ ]
     @multtest = multregex
+  end
+
+  def county?
+    @categories.has_key?("expedition") ? 1 : 0
+  end
+
+  def school?
+    @categories.has_key?("school") ? 1 : 0
+  end
+
+  def youth?
+    @categories.has_key?("youth") ? 1 : 0
+  end
+
+  def mobile?
+    @categories.has_key?("mobile") ? 1 : 0
+  end
+
+  def female?
+    @categories.has_key?("female") ? 1 : 0
+  end
+  
+  def newcontester?
+    @categories.has_key?("newcontester") ? 1 : 0
   end
 
   def numOpsInconsistent?
@@ -167,6 +191,10 @@ class CQPLog
     nil
   end
 
+  def filterQTH
+    @sentqth.keys.find_all { |sq| @multtest.match(sq) }.sort.map { |qth| qth }
+  end
+
   def to_json
     result = Hash.new
     result["callsign"] = (@callsign ? @callsign : "UNKNOWN")
@@ -183,7 +211,7 @@ class CQPLog
     if @email
       result["email"] = @email
     end
-    result["SentQTH"] = @sentqth.keys.find_all { |sq| @multtest.match(sq) }.sort.map { |qth| qth }
+    result["SentQTH"] = filterQTH
     result["warnings"] = @warnings.map { |w| w.to_hash }
     result["errors"] = @errors.map { |w| w.to_hash }
     result["multipliers"] = { "errors" => @badmultipliers.keys.sort.map { |m| m },
