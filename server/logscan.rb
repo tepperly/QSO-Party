@@ -188,7 +188,7 @@ class CQPLog
     when :QRP
       return "QRP"
     end
-    nil
+    return "High"
   end
 
   def filterQTH

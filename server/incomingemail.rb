@@ -80,7 +80,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
               fixedContent.encoding.to_s,
               timestamp, Digest::SHA1.hexdigest(rawContent).to_s,
               "email")
-#    print "Id: #{logID}\nCallsign: #{callsign}\nEmail: #{sender}\nOp class: #{log.powerStr}\n"
+#    print "Id: #{logID}\nCallsign: #{callsign}\nEmail: #{sender}\nOp class: #{log.calcOpClass}\nPower string: #{log.powerStr}\nSent QTH: #{log.filterQTH[0]}\n"
     db.addExtra(logID, callsign, sender, log.calcOpClass, log.powerStr,
                 log.filterQTH[0].to_s, "", "",
                 log.county?, log.youth?, log.mobile?, log.female?, log.school?,
@@ -159,33 +159,36 @@ begin
 
   msgs.each { |uid|
     data = imap.uid_fetch(uid, ["RFC822"])
-    seqno = data[0].seqno
+    begin
+      seqno = data[0].seqno
     #   print data[0]
-    _body = data[0].attr["RFC822"]
+      _body = data[0].attr["RFC822"]
     #  print data[0].attr["X-GM-LABELS"].join(" ") + "\n"
     
 #    print "Message #{uid} " + _body.encoding.to_s + "\n"
     
-    mail = Mail.new(_body)
-    numlogs = checkMail(mail, mail.subject, getReturnEmail(mail), mail.header, db, logCheck)
+      mail = Mail.new(_body)
+      numlogs = checkMail(mail, mail.subject, getReturnEmail(mail), mail.header, db, logCheck)
 #    print "Mail message #{uid} had #{numlogs} log(s)\n"
-    if numlogs > 0
-      #    imap.store(uid, "+X-GM-LABELS", ["CQP2014/Log"])
-      imap.copy(seqno, CQPConfig::INCOMING_IMAP_SUCCESS_FOLDER)
-    else
-      #    imap.store(uid, "+X-GM-LABELS", ["CQP2014/Unknown"])
-      imap.copy(seqno, CQPConfig::INCOMING_IMAP_FAIL_FOLDER)
+      if numlogs > 0
+        #    imap.store(uid, "+X-GM-LABELS", ["CQP2014/Log"])
+        imap.copy(seqno, CQPConfig::INCOMING_IMAP_SUCCESS_FOLDER)
+      else
+        #    imap.store(uid, "+X-GM-LABELS", ["CQP2014/Unknown"])
+        imap.copy(seqno, CQPConfig::INCOMING_IMAP_FAIL_FOLDER)
+      end
+      #  imap.store(uid, "-X-GM-LABELS", ["\\Inbox"])
+      imap.store(seqno, "+FLAGS", [:Deleted, :Seen])
+      #  print _body
+    rescue => e
+      $stderr.write("Exception: " + e.class.to_s + "\nMessage: " + e.message + "\nTraceback: \n: " + e.backtrace.join("\n") + "\n")
+      $stderr.flush
     end
-    #  imap.store(uid, "-X-GM-LABELS", ["\\Inbox"])
-    imap.store(seqno, "+FLAGS", [:Deleted, :Seen])
-    #  print _body
   }
   
   imap.expunge
   imap.logout
   imap.disconnect
 rescue => e
-  $stderr.write("Exception: " + e.class.to_s + "\nMessage: " + e.message + "\nTraceback: \n: " + e.backtrace.join("\n") + "\n")
-  $stderr.flush
   raise
 end
