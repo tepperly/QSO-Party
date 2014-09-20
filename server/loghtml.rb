@@ -66,12 +66,16 @@ SUMMARY_TABLE=<<SUMMARY_END
          <TD %{dataodd}>%{id}</TD>
       </TR>
       <TR>
-         <TH %{headeven}>Received:</TH>
-         <TD %{dataeven}>%{uploadtime}</TD>
+         <TH %{headeven}>Log SHA1 Digest:</TH>
+         <TD %{dataeven}>%{digest}</TD>
       </TR>
       <TR>
-         <TH %{headodd}>Deadline:</TH>
-         <TD %{dataodd}>%{deadline}</TD>
+         <TH %{headodd}>Received:</TH>
+         <TD %{dataodd}>%{uploadtime}</TD>
+      </TR>
+      <TR>
+         <TH %{headeven}>Deadline:</TH>
+         <TD %{dataeven}>%{deadline}</TD>
       </TR>
     </TABLE>
 
@@ -176,6 +180,7 @@ def logHtml(log, dbent)
     "female" => "YL", "school" => "School", "newcontester" => "New-contester" }
   attr = Hash.new
   attr[:id] = dbent["id"]
+  attr[:digest] = dbent["origdigest"]
   attr[:year] = CQPConfig::CONTEST_DEADLINE.strftime("%Y")
   attr[:uploadtime] = CGI::escapeHTML(dbent["uploadtime"].to_s)
   attr[:deadline] = CGI::escapeHTML(CQPConfig::CONTEST_DEADLINE.to_s)

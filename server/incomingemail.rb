@@ -5,7 +5,7 @@
 # ns6t@arrl.net
 #
 #
-require 'net/imap'
+require 'net/imap/gmail'
 require 'mail'
 require 'tempfile'
 require_relative 'email'
@@ -25,7 +25,6 @@ def htmlToPlain(str, mimeType)
     IO.popen("w3m -dump -T \"text/html\" -I UTF-8 -O UTF-8 #{file.path}", :encoding => Encoding::UTF_8) { |input|
       str = input.read
     }
-    print "Converted to plain text: #{str}\n"
   end
   str
 end
@@ -81,7 +80,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
               fixedContent.encoding.to_s,
               timestamp, Digest::SHA1.hexdigest(rawContent).to_s,
               "email")
-    print "Id: #{logID}\nCallsign: #{callsign}\nEmail: #{sender}\nOp class: #{log.powerStr}\n"
+#    print "Id: #{logID}\nCallsign: #{callsign}\nEmail: #{sender}\nOp class: #{log.powerStr}\n"
     db.addExtra(logID, callsign, sender, log.calcOpClass, log.powerStr,
                 log.filterQTH[0].to_s, "", "",
                 log.county?, log.youth?, log.mobile?, log.female?, log.school?,
@@ -147,51 +146,46 @@ def getReturnEmail(mail)
   mail.from[0]
 end
 
-db = LogDatabase.new
-logCheck = CheckLog.new
-imap = Net::IMAP.new(CQPConfig::INCOMING_IMAP_HOST, CQPConfig::INCOMING_IMAP_PORT, usessl = true, certs = nil, verify = false)
-imap.login(CQPConfig::INCOMING_IMAP_USER, CQPConfig::INCOMING_IMAP_PASSWORD)
+begin
+  db = LogDatabase.new
+  logCheck = CheckLog.new
+  imap = Net::IMAP::Gmail.new(CQPConfig::INCOMING_IMAP_HOST, CQPConfig::INCOMING_IMAP_PORT, usessl = true, certs = nil, verify = false)
+  # Net::IMAP.debug = true
+  imap.login(CQPConfig::INCOMING_IMAP_USER, CQPConfig::INCOMING_IMAP_PASSWORD)
+  
+  imap.select(CQPConfig::INCOMING_IMAP_FOLDER)
 
-imap.select(CQPConfig::INCOMING_IMAP_FOLDER)
+  msgs = imap.uid_search(["ALL"])
 
-msgs = imap.uid_search(["ALL"])
-
-msgs.each { |uid|
-  _body = imap.uid_fetch(uid, "RFC822")[0].attr["RFC822"]
-
-  print "Message #{uid} " + _body.encoding.to_s + "\n"
-  open("/tmp/mailtests/file#{uid}.raw", "wb") { |out|
-    out.write(_body)
-  }
-
-  mail = Mail.new(_body)
-  numlogs = checkMail(mail, mail.subject, getReturnEmail(mail), mail.header, db, logCheck)
-  if numlogs > 0
-    print "Mail message #{uid} had #{numlogs} log(s)\n"
-  end
-  if mail.multipart?
-    print "Mail is multipart\n"
-    print mail.parts.length.to_s + " parts\n"
-    print "Overall content-type: " + mail.content_type.to_s + "\n"
-    mail.attachments.each { |attach|
-      print "Mime type: " + attach.mime_type.to_s + "\n"
-      print "Charset: " + attach.charset.to_s + "\n"
-      
-    }
-    mail.parts.each { |part|
-      print part.content_type + "\n"
-      print "Type params: " + part.content_type_parameters.to_s + "\n"
-      print "Text encoding: " + part.body.decoded.encoding.to_s + "\n"
-      print part.attachment? ? "Is attachment\n" : "Isn't attachment\n"
-      print "Filename: " + part.filename.to_s + "\n"
-    }
-  else
+  msgs.each { |uid|
+    data = imap.uid_fetch(uid, ["RFC822"])
+    seqno = data[0].seqno
+    #   print data[0]
+    _body = data[0].attr["RFC822"]
+    #  print data[0].attr["X-GM-LABELS"].join(" ") + "\n"
     
-    print "Mail is single part\n"
-    print "Content type: " + mail.content_type.to_s + "\n"
-    print "Type params: " + mail.content_type_parameters.to_s + "\n"
-    print "Bodying encoding: " + mail.body.decoded.encoding.to_s + "\n"
-  end
-  print "\n\n"
-#  print _body
-}
+    print "Message #{uid} " + _body.encoding.to_s + "\n"
+    
+    mail = Mail.new(_body)
+    numlogs = checkMail(mail, mail.subject, getReturnEmail(mail), mail.header, db, logCheck)
+    print "Mail message #{uid} had #{numlogs} log(s)\n"
+    if numlogs > 0
+      #    imap.store(uid, "+X-GM-LABELS", ["CQP2014/Log"])
+      imap.copy(seqno, CQPConfig::INCOMING_IMAP_SUCCESS_FOLDER)
+    else
+      #    imap.store(uid, "+X-GM-LABELS", ["CQP2014/Unknown"])
+      imap.copy(seqno, CQPConfig::INCOMING_IMAP_FAIL_FOLDER)
+    end
+    #  imap.store(uid, "-X-GM-LABELS", ["\\Inbox"])
+    imap.store(seqno, "+FLAGS", [:Deleted, :Seen])
+    #  print _body
+  }
+  
+  imap.expunge
+  imap.logout
+  imap.disconnect
+rescue => e
+  $stderr.write("Exception: " + e.class.to_s + "\nMessage: " + e.message + "\nTraceback: \n: " + e.backtrace.join("\n") + "\n")
+  $stderr.flush
+  raise
+end
