@@ -187,7 +187,7 @@ def handleRequest(request, db, logCheck)
       end
     end
   end
-  emailConfirmation(db, logID)
+#  emailConfirmation(db, logID)
   content = nil
   encodedConent = nil
   if source != "form3"

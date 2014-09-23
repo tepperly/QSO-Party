@@ -89,9 +89,10 @@ class CallsignReport
   end
 
   def report
-    callsigns, rdate = @db.callsignsRcvd()
+    callsigns = @db.callsignsRcvd()
+    mindate, maxdate = @db.logDates()
     table = splitIntoColumns(callsigns)
-    generateHTML(table, callsigns.length, rdate)
+    generateHTML(table, callsigns.length, maxdate)
   end
 end
 

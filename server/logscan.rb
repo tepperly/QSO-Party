@@ -720,7 +720,7 @@ class CategoryTag < HeaderTag
           log.numops = :checklog
         when 'ALL', /^\d+M$/, 'LIMITED'
           log.band = cat.upcase
-        when 'CCE'
+        when 'CCE', 'COUNTY', 'EXPEDITION'
           log.categories["expedition"] = 1
           log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
         when /^SO-?HP$/
@@ -733,6 +733,21 @@ class CategoryTag < HeaderTag
           log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
         when /^SO-?QRP$/
           log.numops = :single
+          log.power = :QRP
+          log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
+        when 'MM-HP'
+          log.numops = :multi
+          log.numtrans = :unlimited
+          log.power = :high
+          log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
+        when 'MM-LP'
+          log.numops = :multi
+          log.numtrans = :unlimited
+          log.power = :low
+          log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
+        when 'MM-QRP'
+          log.numops = :multi
+          log.numtrans = :unlimited
           log.power = :QRP
           log.warnings << LineIssue.new(linenum, cat + " is a non-standard CATEGORY", false)
         when 'MOBILE'
@@ -1194,13 +1209,14 @@ class QSOTag < StandardNearMiss
     @tagregex= TAGREGEX
     @error = true
     @multipliers = nil
+    @tally = nil
   end
 
   def properSyntax
     TAG + ": see robot.cqp.org/cqp/qso_syntax.html"
   end
 
-  attr_writer :multipliers
+  attr_writer :multipliers, :tally
 
   def checkFreqMode(log, lineNum, freq, mode)
     true
@@ -1261,14 +1277,21 @@ class QSOTag < StandardNearMiss
     valid = valid and checkDateTime(log, lineNum, date, time)
     log.sentqth[sentqth.upcase] = 1
     valid = valid and callCheck(log, sentcall)
-    valid = valid and callCheck(log, recvdcall)
+    if callCheck(log, recvdcall)
+      if @tally
+        ru = recvdcall.upcase
+        @tally[ru] = @tally[ru] + 1
+      end
+    else
+      valid = false
+    end
     valid = valid and multiplierCheck(log, sentqth)
     valid = valid and multiplierCheck(log, recvdqth)
 
     if valid
       log.validqso = log.validqso + 1
     else
-      log.errors << LineIssue.new(startLineNum, "QSO line contains some invalid data: " + sample(line), true)
+      log.errors << LineIssue.new(lineNum, "QSO line contains some invalid data: " + sample(line), true)
     end
   end
 
@@ -1349,8 +1372,9 @@ class CheckLog
                  ClubTag ARRLSectionTag ContestTag CreatedByTag XCQPTag EmailTag LocationTag NameTag AddressTag AddressCityTag
                  AddressStateTag AddressPostcodeTag AddressCountryTag OperatorsTag OfftimeTag CategoryTag
                  SoapboxTag QSOTag IOTATag LineChecker )
-  def initialize
+  def initialize(callTally = nil)
     @checkers = [ ]
+    @callTally = callTally
     @multipliers = readMultAliases(File.dirname(__FILE__) + "/multipliers.csv")
     @multregex = makeMultRegex
     CHECKERS.each { |c|
@@ -1360,7 +1384,21 @@ class CheckLog
       if chk.respond_to?(:multipliers=)
         chk.multipliers = @multipliers
       end
+      if @callTally and chk.respond_to?(:tally=)
+        chk.tally = @callTally
+      end
       @checkers << chk
+    }
+  end
+
+  attr_reader :callTally
+
+  def callTally=(val)
+    @callTally = val
+    @checkers.each { |chk|
+      if chk.respond_to?(:tally=)
+        chk.tally = val
+      end
     }
   end
 
