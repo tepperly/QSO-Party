@@ -245,4 +245,16 @@ class LogDatabase
     end
     result
   end
+
+  def summaryStats(field, entries)
+    results = Hash.new(0)
+    connect
+    if @connection
+      res = @connection.query("select #{field}, count(*) from CQPLog where id in (#{entries.join(", ")}) group by #{field};")
+      res.each(:as => :array) { |row|
+        results[row[0]] = row[1].to_i
+      }
+    end
+    results
+  end
 end
