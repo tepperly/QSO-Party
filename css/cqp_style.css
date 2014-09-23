@@ -7,6 +7,10 @@ h1 {
     margin-bottom: 10px;
 }
 
+.UploadDone {
+    font-size: 1.75em;
+}
+
 .QSOReport {
     border-style: solid;
     border-width: 2px;

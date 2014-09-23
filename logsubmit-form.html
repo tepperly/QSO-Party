@@ -1,4 +1,4 @@
-<!doctype html>
+<<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -143,7 +143,7 @@ resubmit. Examples of the preferred QSO line syntax are available
 	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
-    <div id="doneMsg" style="visibility: hidden;"><p><strong>Upload Completed!</strong></p></div>
+    <div id="doneMsg" style="visibility: hidden;"><p><strong class="UploadDone">Upload Completed!</strong></p></div>
     <div id="reminder" >
       <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
 	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.
@@ -262,7 +262,7 @@ resubmit. Examples of the preferred QSO line syntax are available
 	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
-    <div id="AltdoneMsg" style="visibility: hidden;"><p><strong>Upload Completed!</strong></p></div>
+    <div id="AltdoneMsg" style="visibility: hidden;"><p><strong class="UploadDone">Upload Completed!</strong></p></div>
     <div id="Altreminder" >
       <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
 	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.
@@ -692,7 +692,7 @@ function calcColor(validQ, maxQ, badMults) {
             success: function(data) {
                console.log("Success 2");
                clearTabTwo();
-               $("#doneMsg").css("visibility", "visible");
+               $("#AltdoneMsg").css("visibility", "visible");
             },
             error: function(xhr, tstatus, errthrn)  {
                console.log("Error 2");
