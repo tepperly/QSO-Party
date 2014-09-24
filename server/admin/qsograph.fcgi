@@ -10,7 +10,7 @@ require 'fcgi'
 require 'SVG/Graph/TimeSeries'
 require_relative '../database'
 
-BANDS = %w(160M 80M 40M 20M 15M 6M 2M 222 432 902)
+BANDS = %w(160M 80M 40M 20M 15M 10M 6M 2M 222 432 902)
 MINUTES_PER_BIN = 15
 CONTEST_HOURS = 30
 CONTEST_START = Time.utc(2013, 10, 5, 16, 0)
@@ -75,12 +75,34 @@ def convertData(band, timedata)
   result
 end
 
+def dataLines(timedata, bands)
+  result = ""
+  timedata.each_index { |i|
+    result << (CONTEST_START + MINUTES_PER_BIN * 60 *i).strftime("%m/%d/%Y %H:%M")
+    bands.each { |band|
+      result << ","
+      result << timedata[i][band].to_s
+    }
+    result << "\n"
+  }
+  result
+end
+
+def buildCSV(request, timedata, bandtotals)
+  bands = BANDS.select { |band| bandtotals[band] > 0 }
+  request.out("text/csv") {
+    "\"Date/Time\"," + bands.map { |b| "\"" + b + "\"" }.join(",") + "\n" +
+    dataLines(timedata, bands)
+  }
+end
+
 def buildGraph(request, timedata, bandtotals)
   graph = SVG::Graph::TimeSeries.new( { :width => 1024,
                                         :height => 800,
                                         :graph_title => "QSOs by Band for CQP 2013",
                                         :show_graph_title => true,
                                         :show_data_values => false,
+                                        :timescale_divisions => "2 hours",
                                         :stacked => true,
                                         :area_fill => true,
                                         :y_title => "# QSOs",
@@ -109,7 +131,11 @@ def makeGraph(request, db)
   entries.each { |id|
     dataFromLog(db.getASCIIFile(id), bandtotals, data)
   }
-  buildGraph(request, data, bandtotals)
+  if request.has_key?("type") and request["type"] == "csv"
+    buildCSV(request, data, bandtotals)
+  else
+    buildGraph(request, data, bandtotals)
+  end
 end
 
 db = LogDatabase.new
