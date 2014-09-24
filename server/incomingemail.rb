@@ -64,6 +64,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
   logID = db.getID
   log = logCheck.checkLogStr(filename, logID, asciiContent)
   if log
+    db.addWorked(logID, log.tally)
     db.addQSOCount(logID, log.maxqso, log.validqso)
     if log.callsign and log.callsign != "UNKNOWN"
       callsign = log.callsign

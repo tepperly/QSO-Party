@@ -61,6 +61,7 @@ class CQPLog
     @badcallsigns = { }         # collection of bad callsigns
     @warnmultipliers = { }      # collection of aliases multipliers
     @badmultipliers = { }       # collection of unknown multipliers
+    @tally = Hash.new(0)        # callsign database
     @mode = nil
     @name = nil                 # operator name
     @assisted = nil
@@ -127,7 +128,8 @@ class CQPLog
             :state, :name, :badcallsigns, :version, :mode, :comments
   attr_reader :id, :callsign, :assisted, :numops, :power, :categories, :numtrans, :maxqso,
             :validqso, :email, :sentqth, :operators, :qsos, :warnings, :errors, :state, :band,
-            :name, :badcallsigns, :version, :mode, :comments, :badmultipliers, :warnmultipliers
+            :name, :badcallsigns, :version, :mode, :comments, :badmultipliers, :warnmultipliers,
+            :tally
 
   def to_s
     @id.to_s + "\nCabrillo version: " + @version.to_s + "\nCallsign: " + @callsign.to_s + "\nState: " +
@@ -1209,14 +1211,13 @@ class QSOTag < StandardNearMiss
     @tagregex= TAGREGEX
     @error = true
     @multipliers = nil
-    @tally = nil
   end
 
   def properSyntax
     TAG + ": see robot.cqp.org/cqp/qso_syntax.html"
   end
 
-  attr_writer :multipliers, :tally
+  attr_writer :multipliers
 
   def checkFreqMode(log, lineNum, freq, mode)
     true
@@ -1278,9 +1279,9 @@ class QSOTag < StandardNearMiss
     log.sentqth[sentqth.upcase] = 1
     valid = valid and callCheck(log, sentcall)
     if callCheck(log, recvdcall)
-      if @tally
+      if log.tally
         ru = recvdcall.upcase
-        @tally[ru] = @tally[ru] + 1
+        log.tally[ru] = log.tally[ru] + 1
       end
     else
       valid = false
@@ -1372,9 +1373,8 @@ class CheckLog
                  ClubTag ARRLSectionTag ContestTag CreatedByTag XCQPTag EmailTag LocationTag NameTag AddressTag AddressCityTag
                  AddressStateTag AddressPostcodeTag AddressCountryTag OperatorsTag OfftimeTag CategoryTag
                  SoapboxTag QSOTag IOTATag LineChecker )
-  def initialize(callTally = nil)
+  def initialize
     @checkers = [ ]
-    @callTally = callTally
     @multipliers = readMultAliases(File.dirname(__FILE__) + "/multipliers.csv")
     @multregex = makeMultRegex
     CHECKERS.each { |c|
@@ -1384,21 +1384,7 @@ class CheckLog
       if chk.respond_to?(:multipliers=)
         chk.multipliers = @multipliers
       end
-      if @callTally and chk.respond_to?(:tally=)
-        chk.tally = @callTally
-      end
       @checkers << chk
-    }
-  end
-
-  attr_reader :callTally
-
-  def callTally=(val)
-    @callTally = val
-    @checkers.each { |chk|
-      if chk.respond_to?(:tally=)
-        chk.tally = val
-      end
     }
   end
 

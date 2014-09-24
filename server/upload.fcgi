@@ -67,6 +67,7 @@ def handleRequest(request, db, logCheck)
       logID = db.getID
       log = logCheck.checkLogStr(fileent["name"], logID, asciiContent)
       if log 
+        db.addWorked(logID, log.tally)
         db.addQSOCount(logID, log.maxqso, log.validqso)
         if log.callsign and log.callsign != "UNKNOWN"
           callsign = log.callsign
@@ -114,6 +115,7 @@ def handleRequest(request, db, logCheck)
       logID = db.getID
       log = logCheck.checkLogStr("", logID, asciiContent)
       if log 
+        db.addWorked(logID, log.tally)
         if log.maxqso and log.validqso
           db.addQSOCount(logID, log.maxqso, log.validqso)
         end

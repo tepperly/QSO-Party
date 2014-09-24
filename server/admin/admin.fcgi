@@ -8,7 +8,6 @@
 
 require 'fcgi'
 require_relative '../database'
-require_relative '../logscan'
 
 MISSING_THRESHOLD=75
 
@@ -43,6 +42,35 @@ HTML_HEADER=<<HEADER_END
     </TABLE>
 
     <TABLE %{tablestyle}>
+      <CAPTION %{capstyle}>Special Categories</CAPTION>
+      <TR>
+         <TH %{rightodd}>CA County Expeditions:</TH>
+         <TD %{dataodd}>%{county}</TD>
+      </TR>
+      <TR>
+         <TH %{righteven}>Mobile Entries:</TH>
+         <TD %{dataeven}>%{mobile}</TD>
+      </TR>
+      <TR>
+         <TH %{rightodd}>New Contesters:</TH>
+         <TD %{dataodd}>%{newcontester}</TD>
+      </TR>
+      <TR>
+         <TH %{righteven}>School:</TH>
+         <TD %{dataeven}>%{school}</TD>
+      </TR>
+      <TR>
+         <TH %{rightodd}>YL:</TH>
+         <TD %{dataodd}>%{female}</TD>
+      </TR>
+      <TR>
+         <TH %{righteven}>Youth:</TH>
+         <TD %{dataeven}>%{youth}</TD>
+      </TR>
+    </TABLE>
+      
+
+    <TABLE %{tablestyle}>
       <CAPTION %{capstyle}>Incomplete Logs</CAPTION>
       <TR><TH %{headeven}>Callsign</TH><TH %{headeven}>Upload date</TH></TR>
 HEADER_END
@@ -59,6 +87,13 @@ MIDDLE_END
 
 HTML_TRAILER = <<TRAILER_END
     </TABLE>
+
+     <h1>Entries by Power Level</h1>
+     <img src="piechart.fcgi?type=power" height="450" width="500">
+     <h1>Entries by Operator Class</h1>
+     <img src="piechart.fcgi?type=opclass" height="450" width="500"> 
+     <h1>Entries by Submission Approach</h1>
+     <img src="piechart.fcgi?type=source" height="450" width="500">
   </BODY>
 </HTML> 
 TRAILER_END
@@ -67,7 +102,7 @@ TRAILER_END
 
 
 
-def handle_request(request, db, logCheck)
+def handle_request(request, db)
   timestamp = Time.new.utc
   completedLogs = db.allEntries # array of log IDs for completed logs
   incompleteLogs = db.incompleteEntries # array of log IDs for incomplete logs
@@ -75,9 +110,8 @@ def handle_request(request, db, logCheck)
   callsigns = Hash.new(false)
   completedLogs.each { |id|
     callsigns[db.getCallsign(id)] = true
-    logCheck.checkLog(db.getASCIIFile(id), id)
   }
-  callsWorked = logCheck.callTally
+  callsWorked = db.workedStats(completedLogs, MISSING_THRESHOLD)
   callsigns.keys.each { |call|
     callsWorked.delete(call)
   }
@@ -92,6 +126,10 @@ def handle_request(request, db, logCheck)
   attr[:incompletelogs] = incompleteLogs.length
   attr[:firstlog] = CGI::escapeHTML(firstLogDate.to_s)
   attr[:lastlog] = CGI::escapeHTML(lastLogDate.to_s)
+  categories = %w(county youth mobile female school newcontester)
+  categories.each { |cat|
+    attr[cat.to_sym] = db.numSpecial(completedLogs, cat)
+  }
 
   attr[:capstyle] = "style=\"text-align: center; font-family: 'Trebuchet MS', Verdana, Sans-serif; font-style: normal; font-weight: bold; font-size: 16px; margin-top: 0;  margin-bottom: 0; padding: 0 0 0 0;\""
 
@@ -121,22 +159,23 @@ def handle_request(request, db, logCheck)
     ( HTML_HEADER  +
       incompleteLogs.reduce("") { |total, id|
         call, ldate = db.getIncomplete(id)
-         counttwo = counttwo + 1
-         if counttwo.even?
-           total = total + "      <TR><TD %{dataeven}>" + call + "</TD><TD %{dataeven}>" + ldate.to_s + "</TR>\n"
-         else
-           total = total + "      <TR><TD %{dataodd}>" + call + "</TD><TD %{dataodd}>" + ldate.to_s + "</TR>\n"
-         end
+        if call.nil?
+          call="UNKNOWN (nil)"
+        end
+        counttwo = counttwo + 1
+        if counttwo.even?
+          total = total + "      <TR><TD %{dataeven}>" + call.to_s + "</TD><TD %{dataeven}>" + ldate.to_s + "</TR>\n"
+        else
+          total = total + "      <TR><TD %{dataodd}>" + call.to_s + "</TD><TD %{dataodd}>" + ldate.to_s + "</TR>\n"
+        end
       } +
       MIDDLE +
       missingCalls.reduce("") { |total, call|
-        if callsWorked[call] >= MISSING_THRESHOLD
-          count = count + 1
-          if count.even?
-            total = total + "      <TR><TD %{dataeven}>" + call + "</TD><TD %{numeven}>" + callsWorked[call].to_s + "</TD></TR>\n"
-          else
-            total = total + "      <TR><TD %{dataodd}>" + call + "</TD><TD %{numodd}>" + callsWorked[call].to_s + "</TD></TR>\n"
-          end
+        count = count + 1
+        if count.even?
+          total = total + "      <TR><TD %{dataeven}>" + call + "</TD><TD %{numeven}>" + callsWorked[call].to_s + "</TD></TR>\n"
+        else
+          total = total + "      <TR><TD %{dataodd}>" + call + "</TD><TD %{numodd}>" + callsWorked[call].to_s + "</TD></TR>\n"
         end
         total
       } +
@@ -146,8 +185,6 @@ end
   
 begin
   db = LogDatabase.new
-  callTally = Hash.new(0)
-  logCheck = CheckLog.new(callTally)
 rescue => e
   $stderr.write(e.message + "\n")
   $stderr.write(e.backtrace.join("\n"))
@@ -158,8 +195,7 @@ end
 
 FCGI.each_cgi("html4Tr") { |request|
   begin
-    logCheck.callTally = Hash.new(0)
-    handle_request(request, db, logCheck)
+    handle_request(request, db)
   rescue => e
     $stderr.write(e.message + "\n")
     $stderr.write(e.backtrace.join("\n"))
