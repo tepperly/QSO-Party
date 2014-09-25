@@ -316,6 +316,7 @@ class FormOne
 
   def stepTwo(id)
     hdr = randomHdr(id, @callsign)
+    hdr["source"] = "form1"
     @mg.post("/cqp/server/upload.fcgi", hdr, @filename)
   end
 
@@ -327,6 +328,12 @@ end
 
 class FormTwo < FormOne
   
+  def stepTwo(id)
+    hdr = randomHdr(id, @callsign)
+    hdr["source"] = "form2"
+    @mg.post("/cqp/server/upload.fcgi", hdr, @filename)
+  end
+
   def upload(io)
     content = toUTFCompat(io.read())
     src = @mg.post("/cqp/server/upload.fcgi", { "cabcontent" => content }, @filename)
@@ -356,6 +363,7 @@ class FormThree
     @mg.getFiles(FORM_THREE)
     open(@filename, "rb") { |io|
       hdr = randomHdr(-1, @callsign)
+      hdr["source"] = "form3"
       content = toUTFCompat(io.read())
       hdr["cabcontent"] = content
       @mg.post("/cqp/server/upload.fcgi", hdr, @filename)
