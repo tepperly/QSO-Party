@@ -95,9 +95,13 @@ class LogDatabase
 
   def getSourceStates(ids)
     result = Hash.new
+    data = ids
+    if data.empty?
+      data = [ -1 ]
+    end
     connect
     if @connection
-      @connection.query("select source, count(*) from CQPLog where id in (" + ids.join(", ") + ") group by source asc order by source asc;")
+      @connection.query("select source, count(*) from CQPLog where id in (" + data.join(", ") + ") group by source asc order by source asc;")
     end
     
   end
@@ -125,8 +129,12 @@ class LogDatabase
   def numSpecial(entries, category)
     count = 0
     connect
+    data = entries
+    if data.empty?
+      data = [ -1 ]
+    end
     if @connection
-      count = getOne("select count(*) from CQPLog where id in (#{entries.join(', ')}) and #{category};")
+      count = getOne("select count(*) from CQPLog where id in (#{data.join(', ')}) and #{category};")
     end
     count
   end
@@ -268,8 +276,12 @@ class LogDatabase
   def workedStats(entries, threshold=0)
     results = Hash.new(0)
     connect
+    data = entries
+    if data.empty?
+      data = [ -1 ]
+    end
     if @connection
-      res = @connection.query("select callsign, sum(count) as tot from CQPWorked where logid in (#{entries.join(', ')}) group by callsign having tot >= #{threshold.to_i};")
+      res = @connection.query("select callsign, sum(count) as tot from CQPWorked where logid in (#{data.join(', ')}) group by callsign having tot >= #{threshold.to_i};")
       res.each(:as => :array) { |row|
         results[row[0]] = row[1].to_i
       }
@@ -280,8 +292,12 @@ class LogDatabase
   def summaryStats(field, entries)
     results = Hash.new(0)
     connect
+    data = entries
+    if data.empty?
+      data = [ -1 ]
+    end
     if @connection
-      res = @connection.query("select #{field}, count(*) from CQPLog where id in (#{entries.join(", ")}) group by #{field};")
+      res = @connection.query("select #{field}, count(*) from CQPLog where id in (#{data.join(", ")}) group by #{field};")
       res.each(:as => :array) { |row|
         results[row[0]] = row[1].to_i
       }
