@@ -18,8 +18,9 @@ end
 
 
 class LogDatabase
-  def initialize
+  def initialize(readonly = false)
     @connection = nil
+    @readonly = readonly
     @mapping = Hash.new("")
     @mapping["single"] = "Single-Op"
     @mapping["multi-single"] = "Multi-single"
@@ -33,16 +34,20 @@ class LogDatabase
   def connect
     if not @connection
       @connection = Mysql2::Client.new(:host => CQPConfig::DATABASE_HOST,
-                                       :username => CQPConfig::DATABASE_USER,
+                                       :username => (@readonly ? CQPConfig::READ_ONLY_USER : CQPConfig::DATABASE_USER),
                                        :reconnect => true,
-                                       :password => CQPConfig::DATABASE_PASSWORD)
+                                       :password => (@readonly ? CQPConfig::READ_ONLY_PASSWORD : CQPConfig::DATABASE_PASSWORD))
       if @connection 
-        @connection.query("create database if not exists CQPUploads character set = 'utf8';")
-        @connection.query("use CQPUploads;")
-        @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), userfilename varchar(1024), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, uploadinstant double, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned not null default 0, source enum('unknown', 'email', 'form1', 'form2', 'form3') not null default 'unknown', index callindex (callsign asc), index calltwoind (callsign_confirm asc), index uploadtimeind (uploadtime asc), index uploadinstind (uploadinstant asc));")
-        @connection.query("create table if not exists CQPError (id int auto_increment primary key, message varchar(256), traceback varchar(1024), timestamp datetime);")
-        @connection.query("create table if not exists CQPExtra (id bigint primary key auto_increment, logid bigint, callsign varchar(32), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, source enum('unknown', 'email', 'form1', 'form2', 'form3') not null default 'unknown', index uploadtimeind (uploadtime asc));")
-        @connection.query("create table if not exists CQPWorked (id bigint primary key auto_increment, logid bigint not null, callsign varchar(32) not null, count smallint unsigned not null default 0, index logind (logid asc), index callind (callsign asc));")
+        if @readonly
+          @connection.query("use CQPUploads;")
+        else
+          @connection.query("create database if not exists CQPUploads character set = 'utf8';")
+          @connection.query("use CQPUploads;")
+          @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), userfilename varchar(1024), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, uploadinstant double, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned not null default 0, source enum('unknown', 'email', 'form1', 'form2', 'form3') not null default 'unknown', index callindex (callsign asc), index calltwoind (callsign_confirm asc), index uploadtimeind (uploadtime asc), index uploadinstind (uploadinstant asc));")
+          @connection.query("create table if not exists CQPError (id int auto_increment primary key, message varchar(256), traceback varchar(1024), timestamp datetime);")
+          @connection.query("create table if not exists CQPExtra (id bigint primary key auto_increment, logid bigint, callsign varchar(32), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, source enum('unknown', 'email', 'form1', 'form2', 'form3') not null default 'unknown', index uploadtimeind (uploadtime asc));")
+          @connection.query("create table if not exists CQPWorked (id bigint primary key auto_increment, logid bigint not null, callsign varchar(32) not null, count smallint unsigned not null default 0, index logind (logid asc), index callind (callsign asc));")
+        end
       end
     else
       @connection.query("use CQPUploads;")  # useful for database reconnects
@@ -173,6 +178,15 @@ class LogDatabase
     if @connection
       @connection.query("insert into CQPError (message, traceback, timestamp) values ('#{Mysql2::Client::escape(e.message)}', '#{Mysql2::Client::escape(e.backtrace.join("\n"))}', NOW());")
     end
+  end
+
+  def numExceptions
+    connect
+    num = 0
+    if @connection
+      num = getOne("select count(*) from CQPError;")
+    end
+    num
   end
 
   def addQSOCount(id, maxq, validq)

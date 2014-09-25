@@ -14,7 +14,7 @@ BANDS = %w(160M 80M 40M 20M 15M 10M 6M 2M 222 432 902)
 MODES = %w(PH CW)
 MINUTES_PER_BIN = 15
 CONTEST_HOURS = 30
-CONTEST_START = Time.utc(2013, 10, 5, 16, 0)
+CONTEST_START = Time.utc(2014, 10, 4, 16, 0)
 CONTEST_END = CONTEST_START + CONTEST_HOURS*60*60
 
 def bandFromFreq(freq)
@@ -97,7 +97,8 @@ end
 
 def buildCSV(request, timedata, bandtotals)
   bands = BANDS.select { |band| bandtotals[band] > 0 }
-  request.out("text/csv") {
+  request.out("status" => "OK", "type" => "text/csv", "charset" => "us-ascii",
+              "Content-Disposition" => "attachment; filename=qsograph.csv" ) {
     "\"Date/Time\"," + bands.map { |b| "\"" + b + "\"" }.join(",") + "\n" +
     dataLines(timedata, bands)
   }
@@ -130,17 +131,27 @@ end
 
 def buildCSV2(request, details, bandtotals)
   bands = BANDS.select { |band| bandtotals[band] > 0 }
-  request.out("text/csv") {
+  request.out("status" => "OK", "type" => "text/csv", "charset" => "us-ascii",
+              "Content-Disposition" => "attachment; filename=qsograph.csv" ) {
     "\"Date/Time\"," + crossProd(bands, MODES).map { |b| "\"" + b + "\"" }.join(",") + "\n" +
     dateLines2(details, bands)
   }
+end
+
+def emptyData
+  result = Array.new
+  (1 + CONTEST_HOURS * 60 / MINUTES_PER_BIN).to_i.times { |i|
+    result << (CONTEST_START + MINUTES_PER_BIN * 60 * i)
+    result << 0
+  }
+  { :data => result, :title => "No Data" }
 end
 
 
 def buildGraph(request, timedata, bandtotals)
   graph = SVG::Graph::TimeSeries.new( { :width => 1024,
                                         :height => 800,
-                                        :graph_title => "QSOs by Band for CQP 2013",
+                                        :graph_title => "QSOs by Band for CQP #{CONTEST_START.strftime("%Y")}",
                                         :show_graph_title => true,
                                         :show_data_values => false,
                                         :timescale_divisions => "2 hours",
@@ -152,11 +163,16 @@ def buildGraph(request, timedata, bandtotals)
                                         :show_x_title => true,
                                         :scale_y_integers => true,
                                         :x_label_format => "%H:%M" } )
+  num = 0
   BANDS.each {  |band|
     if bandtotals[band] > 0
+      num = num + 1
       graph.add_data({ :data => convertData(band, timedata), :title => band })
     end
   }
+  if num == 0
+    graph.add_data(emptyData)
+  end
   request.out("image/svg+xml") {
     graph.burn()
   }
@@ -191,7 +207,7 @@ def makeGraph(request, db)
   end
 end
 
-db = LogDatabase.new
+db = LogDatabase.new(true)
 FCGI.each_cgi { |request|
   begin
     makeGraph(request, db)

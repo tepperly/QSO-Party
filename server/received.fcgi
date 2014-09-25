@@ -17,7 +17,7 @@ class CallsignReport
     if db
       @db = db
     else
-      @db = LogDatabase.new
+      @db = LogDatabase.new(true)
     end
     @timestamp = Time.new.utc
 
@@ -96,8 +96,16 @@ class CallsignReport
   end
 end
 
-ldb = LogDatabase.new
+ldb = LogDatabase.new(true)
 FCGI.each_cgi("html4Tr") { |cgi|
-  csr = CallsignReport.new(cgi, ldb)
-  csr.report
+  begin
+    csr = CallsignReport.new(cgi, ldb)
+    csr.report
+  rescue => e
+    $stderr.write(e.message + "\n")
+    $stderr.write(e.backtrace.join("\n"))
+    $stderr.flush()
+    ldb.addException(e)
+    raise
+  end
 }

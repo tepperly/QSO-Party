@@ -37,7 +37,7 @@ def handleRequest(request, db)
   }
 end
 
-db = LogDatabase.new
+db = LogDatabase.new(true)
 FCGI.each_cgi {  |request|
   begin
     handleRequest(request, db)
