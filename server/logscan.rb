@@ -1368,11 +1368,11 @@ def splitLines(str)
 end
 
 class CheckLog
-  CHECKERS = %w( StartLogTag EndLogTag CallsignTag CatAssistedTag CatBandTag CatDXPTag CatModeTag CatOperatorTag CatPowerTag
-                 CatStationTag CatTimeTag CatTransmitterTag CatOverlayTag CertificateTag ClaimedScoreTag
-                 ClubTag ARRLSectionTag ContestTag CreatedByTag XCQPTag EmailTag LocationTag NameTag AddressTag AddressCityTag
-                 AddressStateTag AddressPostcodeTag AddressCountryTag OperatorsTag OfftimeTag CategoryTag
-                 SoapboxTag QSOTag IOTATag LineChecker )
+  CHECKERS = %w( QSOTag StartLogTag EndLogTag CallsignTag CatAssistedTag CatBandTag CatDXPTag CatModeTag 
+                 CatOperatorTag CatPowerTag CatStationTag CatTimeTag CatTransmitterTag CatOverlayTag
+                 CertificateTag ClaimedScoreTag ClubTag ARRLSectionTag ContestTag CreatedByTag XCQPTag
+                 EmailTag LocationTag NameTag AddressTag AddressCityTag AddressStateTag AddressPostcodeTag
+                 AddressCountryTag OperatorsTag OfftimeTag CategoryTag SoapboxTag IOTATag LineChecker )
   def initialize
     @checkers = [ ]
     @multipliers = readMultAliases(File.dirname(__FILE__) + "/multipliers.csv")
