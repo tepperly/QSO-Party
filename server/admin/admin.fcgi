@@ -43,6 +43,10 @@ HTML_HEADER=<<HEADER_END
          <TH %{rightodd}>Number Exceptions:</TH>
          <TD %{dataodd}>%{numexcept}</TD>
       </TR>
+      <TR>
+         <TH %{righteven}>Last Exception:</TH>
+         <TD %{dataeven}>%{lastexcept}</TD>
+      </TR>
     </TABLE>
 
     <TABLE %{tablestyle}>
@@ -130,6 +134,7 @@ def handle_request(request, db)
   attr[:incompletelogs] = incompleteLogs.length
   attr[:firstlog] = CGI::escapeHTML(firstLogDate.to_s)
   attr[:lastlog] = CGI::escapeHTML(lastLogDate.to_s)
+  attr[:lastexcept] = CGI::escapeHTML(db.latestException.to_s)
   attr[:numexcept]  = db.numExceptions
   categories = %w(county youth mobile female school newcontester)
   categories.each { |cat|

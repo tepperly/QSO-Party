@@ -189,6 +189,15 @@ class LogDatabase
     num
   end
 
+  def latestException
+    connect
+    date = nil
+    if @connection
+      date = getOne("select max(timestamp) from CQPError;")
+    end
+    date
+  end
+
   def addQSOCount(id, maxq, validq)
     connect
     if @connection
