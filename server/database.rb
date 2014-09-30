@@ -45,7 +45,7 @@ class LogDatabase
           @connection.query("use CQPUploads;")
           @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), userfilename varchar(1024), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, uploadinstant double, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned not null default 0, source enum('unknown', 'email', 'form1', 'form2', 'form3') not null default 'unknown', index callindex (callsign asc), index calltwoind (callsign_confirm asc), index uploadtimeind (uploadtime asc), index uploadinstind (uploadinstant asc));")
           @connection.query("create table if not exists CQPError (id int auto_increment primary key, message varchar(256), traceback varchar(1024), timestamp datetime);")
-          @connection.query("create table if not exists CQPExtra (id bigint primary key auto_increment, logid bigint, callsign varchar(32), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, source enum('unknown', 'email', 'form1', 'form2', 'form3') not null default 'unknown', index uploadtimeind (uploadtime asc));")
+          @connection.query("create table if not exists CQPExtra (id bigint primary key auto_increment, logid bigint, callsign varchar(32), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, source enum('unknown', 'email', 'form1', 'form2', 'form3') not null default 'unknown', ipaddress varchar(22), index uploadtimeind (uploadtime asc));")
           @connection.query("create table if not exists CQPWorked (id bigint primary key auto_increment, logid bigint not null, callsign varchar(32) not null, count smallint unsigned not null default 0, index logind (logid asc), index callind (callsign asc));")
         end
       end
@@ -156,7 +156,8 @@ class LogDatabase
     return nil, nil
   end
 
-  def addExtra(id,callsign, email, opclass, power, sentqth, phone, comments, county, youth, mobile, female, school, newcontester, source)
+  def addExtra(id,callsign, email, opclass, power, sentqth, phone, comments, county, youth, mobile, female, school, newcontester, source,
+               ipaddr)
     connect
     if @connection
       id = id.to_i
@@ -166,7 +167,11 @@ class LogDatabase
       queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign)}', opclass='#{Mysql2::Client::escape(opclass)}', power='#{Mysql2::Client::escape(power)}', emailaddr='#{Mysql2::Client::escape(email)}', sentqth='#{Mysql2::Client::escape(sentqth)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1, source='#{Mysql2::Client::escape(source)}' where id = #{id.to_i} limit 1;"
 #      $outfile.write(queryStr + "\n");
       @connection.query(queryStr)
-      @connection.query("insert into CQPExtra (logid, callsign, opclass, power, uploadtime, emailaddr, sentqth, phonenum, comments, county, youth, mobile, female, school, newcontester, source) values (#{id}, '#{Mysql2::Client::escape(callsign)}', '#{Mysql2::Client::escape(opclass)}', '#{Mysql2::Client::escape(power)}', NOW(), '#{Mysql2::Client::escape(email)}', '#{Mysql2::Client::escape(sentqth)}', '#{Mysql2::Client::escape(phone)}', '#{Mysql2::Client::escape(comments)}', #{county.to_i}, #{youth.to_i}, #{mobile.to_i}, #{female.to_i}, #{school.to_i}, #{newcontester.to_i}, source='#{Mysql2::Client::escape(source)}');")
+      if ipaddr
+        @connection.query("insert into CQPExtra (logid, callsign, opclass, power, uploadtime, emailaddr, sentqth, phonenum, comments, county, youth, mobile, female, school, newcontester, source, ipaddress) values (#{id}, '#{Mysql2::Client::escape(callsign)}', '#{Mysql2::Client::escape(opclass)}', '#{Mysql2::Client::escape(power)}', NOW(), '#{Mysql2::Client::escape(email)}', '#{Mysql2::Client::escape(sentqth)}', '#{Mysql2::Client::escape(phone)}', '#{Mysql2::Client::escape(comments)}', #{county.to_i}, #{youth.to_i}, #{mobile.to_i}, #{female.to_i}, #{school.to_i}, #{newcontester.to_i}, '#{Mysql2::Client::escape(source)}', '#{Mysql2::Client::escape(ipaddr)}');")
+      else
+        @connection.query("insert into CQPExtra (logid, callsign, opclass, power, uploadtime, emailaddr, sentqth, phonenum, comments, county, youth, mobile, female, school, newcontester, source) values (#{id}, '#{Mysql2::Client::escape(callsign)}', '#{Mysql2::Client::escape(opclass)}', '#{Mysql2::Client::escape(power)}', NOW(), '#{Mysql2::Client::escape(email)}', '#{Mysql2::Client::escape(sentqth)}', '#{Mysql2::Client::escape(phone)}', '#{Mysql2::Client::escape(comments)}', #{county.to_i}, #{youth.to_i}, #{mobile.to_i}, #{female.to_i}, #{school.to_i}, #{newcontester.to_i}, '#{Mysql2::Client::escape(source)}');")
+      end
       true
     else
       false
@@ -235,6 +240,17 @@ class LogDatabase
     connect
     if @connection
       res = @connection.query("select min(uploadtime), max(uploadtime) from CQPLog where completed;")
+      res.each(:as => :array) { |row|
+        return row[0], row[1]
+      }
+    end
+    return nil, nil
+  end
+
+  def uploadStats
+    connect 
+    if @connection
+      res = @connection.query("select count(*), max(uploadtime) from CQPLog;")
       res.each(:as => :array) { |row|
         return row[0], row[1]
       }

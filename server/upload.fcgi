@@ -164,7 +164,7 @@ def handleRequest(request, db, logCheck)
                   checkBox(request, "expedition"), checkBox(request, "youth"),
                   checkBox(request, "mobile"), checkBox(request, "female"),
                   checkBox(request, "school"), checkBox(request, "new"), 
-                  source)
+                  source, nil)
       asciiFile = db.getASCIIFile(logID)
       if asciiFile
         attrib = makeAttributes(logID, request["callsign"],

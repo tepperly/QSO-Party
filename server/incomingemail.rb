@@ -85,7 +85,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
     db.addExtra(logID, callsign, sender, log.calcOpClass, log.powerStr,
                 log.filterQTH[0].to_s, "", "",
                 log.county?, log.youth?, log.mobile?, log.female?, log.school?,
-                log.newcontester?, "email")
+                log.newcontester?, "email", nil)
     attrib = makeAttributes(logID, callsign, sender, sender, log.filterQTH[0].to_s,
                             "", "", log.county?, log.youth?, log.mobile?,
                             log.female?, log.school?, log.newcontester?)
