@@ -6,14 +6,14 @@ require 'json'
 require 'open-uri'
 require 'time'
 
-RESTTIME = 60 * 10              # check every 10 minutes
+RESTTIME = 60 * 15              # check every 15 minutes
 JITTER = 60
 MAX_TIME_BETWEEN = 24 * 60 * 60 # 24 hours in seconds
 MAX_LOGS = 50
 
 begin
   timestr = File.read("last_backup.txt")
-  $lastBackup = Time.at(timestr.to_f)
+  $lastBackup = Time.at(timestr.to_i)
 rescue => e
   $lastBackup = Time.at(0)      # beginning of Epoch
 end
@@ -21,8 +21,9 @@ $lastCount = 0
 
 def makeBackup
   $lastBackup = Time.now
-  print "Make backup:" + $lastBackup.to_s + "\n"
-  File.write("last_backup.txt", $lastBackup.to_f.to_s)
+  print "Make backup: " + $lastBackup.to_s + "\n"
+  system("./cqp_backup")
+  File.write("last_backup.txt", $lastBackup.to_i.to_s)
 end
 
 def readStats
