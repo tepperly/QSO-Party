@@ -1,8 +1,8 @@
 #!/bin/sh
-timestamp=`date +"%Y%m%d-%H%M"`
+timestamp=`date --utc +"%Y%m%d-%H%M"`
 
 mkdir -p ${HOME}/pub/qso-party/cqp_backups
 
-ssh tepperly@robot.cqp.org ${HOME}/cqpbackup ${timestamp}
+ssh tepperly@robot.cqp.org '${HOME}/cqpbackup' ${timestamp}
 scp tepperly@robot.cqp.org:tmp/backup${timestamp}.tar.xz ${HOME}/pub/qso-party/cqp_backups/
 ssh tepperly@robot.cqp.org /bin/rm -rf tmp/backup${timestamp}.tar.xz

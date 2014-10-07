@@ -1,2 +1,4 @@
 logs
 *.tar.xz
+*~
+last_backup.txt

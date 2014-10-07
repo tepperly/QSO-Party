@@ -9,7 +9,7 @@ require 'time'
 RESTTIME = 60 * 15              # check every 15 minutes
 JITTER = 60
 MAX_TIME_BETWEEN = 24 * 60 * 60 # 24 hours in seconds
-MAX_LOGS = 50
+MAX_LOGS = 25
 
 begin
   timestr = File.read("last_backup.txt")
