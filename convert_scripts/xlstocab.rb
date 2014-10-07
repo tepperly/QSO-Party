@@ -28,26 +28,26 @@ class Entrant
 end
 
 BAND_TO_FREQ = {
-  "160M" => 1.8,
-  "160" => 1.8,
-  "80M" => 3.5,
-  "80" => 3.5,
-  "60M" => 5.102,
-  "60" => 5.102,
-  "40M" => 7,
-  "40" => 7,
-  "30M" => 10.1,
-  "30" => 10.1,
-  "20M" => 14,
-  "20" => 14,
-  "17M" => 18.068,
-  "17" => 18.068,
-  "15M" => 21,
-  "15" => 21,
-  "12M" => 24.890,
-  "12" => 24.890,
-  "10M" => 28,
-  "10" => 28,
+  "160M" => 1800,
+  "160" => 1800,
+  "80M" => 3500,
+  "80" => 3500,
+  "60M" => 5102,
+  "60" => 5102,
+  "40M" => 7000,
+  "40" => 7000,
+  "30M" => 10100,
+  "30" => 10100,
+  "20M" => 14000,
+  "20" => 14000,
+  "17M" => 18068,
+  "17" => 18068,
+  "15M" => 21000,
+  "15" => 21000,
+  "12M" => 24890,
+  "12" => 24890,
+  "10M" => 28000,
+  "10" => 28000,
   "6M" => 50,
   "6" => 50,
   "2M" => 144,
@@ -397,7 +397,7 @@ ENDOFHEADER
 
 def printHeader(entrant, callsign, sentqth, power)
   print CAB_HEADER % { :callsign => callsign, :name => entrant.name,
-    :email => entrant.email, :power => power, :optype => "single",
+    :email => entrant.email, :power => power, :optype => "single-op",
     :location => sentqth }
 end
 
@@ -411,9 +411,9 @@ def validQ(ary)
 end
 
 def dateTime(date, time)
-  print date
   rdate = Date.strptime(date, "%m/%d/%Y")
-  rdate.strftime("%Y-%m-%d ") + time
+  time = time.to_i
+  rdate.strftime("%Y-%m-%d ") + ("%04d" % time)
 end
 
 MODE = {
