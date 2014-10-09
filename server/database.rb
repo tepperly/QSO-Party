@@ -164,7 +164,7 @@ class LogDatabase
       if not %w( email form1 form2 form3 ).index(source)
         source = "unknown"
       end
-      queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign)}', opclass='#{Mysql2::Client::escape(opclass)}', power='#{Mysql2::Client::escape(power)}', emailaddr='#{Mysql2::Client::escape(email)}', sentqth='#{Mysql2::Client::escape(sentqth)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1, source='#{Mysql2::Client::escape(source)}' where id = #{id.to_i} limit 1;"
+      queryStr = "update CQPLog set callsign_confirm='#{Mysql2::Client::escape(callsign.upcase)}', opclass='#{Mysql2::Client::escape(opclass)}', power='#{Mysql2::Client::escape(power)}', emailaddr='#{Mysql2::Client::escape(email)}', sentqth='#{Mysql2::Client::escape(sentqth)}', phonenum='#{Mysql2::Client::escape(phone)}', comments='#{Mysql2::Client::escape(comments)}', county=#{county.to_i}, youth=#{youth.to_i}, mobile= #{mobile.to_i}, female=#{female.to_i}, school=#{school.to_i}, newcontester=#{newcontester.to_i}, completed=1, source='#{Mysql2::Client::escape(source)}' where id = #{id.to_i} limit 1;"
 #      $outfile.write(queryStr + "\n");
       @connection.query(queryStr)
       if ipaddr

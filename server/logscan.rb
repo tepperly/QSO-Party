@@ -661,7 +661,7 @@ end
 class CatTimeTag < HeaderTag
   TAG="CATEGORY-TIME"
   TAGREGEX=/\Acategory-time:/i
-  WHOLETAG=/\Acategory-time:\s*((6|12|24)-hour)\s*/i
+  WHOLETAG=/\Acategory-time:\s*((6|12|24)-hours?)\s*/i
 
   def initialize
     super

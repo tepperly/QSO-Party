@@ -139,7 +139,7 @@ resubmit. Examples of the preferred QSO line syntax are available
 	<label for="commentId">Comments:</label><br>
 	<textarea name="comments" id="commentId" cols="80" 
 		  rows="5" class="jForm"></textarea><br>
-        <input type="submit" id="submit" class="jForm cqpbutton">
+        <input type="submit" id="submit" class="jForm cqpbutton" value="Submit Details">
 	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
@@ -159,7 +159,7 @@ resubmit. Examples of the preferred QSO line syntax are available
 	<label for="cabcontentId">Paste your log here:</label><br>
 	<textarea name="cabcontent" id="cabcontentId" cols="100" wrap="soft"
 		  rows="5" ></textarea><br>
-	<input type="submit" id="cabsubmit" class="cqpbutton">
+	<input type="submit" id="cabsubmit" class="cqpbutton" value="Submit Log">
       </form>
     </div>
     <div id="step-2a">
@@ -211,6 +211,7 @@ resubmit. Examples of the preferred QSO line syntax are available
 	  <option value="single">Single-op</option>
 	  <option value="multi-single">Multi-single</option>
 	  <option value="multi-multi" selected="selected">Multi-multi</option>
+	  <option value="checklog" >Checklog</option>
 	</select>
 	<select name="power" id="AltpowerId" class="jForma">
 	  <option value="Low">Low Power</option>
@@ -258,7 +259,7 @@ resubmit. Examples of the preferred QSO line syntax are available
 	<label for="AltcommentId">Comments:</label><br>
 	<textarea name="comments" id="AltcommentId" cols="80"
 		  rows="5" class="jForma"></textarea><br>
-        <input type="submit" id="Altsubmit" class="jForma cqpbutton">
+        <input type="submit" id="Altsubmit" class="jForma cqpbutton" value="Submit Details">
 	<p>* Indicates <strong>required</strong> fields.
       </form>
     </div>
@@ -294,6 +295,7 @@ resubmit. Examples of the preferred QSO line syntax are available
       <option value="single">Single-op</option>
       <option value="multi-single">Multi-single</option>
       <option value="multi-multi" selected="selected">Multi-multi</option>
+      <option value="checklog" >Checklog</option>
     </select>
     <select name="power" id="ALLpowerId" class="jFormb">
       <option value="Low">Low Power</option>
@@ -437,7 +439,7 @@ function clearTabTwo() {
  * @returns {String} The hexidecimal code
  */
 function intToHex(i) {
-    var hex = parseInt(i).toString(16);
+    var hex = parseInt(i,10).toString(16);
     return (hex.length < 2) ? "0" + hex : hex;
 }   
 
@@ -459,7 +461,7 @@ function makeColor(value) {
     } else {
         greenValue = 255;
         value = value - 255;
-        redValue = 256 - (value * value / 255)
+        redValue = 256 - (value * value / 255);
         redValue = Math.round(redValue);
     }
    return "#" + intToHex(redValue) + intToHex(greenValue) + "00";
@@ -481,7 +483,7 @@ function escapeHtml(string) {
 }
 
 function calcColor(validQ, maxQ, badMults) {
-   if (maxQ == 0) {
+   if (maxQ === 0) {
      return "#ff0000";
    }
    else {
@@ -499,11 +501,15 @@ function calcColor(validQ, maxQ, badMults) {
         url: urlval,
         dataType: 'json',
         done: function (e, data) {
-            console.log("Success 4");
-            console.log(JSON.stringify(data.result))
+	    if (console) {
+              console.log("Success 4");
+              console.log(JSON.stringify(data.result));
+            }
             $.each(data.result.files, function (index, file) {
-                console.log("File name = " + file.name)
-                console.log("ID = " + file.id)
+                if (console) {
+                  console.log("File name = " + file.name);
+                  console.log("ID = " + file.id);
+                }
                 $('#logDBId').val(file.id);
             });
             if (data.result.callsign) {
@@ -519,7 +525,7 @@ function calcColor(validQ, maxQ, badMults) {
               $('#opclassId').val(escapeHtml(data.result.opclass));
             }
             if (data.result.opmsg) {
-              $('#opmsgId').html(escapeHtml(data.result.opmsg))
+              $('#opmsgId').html(escapeHtml(data.result.opmsg));
             }
             if (data.result.power) {
               $('#powerId').val(escapeHtml(data.result.power));
@@ -531,7 +537,7 @@ function calcColor(validQ, maxQ, badMults) {
             }
             if (!(typeof data.result.MaxQSO === 'undefined')) {
               $('#maxQSOId').text(data.result.MaxQSO.toString());
-              if (0 == data.result.MaxQSO) {
+              if (0 === data.result.MaxQSO) {
                 $('#circleId').css('background-color', "#ff0000");
               }
               else {
@@ -586,7 +592,7 @@ function calcColor(validQ, maxQ, badMults) {
                });
             }
             if (data.result.errors && data.result.errors.length > 0) {
-               $('#QSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n")
+               $('#QSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n");
                $.each(data.result.errors, function (index, errval) {
                   $('#QSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
                                             escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
@@ -594,7 +600,7 @@ function calcColor(validQ, maxQ, badMults) {
                });
             }
             if (data.result.warnings && data.result.warnings.length > 0) {
-               $('#QSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n")
+               $('#QSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n");
                $.each(data.result.warnings, function (index, errval) {
                   $('#QSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
                                             escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
@@ -603,13 +609,13 @@ function calcColor(validQ, maxQ, badMults) {
             }
             if (data.result.multipliers) {
                if (data.result.multipliers.errors && data.result.multipliers.errors.length > 0) {
-                 $('#MultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n")
+                 $('#MultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n");
                  $.each(data.result.multipliers.errors, function (index, errval) {
                     $('#MultErrorsID').append('<p class="multerr">' + escapeHtml(errval) + "</p>\n");
                  });
                }
                if (data.result.multipliers.warnings && data.result.multipliers.warnings.length > 0) {
-                 $('#MultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n")
+                 $('#MultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n");
                  $.each(data.result.multipliers.warnings, function (index, errval) {
                     $('#MultErrorsID').append('<p class="multerr"><span class="multalias">' + escapeHtml(errval.log) +
                                              '</span> &rarr; <span class="multireal">' + 
@@ -622,26 +628,31 @@ function calcColor(validQ, maxQ, badMults) {
             $('#step-2').fadeTo(100, 1.0);
             $('.jForm').prop("disabled", false);
             $('#step-3').fadeTo(100, 1.0);
-            console.log("Done")
+            if (console) {
+               console.log("Done");
+            }
         },
         progressall: function (e, data) {
             var progress = parseInt(data.loaded / data.total * 100, 10);
             $('#progress .progress-bar').css(
                 'width',
-                progress + '%'
-            );
+                progress + '%' );
         }
-    }).prop('disabled', !$.support.fileInput)
-        .parent().addClass($.support.fileInput ? undefined :
-    'disabled');
+    }).prop('disabled', !$.support.fileInput).
+        parent().addClass($.support.fileInput ? undefined :
+       'disabled');
     clearTabOne();
     clearTabTwo();
     $( '#ReloadID' ).click( function () {
-       console.log("Click");
+       if (console) {
+         console.log("Click");
+       }
        clearTabOne();
     });
     $( '#AltReloadID' ).click( function () {
-       console.log("Click");
+       if (console) {
+         console.log("Click");
+       }
        clearTabTwo();
     });
     $( "#tabs" ).tabs({ active: 0});
@@ -663,7 +674,9 @@ function calcColor(validQ, maxQ, badMults) {
             url : urlval,
             data: $("#supplementalForm").serialize(),
             success: function(data) {
-               console.log("Success 3");
+               if (console) {
+                 console.log("Success 3");
+               }
                clearTabOne();
                $("#doneMsg").css("visibility", "visible");
             }
@@ -690,15 +703,19 @@ function calcColor(validQ, maxQ, badMults) {
             url : urlval,
             data: $("#AltsupplementalForm").serialize(),
             success: function(data) {
-               console.log("Success 2");
+               if (console) {
+                 console.log("Success 2");
+               }
                clearTabTwo();
                $("#AltdoneMsg").css("visibility", "visible");
             },
             error: function(xhr, tstatus, errthrn)  {
-               console.log("Error 2");
-               console.log(xhr.responseText);
-               console.log(tstatus);
-               console.log(errthrn);
+               if (console) {
+                 console.log("Error 2");
+                 console.log(xhr.responseText);
+                 console.log(tstatus);
+                 console.log(errthrn);
+               }
             }
         });
       }
@@ -713,18 +730,26 @@ function calcColor(validQ, maxQ, badMults) {
           dataType: "json",
           data: $("#cutnpaste").serialize(),
           success: function(data) {
-             console.log(data);
+             if (console) {
+               console.log(data);
+             }
              if (data.files) {
                $.each(data.files, function (index, file) {
-                  console.log("ID = " + file.id)
+                  if (console) {
+                    console.log("ID = " + file.id);
+                  }
                   $('#AltlogDBId').val(file.id);
                });
              }
              else {
-               console.log("Insufficient JSON");
+               if (console) {
+                 console.log("Insufficient JSON");
+               }
                return 1;
              }
-             console.log("Success 1");
+             if (console) {
+               console.log("Success 1");
+             }
              $('#step-1a').fadeTo(100, 0.4);
              $('#cabcontentId').val("");
              $('#step-2a').fadeTo(100, 1.0);
@@ -755,7 +780,7 @@ function calcColor(validQ, maxQ, badMults) {
              }
              if (!(typeof data.MaxQSO === 'undefined')) {
                $('#AltmaxQSOId').text(data.MaxQSO.toString());
-              if (0 == data.MaxQSO) {
+              if (0 === data.MaxQSO) {
                 $('#AltcircleId').css('background-color', "#ff0000");
               }
               else {
@@ -810,7 +835,7 @@ function calcColor(validQ, maxQ, badMults) {
                 });
              }
              if (data.errors && data.errors.length > 0) {
-                 $('#AltQSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n")
+                 $('#AltQSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n");
                  $.each(data.errors, function (index, errval) {
                    $('#AltQSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
                                              escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
@@ -818,7 +843,7 @@ function calcColor(validQ, maxQ, badMults) {
                 });
              }
              if (data.warnings && data.warnings.length > 0) {
-                 $('#AltQSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n")
+                 $('#AltQSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n");
                 $.each(data.warnings, function (index, errval) {
                    $('#AltQSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
                                              escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
@@ -827,13 +852,13 @@ function calcColor(validQ, maxQ, badMults) {
              }
              if (data.multipliers) {
                 if (data.multipliers.errors && data.multipliers.errors.length > 0) {
-                  $('#AltMultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n")
+                  $('#AltMultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n");
                   $.each(data.multipliers.errors, function (index, errval) {
                      $('#AltMultErrorsID').append('<p class="multerr">' + escapeHtml(errval) + "</p>\n");
                   });
                 }
                 if (data.multipliers.warnings && data.multipliers.warnings.length > 0) {
-                  $('#AltMultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n")
+                  $('#AltMultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n");
                   $.each(data.multipliers.warnings, function (index, errval) {
                      $('#AltMultErrorsID').append('<p class="multerr"><span class="multalias">' + escapeHtml(errval.log) +
                                               '</span> &rarr; <span class="multireal">' + 
@@ -842,13 +867,17 @@ function calcColor(validQ, maxQ, badMults) {
                 }
              }
              $('#cabcontentId').prop("disabled", true);
-             console.log("Success 1 done");
+             if (console) {
+               console.log("Success 1 done");
+             }
           },
           error: function(xhr, tstatus, errthrn)      {
-             console.log("Error 1");
-             console.log(xhr.responseText);
-             console.log(tstatus);
-             console.log(errthrn);
+             if (console) {
+               console.log("Error 1");
+               console.log(xhr.responseText);
+               console.log(tstatus);
+               console.log(errthrn);
+             }
           }
       });
       ev.preventDefault();

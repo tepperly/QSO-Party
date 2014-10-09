@@ -185,6 +185,7 @@ begin
       $stderr.write("Exception: " + e.class.to_s + "\nMessage: " + e.message + "\nTraceback: \n: " + e.backtrace.join("\n") + "\n")
       $stderr.flush
     end
+    sleep 0.001
   }
   
   imap.expunge

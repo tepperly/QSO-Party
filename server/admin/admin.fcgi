@@ -21,6 +21,11 @@ HTML_HEADER=<<HEADER_END
   </HEAD>
   <BODY>
       <DIV><IMG SRC="/cqp/images/cqplogo80075.jpg", alt="California QSO Party"></DIV>
+      <P>Data as of: %{timestamp}<br>
+         <a href="../received.fcgi">Received Logs</a><br>
+         <a href="/cqp/logsubmit-form.html">Submission Page</a><br>
+         <a href="qsograph.fcgi">QSO Graph</a>
+      </P>
       <TABLE %{tablestyle}>
       <CAPTION %{capstyle}>CQP %{year} Incoming Logs Summary</CAPTION>
       <TR>
@@ -89,7 +94,7 @@ MIDDLE=<<MIDDLE_END
        not complete step 3. It lacks confirmation of the operator class, power, etc.</p>
 
     <TABLE %{tabletwostyle}>
-      <CAPTION %{capstyle}>Potential Missing Logs</CAPTION>
+      <CAPTION %{capstyle}>%{nummissing} Potential Missing Logs</CAPTION>
       <TR><TH %{headeven}>Callsign</TH><TH %{headeven}># QSO Refs</TH></TR>
 MIDDLE_END
 
@@ -129,6 +134,7 @@ def handle_request(request, db)
   }
 
   attr = Hash.new
+  attr[:timestamp] = timestamp.to_s
   attr[:year] = CQPConfig::CONTEST_DEADLINE.strftime("%Y")
   attr[:totallogs] = completedLogs.length
   attr[:incompletelogs] = incompleteLogs.length
@@ -148,6 +154,7 @@ def handle_request(request, db)
   attr[:multErrors] = attr[:logErrors]
   attr[:multWarnings] = attr[:logErrors]
   attr[:badcall] = attr[:logErrors]
+  attr[:nummissing] = missingCalls.length
 
   attr[:headingstyle] = "style=\"font-family: 'Trebuchet MS', Verdana, Sans-serif; font-style: normal; font-weight: bold; font-size: 16px; margin-top: 0; margin-bottom: 0; padding: 0 0 0 0;\""
 
