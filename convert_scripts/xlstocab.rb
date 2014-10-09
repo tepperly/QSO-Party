@@ -8,14 +8,15 @@ class Entrant
   def initialize
     @name = nil
     @email = nil
+    @club = nil
     @optype = "multi-op"
     @callsign = nil
     @location = nil
     @power=nil
   end
   
-  attr_writer :name, :email, :callsign, :location, :power, :optype
-  attr_reader :name, :email, :callsign, :location, :power, :optype
+  attr_writer :name, :email, :callsign, :location, :power, :optype, :club
+  attr_reader :name, :email, :callsign, :location, :power, :optype, :club
 
   def to_hash
     { :name => @name,
@@ -31,6 +32,7 @@ BAND_TO_FREQ = {
   "160M" => 1800,
   "160" => 1800,
   "80M" => 3500,
+  "8OM" => 3500,
   "80" => 3500,
   "60M" => 5102,
   "60" => 5102,
@@ -44,6 +46,7 @@ BAND_TO_FREQ = {
   "17" => 18068,
   "15M" => 21000,
   "15" => 21000,
+  "21" => 21000,
   "12M" => 24890,
   "12" => 24890,
   "10M" => 28000,
@@ -367,7 +370,7 @@ def calcPower(pow)
   case pow
   when "HIGH", "LOW", "QRP"
     pow
-  when /^(\d+(\.\d+)?)W?$/i
+  when /^(\d+(\.\d+)?)(\s*W(atts?)?)?$/i
     pow = $1.to_f
     if pow <= 5
       "QRP"
@@ -396,9 +399,17 @@ ENDOFHEADER
 
 
 def printHeader(entrant, callsign, sentqth, power)
+  if entrant.optype
+    optype = entrant.optype
+  else
+    optype = "single-op"
+  end
   print CAB_HEADER % { :callsign => callsign, :name => entrant.name,
-    :email => entrant.email, :power => power, :optype => "single-op",
+    :email => entrant.email, :power => power, :optype => optype,
     :location => sentqth }
+  if entrant.club
+    print "CLUB: #{entrant.club}\n"
+  end
 end
 
 def validQ(ary)
@@ -411,8 +422,26 @@ def validQ(ary)
 end
 
 def dateTime(date, time)
-  rdate = Date.strptime(date, "%m/%d/%Y")
-  time = time.to_i
+  begin
+    rdate = Date.strptime(date, "%m/%d/%Y")
+  rescue => e
+    begin
+      rdate = Date.strptime(date, "%d-%b-%Y")
+    rescue => e
+      begin
+        rdate = Date.strptime(date, "%Y-%m-%d")
+      rescue => e
+        rdate = Date.strptime(date, "%d-%b")
+      end
+    end
+  end
+  if time.to_s =~ /(\d{1,2}):(\d{1,2})/
+    hour = $1
+    min = $2
+    time = hour.to_i * 100 + min.to_i
+  else
+    time = time.to_i
+  end
   rdate.strftime("%Y-%m-%d ") + ("%04d" % time)
 end
 
@@ -429,46 +458,53 @@ MODE = {
 def printQSOs(qsos, callsign, sentqth)
   qsos.each {  |qso|
     if validQ(qso)
+      county = qso[8].to_s.strip.upcase.gsub(/\s{2,}/, " ")
+      if CA_COUNTIES.has_key?(county)
+        county = CA_COUNTIES[county]
+      end
       print "QSO: " + ("%5d " % BAND_TO_FREQ[qso[2].to_s.strip.upcase]) + 
         MODE[qso[3].to_s.strip.upcase] + " " + dateTime(qso[1], qso[4]) +
         (" %-11s %4d %-4s " % [callsign, qso[6].to_i, sentqth]) + 
-        (" %-11s %4d %-4s\n" % [ qso[5].to_s.strip.upcase, qso[7].to_i, qso[8].to_s.strip.upcase ])
+        (" %-11s %4d %-4s\n" % [ qso[5].to_s.strip.upcase, qso[7].to_i, county ])
     end
   }
 end
 
 def convertCSV(entrant, csv)
   lines = CSV.read(csv)
-  if (lines[1][1] == "California QSO Party - 2014" and lines[2][1] == "Log Submission Deadline: Friday, October 31, 2014")
-    if entrant.callsign
-      callsign = entrant.callsign
+  0.upto(1) { |offset|
+    if (lines[offset][1] == "California QSO Party - 2014" and lines[offset+1][1] == "Log Submission Deadline: Friday, October 31, 2014")
+      if entrant.callsign
+        callsign = entrant.callsign
+      else
+        callsign = lines[offset + 3][2].strip.upcase
+      end
+      if entrant.location
+        sentqth = entrant.location
+      else
+        sentqth = calcQTH(lines[offset + 3][5], lines[offset + 4][5], lines[offset + 5][5])
+      end
+      if entrant.power
+        power = entrant.power
+      else
+        power = calcPower(lines[offset + 5][2])
+      end
+      printHeader(entrant, callsign, sentqth, power)
+      printQSOs(lines[(offset + 9)..(offset + 458)], callsign, sentqth)
+      print "END-OF-LOG:\n"
+      return nil
     else
-      callsign = lines[4][2].strip.upcase
+      print "CSV doesn't match\n"
+      print lines[offset][1] + "\n"
+      print lines[offset][1] + "\n"
     end
-    if entrant.location
-      sentqth = entrant.location
-    else
-      sentqth = calcQTH(lines[4][5], lines[5][5], lines[6][5])
-    end
-    if entrant.power
-      power = entrant.power
-    else
-      power = calcPower(lines[6][2])
-    end
-    printHeader(entrant, callsign, sentqth, power)
-    printQSOs(lines[10..459], callsign, sentqth)
-    print "END-OF-LOG:\n"
-  else
-    print "CSV doesn't match\n"
-    print lines[1][2] + "\n"
-    print lines[2][2] + "\n"
-  end
+  }
 end
-
 
 
 opts = GetoptLong.new(
   [ '--callsign', '-c', GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--club', '-C', GetoptLong::REQUIRED_ARGUMENT ],                    
   [ '--help', '-h', GetoptLong::NO_ARGUMENT ],
   [ '--email', '-e', GetoptLong::REQUIRED_ARGUMENT ],
   [ '--optype', '-o', GetoptLong::REQUIRED_ARGUMENT ],                     
@@ -486,6 +522,9 @@ adiftocab.rb [OPTIONS] adiffile.adi
 
 -c, --callsign callsign:
    set the entrant's callsign
+
+-C, --club club name:
+   set the entrant's club
 
 -e, --email address:
    set the entrant's email address
@@ -508,6 +547,8 @@ opts.each { |opt, arg|
     printHelp
   when '--callsign'
     entrant.callsign = arg.upcase
+  when '--club'
+    entrant.club = arg.upcase
   when '--name'
     entrant.name = arg.strip
   when '--optype'
@@ -522,7 +563,11 @@ opts.each { |opt, arg|
 }
 
 ARGV.each { |filename|
-  system("libreoffice --headless --convert-to csv --outdir tmp #{filename}")
-  csvfile = "tmp/" + File.basename(filename).sub(/\.[a-z]+$/i,"") + ".csv"
+  if (filename =~ /\.xls$/)
+    system("libreoffice --headless --convert-to csv --outdir tmp #{filename}")
+    csvfile = "tmp/" + File.basename(filename).sub(/\.[a-z]+$/i,"") + ".csv"
+  else
+    csvfile = filename
+  end
   convertCSV(entrant, csvfile)
 }
