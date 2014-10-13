@@ -563,7 +563,7 @@ opts.each { |opt, arg|
 }
 
 ARGV.each { |filename|
-  if (filename =~ /\.xls$/)
+  if (filename =~ /\.xlsx?$/)
     system("libreoffice --headless --convert-to csv --outdir tmp #{filename}")
     csvfile = "tmp/" + File.basename(filename).sub(/\.[a-z]+$/i,"") + ".csv"
   else
