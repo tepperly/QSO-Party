@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# -*- encoding: utf-8 -*-
 #
 # QRZ callsign information fetching
 #
@@ -67,6 +68,19 @@ class QRZLookup
     res = Net::HTTP.get_response(myuri)
     if res.is_a?(Net::HTTPSuccess)
       str = res.body
+      if Encoding::ASCII_8BIT == str.encoding
+        m = /encoding="([^"]*)"/n.match(str)
+        if m
+          str.force_encoding(m[1].encode("US-ASCII"))
+        else
+          if res.key?("content-type")
+            m = /charset=([^;]+)/
+            if m
+              str.force_encoding(m[1].encode("US-ASCII"))
+            end
+          end
+        end
+      end
       xml = Nokogiri::XML(str)
       @session_key = extractKey(xml)
       printMessage(xml)
