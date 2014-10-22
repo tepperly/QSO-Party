@@ -8,8 +8,8 @@
 require 'date'
 require 'SVG/Graph/TimeSeries'
 
-DATEREGEX=/-(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/
-START_OF_CONTEST=DateTime.new(2013,10,05,16,0,0)
+DATEREGEX=/-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-/
+START_OF_CONTEST=DateTime.new(2014,10,04,16,0,0)
 HOURS_PER_BIN = 2
 data = Array.new(30*24/HOURS_PER_BIN,0)         # 2-hour incremenets
 

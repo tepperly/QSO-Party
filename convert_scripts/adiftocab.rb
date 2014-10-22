@@ -179,6 +179,8 @@ def receivedExchange(qso)
     serial = qso.getText("n3fjp_serial_no_rcvd").to_i
     mult = qso.getText("n3fjp_spcnum").strip
     return "%4d %-4s" % [serial, mult]
+  elsif qso.has_key?("srx_string") and qso.has_key?("srx")
+    return "%4d %-4s" % [ qso.getText("srx").to_i , qso.getText("srx_string").strip ]
   else
     raise "Unknown ADIF format"
   end
@@ -203,5 +205,6 @@ ARGV.each { |arg|
   open(arg, "r:ascii") { |io|
     parseFile(io, qsos)
   }
+  qsos.sort!
   generateCabrillo(entrant, qsos)
 }

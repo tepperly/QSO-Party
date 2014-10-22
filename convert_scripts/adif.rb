@@ -18,14 +18,14 @@ class ClockTime
   end
 
   def <=>(rhs)
-    if hours == rhs.hours
-      if minutes == rhs.minutes
-        seconds <=> rhs.seconds
+    if @hours == rhs.hours
+      if @minutes == rhs.minutes
+        return @seconds <=> rhs.seconds
       else
-        minutes <=> rhs.minutes
+        return @minutes <=> rhs.minutes
       end
     else
-      hours <=> rhs.hours
+      return @hours <=> rhs.hours
     end
   end
 end
@@ -271,14 +271,10 @@ class QSO
   end
 
   def <=>(rhs)
-    if worked == rhs.worked
-      if qso_date == rhs.qso_date
-        qso_time <=> rhs.qso_time
-      else
-        qso_date <=> rhs.qso_date
-      end
+    if qso_date == rhs.qso_date
+      qso_time <=> rhs.qso_time
     else
-      worked <=> rhs.worked
+      qso_date <=> rhs.qso_date
     end
   end
 
