@@ -452,7 +452,8 @@ MODE = {
   "FM" => "PH",
   "CW" => "CW",
   "PH" => "PH",
-  "PHONE" => "PH"
+  "PHONE" => "PH",
+  "DUPE" => "PH"
 }
 
 def printQSOs(qsos, callsign, sentqth)
@@ -495,8 +496,8 @@ def convertCSV(entrant, csv)
       return nil
     else
       print "CSV doesn't match\n"
-      print lines[offset][1] + "\n"
-      print lines[offset][1] + "\n"
+      print lines[offset][1].to_s + "\n"
+      print lines[offset][1].to_s + "\n"
     end
   }
 end
