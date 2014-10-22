@@ -413,7 +413,7 @@ def printHeader(entrant, callsign, sentqth, power)
 end
 
 def validQ(ary)
-  1.upto(8) { |i|
+  1.upto(6) { |i|
     if ary[i].nil? or ary[i].empty?
       return false
     end
@@ -459,14 +459,23 @@ MODE = {
 def printQSOs(qsos, callsign, sentqth)
   qsos.each {  |qso|
     if validQ(qso)
-      county = qso[8].to_s.strip.upcase.gsub(/\s{2,}/, " ")
-      if CA_COUNTIES.has_key?(county)
-        county = CA_COUNTIES[county]
+      if qso[8].nil?
+        county = "XXXX"         # green treats as missing value
+      else
+        county = qso[8].to_s.strip.upcase.gsub(/\s{2,}/, " ")
+        if CA_COUNTIES.has_key?(county)
+          county = CA_COUNTIES[county]
+        end
+      end
+      if qso[7].nil?
+        serialNum = 9999        # green treats as missing value
+      else
+        serialNum = qso[7].to_i
       end
       print "QSO: " + ("%5d " % BAND_TO_FREQ[qso[2].to_s.strip.upcase]) + 
         MODE[qso[3].to_s.strip.upcase] + " " + dateTime(qso[1], qso[4]) +
         (" %-11s %4d %-4s " % [callsign, qso[6].to_i, sentqth]) + 
-        (" %-11s %4d %-4s\n" % [ qso[5].to_s.strip.upcase, qso[7].to_i, county ])
+        (" %-11s %4d %-4s\n" % [ qso[5].to_s.strip.upcase, serialNum, county ])
     end
   }
 end
