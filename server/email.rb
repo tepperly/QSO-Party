@@ -12,12 +12,14 @@ require_relative 'config'
 
 class OutgoingEmail
   def initialize
-    @smtp = Net::SMTP.start(CQPConfig::EMAIL_SERVER, CQPConfig::EMAIL_PORT, CQPConfig::EMAIL_DOMAIN)
+    @smtp = Net::SMTP.new(CQPConfig::EMAIL_SERVER, CQPConfig::EMAIL_PORT)
     if CQPConfig::EMAIL_USE_TLS
       @smtp.enable_starttls
     end
     if CQPConfig::EMAIL_LOGIN_REQUIRED
       @smtp.start(CQPConfig::EMAIL_DOMAIN, CQPConfig::EMAIL_ADDRESS, CQPConfig::EMAIL_PASSWORD, :login)
+    else
+      @smtp.start(CQPConfig::EMAIL_DOMAIN)
     end
   end
   

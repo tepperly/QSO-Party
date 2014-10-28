@@ -27,8 +27,8 @@ end
 
 $CONTESTS = [
   ContestPeriod.new(Time.utc(2014, 10, 4, 16, 0), Time.utc(2014, 10, 5, 22, 0)), # CQP 2014
-  ContestPeriod.new(Time.utc(2013, 10, 5, 16, 0), Time.utc(2013, 10, 6, 22, 0)), # CQP 2013
-  ContestPeriod.new(Time.utc(2012, 10, 6, 16, 0), Time.utc(2013, 10, 7, 22, 0))
+#  ContestPeriod.new(Time.utc(2013, 10, 5, 16, 0), Time.utc(2013, 10, 6, 22, 0)), # CQP 2013
+#  ContestPeriod.new(Time.utc(2012, 10, 6, 16, 0), Time.utc(2013, 10, 7, 22, 0))
 ]
 
 class LineIssue

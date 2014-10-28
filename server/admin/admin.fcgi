@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/local/bin/ruby
 # -*- encoding: utf-8 -*-
 # CQP admin script
 # Tom Epperly NS6T
@@ -9,7 +9,7 @@
 require 'fcgi'
 require_relative '../database'
 
-MISSING_THRESHOLD=75
+MISSING_THRESHOLD=50
 
 HTML_HEADER=<<HEADER_END
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -112,7 +112,24 @@ HTML_TRAILER = <<TRAILER_END
 TRAILER_END
 
 
-
+def rootCall(call)
+  # adapted from WX5S's CQP_RootCall.pm
+  call = call.upcase.gsub(/\s+/,"") # remove space and convert to upper case
+  parts = call.split("/")
+  if parts.length <= 1
+    return call
+  else
+    if parts[0] =~ /\d\z/
+      return parts[1]
+    else
+      if (parts[0] =~ /\d/) or (parts[1] =~ /\d$/)
+        return parts[1]
+      else
+        return parts[0]
+      end
+    end
+  end
+end
 
 
 def handle_request(request, db)
@@ -127,6 +144,12 @@ def handle_request(request, db)
   callsWorked = db.workedStats(completedLogs, MISSING_THRESHOLD)
   callsigns.keys.each { |call|
     callsWorked.delete(call)
+    callsWorked.delete(rootCall(call))
+  }
+  callsWorked.keys.each { |call|
+    if callsigns.has_key?(rootCall(call))
+      callsWorked.delete(call)
+    end
   }
   missingCalls = callsWorked.keys
   missingCalls.sort! { |c1, c2|
