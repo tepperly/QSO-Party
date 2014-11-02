@@ -40,17 +40,22 @@ BAND_TO_FREQ = {
   "40" => 7000,
   "30M" => 10100,
   "30" => 10100,
+  "28" => 28000,
   "20M" => 14000,
   "20" => 14000,
   "17M" => 18068,
   "17" => 18068,
   "15M" => 21000,
+  "15 M" => 21000,
   "15" => 21000,
+  "14" => 14000,
   "21" => 21000,
   "12M" => 24890,
   "12" => 24890,
   "10M" => 28000,
   "10" => 28000,
+  "7" => 7000,
+  "3.5" => 3500,
   "6M" => 50,
   "6" => 50,
   "2M" => 144,
@@ -455,6 +460,14 @@ MODE = {
   "PHONE" => "PH"
 }
 
+def serNum(num)
+  begin
+    return num.to_i
+  rescue TypeError => e
+    return 9999
+  end
+end
+
 def printQSOs(qsos, callsign, sentqth)
   qsos.each {  |qso|
     if validQ(qso)
@@ -466,14 +479,10 @@ def printQSOs(qsos, callsign, sentqth)
           county = CA_COUNTIES[county]
         end
       end
-      if qso[7].nil?
-        serialNum = 9999        # green treats as missing value
-      else
-        serialNum = qso[7].to_i
-      end
+      serialNum = serNum(qso[7])
       print "QSO: " + ("%5d " % BAND_TO_FREQ[qso[2].to_s.strip.upcase]) + 
         MODE[qso[3].to_s.strip.upcase] + " " + dateTime(qso[1], qso[4]) +
-        (" %-11s %4d %-4s " % [callsign, qso[6].to_i, sentqth]) + 
+        (" %-11s %4d %-4s " % [callsign, serNum(qso[6]), sentqth]) + 
         (" %-11s %4d %-4s\n" % [ qso[5].to_s.strip.upcase, serialNum, county ])
     end
   }
@@ -504,8 +513,8 @@ def convertCSV(entrant, csv)
       return nil
     else
       print "CSV doesn't match\n"
-      print lines[offset][1] + "\n"
-      print lines[offset][1] + "\n"
+      print lines[offset][1].to_s + "\n"
+      print lines[offset][1].to_s + "\n"
     end
   }
 end
