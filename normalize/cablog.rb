@@ -488,6 +488,45 @@ class Cabrillo
     when /\Aofftime:\s*(.*)/i
       trans(1, 1)
       @offtimes << $1.strip
+    when /\Ax-cqp-callsign:\s*(.*)\Z/i
+      trans(1,1)
+      @dblogcall = $1.upcase.strip
+    when /\Ax-cqp-sentqth:\s*(.*)\Z/i
+      trans(1, 1)
+      @dbCat.sentQTH = $1.upcase.strip
+    when /\Ax-cqp-email:\s*(.*)\Z/i
+      trans(1,1)
+      @dbCat.email = $1.strip
+    when /\Ax-cqp-confirm1:\s*(.*)\Z/i
+      trans(1, 1)
+      if not @dbCat.email
+        @dbCat.email = $1.strip
+      end
+    when /\Ax-cqp-phone:\s*(.*)\Z/i
+      trans(1, 1)
+      @dbphone = $1
+    when /\Ax-cqp-opclass:\s*(.*)\Z/i
+      trans(1, 1)
+      processCQPOpclass($1)
+    when /\Ax-cqp-id:\s*(\d+)\Z/i
+      trans(1, 1)
+      @logID = $1.to_i
+    when /\Ax-cqp-power:\s*(.*)\Z/i
+      trans(1,1)
+      @dbCat.power = $1.downcase.strip.to_sym
+    when /\Ax-cqp-categories:\s*(.*)\Z/i
+      trans(1, 1)
+      processCQPCategories($1)
+
+    when /\Ax-cqp-comments:\s*(.*)\Z/i
+      trans(1, 1)
+      if $1 and $1.length > 0
+        if @dbcomments
+          @dbcomments = @dbcomments + $1.strip + "\n"
+        else
+          @dbcomments = $1.strip + "\n"
+        end
+      end
     when /\Ax(-[a-z]+)+:.*/i
       @x_lines << line          # ignore and save
     when /\Asoapbox:\s*(.*)/i
@@ -952,7 +991,31 @@ X-CQP-ID: #{@logID.to_s}
       end
     }
   end
-  
+
+  def processCQPOpclass(str)
+    self.dboptype= str.strip.downcase
+  end
+
+  def processCQPCategories(str)
+    str.split(/\s+/).each { |cat|
+      case cat.upcase.strip
+      when "SCHOOL"
+        @dbCat.school = true
+      when "NEW_CONTESTER"
+        @dbCat.newconstester = true
+      when "MOBILE"
+        @dbcat.mobile = true
+      when "COUNTY"
+        @dbcat.cce = true
+      when "YOUTH"
+        @dbcat.youth = true
+      when "FEMALE"
+        @dbcat.female = true
+      end
+    }
+  end
+
+
   def processCategories(str)
     if (str =~ /(CALIFORNIA\s+)?COUNTY\s+EXPEDITION/)
       @logCat.cce = true
@@ -1041,7 +1104,7 @@ X-CQP-ID: #{@logID.to_s}
 
   def dboptype=(value)
     case value
-    when "single"
+    when "single", "single-op"
       @dbCat.assisted = false
       @dbCat.numop = :single
       @dbCat.numtrans = :one
