@@ -166,6 +166,9 @@ def sentExchange(entrant, qso)
   elsif qso.has_key?("stx")
     serial = qso.getText("stx").to_i
     return  ("%4d " % serial) + ("%-4s" % entrant.location)
+  elsif qso.has_key?("stx_string")
+    serial = qso.getText("stx_string").to_i
+    return  ("%4d " % serial) + ("%-4s" % entrant.location)
   else
     raise "Unknown ADIF format"
   end
@@ -181,6 +184,10 @@ def receivedExchange(qso)
     return "%4d %-4s" % [serial, mult]
   elsif qso.has_key?("srx_string") and qso.has_key?("srx")
     return "%4d %-4s" % [ qso.getText("srx").to_i , qso.getText("srx_string").strip ]
+  elsif qso.has_key?("srx")
+    return "%4d XXXX" % [ qso.getText("srx").to_i ]
+  elsif qso.has_key?("srx_string")
+    return "%4d XXXX" % [ qso.getText("srx_string").to_i ]
   else
     raise "Unknown ADIF format"
   end

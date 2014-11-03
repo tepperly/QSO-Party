@@ -457,7 +457,8 @@ MODE = {
   "FM" => "PH",
   "CW" => "CW",
   "PH" => "PH",
-  "PHONE" => "PH"
+  "PHONE" => "PH",
+  "DUPE" => "PH"
 }
 
 def serNum(num)
