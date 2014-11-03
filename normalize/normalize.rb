@@ -42,22 +42,31 @@ def normalize(db, id, callsign)
       open(outputFile(dbEntry["asciifile"]), "w:us-ascii") { |out|
         log.write(out)
       }
+      return true
     end
   rescue => e
     print "Log for #{callsign} #{dbEntry["asciifile"]} exception: #{e.to_s}\n"
     print e.backtrace
   end
+  false
 end
 
 db = LogDatabase.new(true)      # read-only connection to database
 
 entries = db.allEntries         # list of IDs for complete entries
 
+total = 0
+fixed = 0
+
 entries.each { |id|
   callsign = db.getCallsign(id)
   if "UNKNOWN" != callsign
-    normalize(db, id, callsign)
+    total = total + 1
+    if normalize(db, id, callsign)
+      fixed = fixed + 1
+    end
   end
 }
 
+print "Total: #{total}\nFixed: #{fixed}\n"
 

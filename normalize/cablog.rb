@@ -901,13 +901,18 @@ X-CQP-EMAIL: #{@dbCat.email.strip}
 X-CQP-CONFIRM1: #{@dbCat.email.strip}
 X-CQP-PHONE: #{dbphone}
 X-CQP-POWER: #{@dbCat.power.to_s.upcase}
-X-CQP-OPCLASS: #{cqpOpClass}
-X-CQP-COMMENTS: #{@dbcomments ? @dbcomments.gsub(/\s+/, " ").encode("US-ASCII", :invalid => :replace, :undef => :replace) : ""}
-X-CQP-CATEGORIES: #{cqpCategories}
+X-CQP-OPCLASS: #{cqpOpClass}\n")
+    if @dbcomments 
+      comments = @dbcomments.encode("US-ASCII", :invalid => :replace, :undef => :replace)
+      comments.split(/\r\n?|\n\r?/).each { |line|
+        out.write("X-CQP-COMMENTS: " + line.strip.gsub(/\s+/, " ") + "\n")
+      }
+    else
+      out.write("X-CQP-COMMENTS:\n")
+    end
+    out.write("X-CQP-CATEGORIES: #{cqpCategories}
 X-CQP-ID: #{@logID.to_s}
-"
-              )
-    
+")
   end
 
   def cqpOpClass
