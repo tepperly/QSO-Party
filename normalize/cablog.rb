@@ -69,8 +69,10 @@ class QSO
   attr_writer :freq, :datetime, :transceiver
   def mode=(str)
     case str
-    when /[uls]sb?|phone|ph|fm/i
+    when /[uls]sb?|phone|ph/i
       @mode = "PH"
+    when /fm/i
+      @mode = "FM"
     when /cw|morse/i
       @mode = "CW"
     when /ry|rtty|rt/i
