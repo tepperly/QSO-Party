@@ -7,6 +7,9 @@
 require 'csv'
 require 'time'
 
+CONTEST_START=Time.utc(2014,10,4, 16, 0)
+CONTEST_END=Time.utc(2014,10,5,22,0)
+
 def mySplit(str, pattern)
   result = [ ]
   start = 0
@@ -306,7 +309,7 @@ class Cabrillo
       if $1
         @logcall = $1.upcase
       end
-    when /\Acategory-assisted:\s*((non-|un)?assisted)?\s*\Z/i
+    when /\Acategory-assisted:\s*((non-|un)?assis?ted)?\s*\Z/i
       if $1
         @logCat.assisted = ($1.upcase == "ASSISTED")
       end
@@ -715,6 +718,15 @@ class Cabrillo
     reviewQTH(:recdExch)
   end
 
+  def checkTime(qso)
+    if qso.datetime < CONTEST_START
+      print "QSO date #{qso.datetime} before contest start\n"
+    end
+    if qso.datetime > CONTEST_END
+      print "QSO date #{qso.datetime} after contest end\n"
+    end
+  end
+
   def parse
     @parsestate = 0
     content = pretreat(File.read(@filename, {:encoding => "US-ASCII"}))
@@ -735,6 +747,7 @@ class Cabrillo
       end
     }
     reviewQSOs
+    @qsos.each { |qso| checkTime(qso) }
     print "cleanparse is #{@cleanparse.to_s}\n"
   end
 
@@ -766,7 +779,7 @@ class Cabrillo
     if not @dbCat.assisted.nil?
       @dbCat.assisted ? "ASSISTED" : "NON-ASSISTED"
     else
-      @logCat.assisted ? "ASSISTED" : "NON-ASSITED"
+      @logCat.assisted ? "ASSISTED" : "NON-ASSISTED"
     end
   end
 
@@ -1004,15 +1017,15 @@ X-CQP-ID: #{@logID.to_s}
       when "SCHOOL"
         @dbCat.school = true
       when "NEW_CONTESTER"
-        @dbCat.newconstester = true
+        @dbCat.newcontester = true
       when "MOBILE"
-        @dbcat.mobile = true
+        @dbCat.mobile = true
       when "COUNTY"
-        @dbcat.cce = true
+        @dbCat.cce = true
       when "YOUTH"
-        @dbcat.youth = true
+        @dbCat.youth = true
       when "FEMALE"
-        @dbcat.female = true
+        @dbCat.female = true
       end
     }
   end
@@ -1028,9 +1041,9 @@ X-CQP-ID: #{@logID.to_s}
       @logCat.numtrans = :unlimited
       str.gsub!(/MULTI-MULTI|M-M/, " ")
     end
-    if (str =~ /NON-ASSISTED/)
+    if (str =~ /NON-ASSIS?TED/)
       @logCat.assisted = false
-      str.gsub!(/NON-ASSISTED/,"")
+      str.gsub!(/NON-ASSIS?TED/,"")
     end
     str.gsub!(/POWER/," ")
     str.split(/[-! \t]+/).each { |tok|

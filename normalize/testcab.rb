@@ -17,10 +17,15 @@ opts.each { |opt,arg|
   end
 }
 
-ARGV.shuffle.each { |arg|
+count = 0
+total = 0
+ARGV.each { |arg|
+  total = total + 1
   begin
     cab = Cabrillo.new(arg)
+    $stderr.flush
     if cab.cleanparse
+      count = count + 1
       if $makeoutput
         if $overwritefile
           open(arg, "w:us-ascii") { |out|
@@ -37,7 +42,11 @@ ARGV.shuffle.each { |arg|
         print "#{arg} is not clean\n"
       end
     end
-  rescue => e
+  rescue ArgumentError => e
     print "Filename: #{arg}\nException: #{e}\n"
   end
+  $stdout.flush
 }
+
+print "#{count} clean logs\n"
+print "#{total} total logs\n"
