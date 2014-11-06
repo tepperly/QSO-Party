@@ -4,6 +4,7 @@
 
 require 'sqlite3'
 require 'time'
+require_relative 'callsign'
 
 BANDS = [
   [ "160m", 1800, 2000],
@@ -37,11 +38,11 @@ OTHER = %w( DX )
 class ChartDB
   def initialize(filename = "chartreuse.db")
     @db = SQLite3::Database.new(filename)
-    @db.execute("create table if not exist Log (id integer primary key asc autoincrement, filename varchar(256))")
-    @db.execute("create table if not exist Multiplier (id integer primary key asc autoincrement, abbreviation char(4) unique not null)")
-    @db.execute("create table if not exist Band (id integer primary key asc autoincrement, name char(12) unique not null, lower integer, upper integer)")
-    @db.execute("create table if not exist Mode (id integer primary key asc autoincrement, name char(4) unique not null)")
-    @db.execute("create table if not exist QSO (id integer primary key asc autoincrement, logid integer not null, frequency integer, bandid integer, modeid integer, time bigint, sentcall varchar(24), sentbase varchar(24), sentserial integer, sentmult integer, sentmulttxt varchar(32), recvdcall varchar(24), recvdbase varchar(24), recvdserial integer, recvdmult integer, recvdmulttxt varchar (32))")
+    @db.execute("create table if not exists Log (id integer primary key asc autoincrement, filename varchar(256))")
+    @db.execute("create table if not exists Multiplier (id integer primary key asc autoincrement, abbreviation char(4) unique not null)")
+    @db.execute("create table if not exists Band (id integer primary key asc autoincrement, name char(12) unique not null, lower integer, upper integer)")
+    @db.execute("create table if not exists Mode (id integer primary key asc autoincrement, name char(4) unique not null)")
+    @db.execute("create table if not exists QSO (id integer primary key asc autoincrement, logid integer not null, frequency integer, bandid integer, modeid integer, time bigint, sentcall varchar(24), sentbase varchar(24), sentserial integer, sentmult integer, sentmulttxt varchar(32), recvdcall varchar(24), recvdbase varchar(24), recvdserial integer, recvdmult integer, recvdmulttxt varchar (32))")
     populate
   end
 
