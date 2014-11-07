@@ -5,7 +5,7 @@
 
 require_relative 'database'
 
-QSOLINE=/^qso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d)\s+(\d+)\s+([a-z0-9\/]+)\s+(\d+)\s+([a-z]+)\s+([a-z0-9\/]+)\s+(\d+)\s+([a-z]+)\s*((\d+)\s*)?$/i
+QSOLINE=/^qso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d+)\s+(\d+)\s+([a-z0-9\/]+)\s+(\d+)\s+([a-z]+)\s+([a-z0-9\/]+)\s+(\d+)\s+([a-z]+)\s*((\d+)\s*)?$/i
 
 db = ChartDB.new
 ARGV.each { |filename|

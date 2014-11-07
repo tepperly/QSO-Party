@@ -49,7 +49,7 @@ def compareCallParts(x, y)
 end
 
 def callBase(str)
-  str = str.upcase
+  str = str.upcase.encode("US-ASCII")
   str.gsub!(/\s+/,"")
   parts = str.split("/")
   case parts.length
