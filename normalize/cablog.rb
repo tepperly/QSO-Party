@@ -70,6 +70,11 @@ class QSO
   attr_reader :mode, :freq, :datetime, :sentExch, :recdExch, :transceiver
 
   attr_writer :freq, :datetime, :transceiver
+
+  def timeshift(delta)
+    @datetime = @datetime + delta
+  end
+
   def mode=(str)
     case str
     when /[uls]sb?|phone|ph/i
@@ -227,6 +232,12 @@ class Cabrillo
   end
 
   attr_reader :cleanparse
+
+  def timeshift(delta)
+    @qsos.each { |qso|
+      qso.timeshift(delta)
+    }
+  end
 
   def trans(oldstate, newstate)
     if @parsestate <= oldstate
@@ -720,10 +731,10 @@ class Cabrillo
 
   def checkTime(qso)
     if qso.datetime < CONTEST_START
-      print "QSO date #{qso.datetime} before contest start\n"
+      print "QSO date #{qso.datetime} before contest start by #{(CONTEST_START-qso.datetime)/60} minutes\n"
     end
     if qso.datetime > CONTEST_END
-      print "QSO date #{qso.datetime} after contest end\n"
+      print "QSO date #{qso.datetime} after contest end by #{(qso.datetime - CONTEST_END)/60} minutes\n"
     end
   end
 
