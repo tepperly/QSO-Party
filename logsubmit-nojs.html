@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Simple CQP Log Submission Form</title>
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 40x40 64x64 128x128" type="image/vnd.microsoft.icon">
+
+  <link rel="stylesheet" href="css/cqp_style.css">
+
+</head>
+<body>
+<img  src="images/cqplogo80075.jpg" alt="California QSO Party" > 
+<div id="AllInOne"> 
+  <h1>Upload your CQP Load</h1>
+  <form id="OneForm" action="server/upload.fcgi" method="post" accept-charset="UTF-8">
+    <label for="ALLcabcontentId">Paste your log here:</label><br>
+    <textarea name="cabcontent" id="ALLcabcontentId" cols="100" wrap="soft"
+	      rows="5" ></textarea><br>
+    <input type="hidden" name="logID" value="-1" id="ALLlogDBId" class="jFormb">
+    <input type="hidden" name="source" value="form4">
+    <label for="ALLcallsignId" class="inLabel">Callsign*:</label>
+    <input type="text" name="callsign" value="" id="ALLcallsignId" class="jFormb"><br >
+    <label for="ALLemailId" class="inLabel">Email*:</label>
+    <input type="email" name="email" id="ALLemailId" class="jFormb"><br>
+    <label for="ALLconfirmId" class="inLabel">Confirm Email*:</label>
+    <input type="email" name="confirm" id="ALLconfirmId" class="jFormb"><br >
+    <label for="ALLphoneId" class="inLabel">Phone Number:</label>
+    <input type="text" name="phone" id="ALLphoneId" class="jFormb"><br >
+    <label for="ALLsentQTHId" class="inLabel">Sent QTH:</label>
+    <input type="text" name="sentQTH" id="ALLsentQTHId" class="jFormb"><br >
+    <label for="ALLopclassId" class="inLabel">Entry class:</label>
+    <select name="opclass" id="ALLopclassId" class="jFormb">
+      <option value="single">Single-op</option>
+      <option value="multi-single">Multi-single</option>
+      <option value="multi-multi" selected="selected">Multi-multi</option>
+      <option value="checklog" >Checklog</option>
+    </select>
+    <select name="power" id="ALLpowerId" class="jFormb">
+      <option value="Low">Low Power</option>
+      <option value="High" selected="selected">High Power</option>
+      <option value="QRP">QRP</option>
+    </select>
+    <p><b>Categories</b> (check all that apply)</p>
+    <table>
+      <tr>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="expedition" value="County Expedition" id="ALLexpedition" class="jFormb">
+	    County Expedition</label>
+	</td>
+	<td class="catCol" >
+          <label>
+	    <input type="checkbox" name="youth" value="Youth" id="ALLyouth" class="jFormb">
+	    Youth (under 18)</label>
+        </td>
+        <td class="catCol" >
+          <label>
+	    <input type="checkbox" name="mobile" value="Mobile" id="ALLmobile" class="jFormb">
+	    Mobile Operation</label>
+        </td>
+      </tr>
+      <tr>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="female" value="YL" id="ALLyl" class="jFormb">
+	    YL</label>
+        </td>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="school" value="School" id="ALLschool" class="jFormb">
+	    School</label>
+        </td>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="new" value="New Contester" id="ALLnewcontester" class="jFormb">
+	    New Contester</label>
+        </td>
+      </tr>
+    </table>
+    <label for="ALLcommentId">Comments:</label><br>
+    <textarea name="comments" id="ALLcommentId" cols="80"
+	      rows="5" class="jFormb"></textarea><br>
+    <input type="submit" id="ALLsubmit" class="jFormb">
+    <input type="reset" id="ALLreset" value="Reset" class="jFormb">
+    <p>* Indicates <strong>required</strong> fields.
+  </form>
+    <div id="ALLreminder" >
+      <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
+	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.
+      </p>
+    </div>
+</div>
+</body>
+</html>
