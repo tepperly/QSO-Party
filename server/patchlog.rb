@@ -73,5 +73,6 @@ def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, comments,
   end
   result['X-CQP-CATEGORIES'] = categories.join(" ")
   result['X-CQP-ID'] = id.to_s
+  result['X-CQP-TIMESTAMP'] = Time.now.utc.strftime("%Y-%m-%d %H:%M:%S.%L +0000")
   result
 end
