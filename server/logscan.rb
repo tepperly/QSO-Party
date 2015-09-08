@@ -51,7 +51,7 @@ class LineIssue
 end
 
 class CQPLog
-  def initialize(id, filename, multregex)
+  def initialize(id, filename, multregex, multaliases)
     @id = id
     @filename = filename
     @version = nil              # Cabrillo version
@@ -79,6 +79,7 @@ class CQPLog
     @warnings = [ ]
     @errors = [ ]
     @multtest = multregex
+    @multaliases = multaliases
   end
 
   def county?
@@ -139,7 +140,7 @@ class CQPLog
       @assisted.to_s + "\nPower: " + @power.to_s + "\nNum Ops: " + @numops.to_s + 
       "\nCategories: " + @categories.keys.sort.join(' ') + 
       "\nNum transceivers: " + @numtrans.to_s + "\nMax QSOs: " + @maxqso.to_s + "\nValid QSOs: " + @validqso.to_s + "\nEmail: " +
-      @email.to_s + "\nSent QTH: " + @sentqth.keys.sort.join(' ') + "\nOperators: " + @operators.keys.sort.join(' ') + 
+      @email.to_s + "\nSent QTH: " + translateQTH.join(' ') + "\nOperators: " + @operators.keys.sort.join(' ') + 
       "\nWarnings: " + @warnings.join("\n") + "\nErrors: " + @errors.join("\n") + "\n"
   end
 
@@ -195,6 +196,10 @@ class CQPLog
 
   def filterQTH
     @sentqth.keys.find_all { |sq| @multtest.match(sq) }.sort.map { |qth| qth }
+  end
+
+  def translateQTH
+    @sentqth.keys.map { |mult| @multaliases[mult] }.find_all { |mult| mult }.sort.uniq
   end
 
   def to_json
@@ -994,7 +999,7 @@ class LocationTag < HeaderTag
 
   def tagMatch(match, log, linenum)
     if match[1].length > 0
-      log.sentqth[match[1]] = 1
+#      log.sentqth[match[1]] = 1
     end
   end
 
@@ -1416,7 +1421,7 @@ class CheckLog
   end
 
   def checkLogStr(filename, id, content)
-    log = CQPLog.new(id, filename, @multregex)
+    log = CQPLog.new(id, filename, @multregex, @multipliers)
     lineNum = 1
     lines = mySplit(content, END_OF_RECORD)
     log.maxqso = content.scan(/\bqso:\s+/i).size # upper bound on number of QSOs
