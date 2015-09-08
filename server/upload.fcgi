@@ -192,7 +192,7 @@ def handleRequest(request, db, logCheck)
   emailConfirmation(db, logID)
   content = nil
   encodedConent = nil
-  if source != "form3"
+  if source !~ /form[34]/
     request.out("text/javascript") { jsonout.to_json }
   else
     request.out("text/html") { logHtml(log, db.getEntry(logID)) }
