@@ -98,7 +98,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
     }
     outE = OutgoingEmail.new
     html = logHtml(log, db.getEntry(logID))
-    outE.sendEmailAlt(sender, "CQP 2014 Log Confirmation", htmlToPlain(html, "text/html"), html)
+    outE.sendEmailAlt(sender, "CQP 2015 Log Confirmation", htmlToPlain(html, "text/html"), html)
     return true
   end
   false

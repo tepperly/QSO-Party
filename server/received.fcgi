@@ -59,7 +59,7 @@ class CallsignReport
           @request.div("id" => "masthead") {
              @request.img("src" => "/cqp/images/cqplogo80075.jpg", "alt" => "California QSO Party") 
           } +
-          @request.h1() { "CQP 2014 Logs Received" } +
+          @request.h1() { "CQP 2015 Logs Received" } +
           @request.p() { "The call signs for all logs received are
     shown below. Please ensure any log you've submitted is shown
     here. If it isn't, return to the " + @request.a("href" => "/cqp/logsubmit-form.html") { "log submittal page" } + " to upload again." } +

@@ -69,8 +69,8 @@ def confEmail(db, entry)
   }
   categories = categories.join(", ")
   confirm = OutgoingEmail.new
-  confirm.sendEmail(entry["emailaddr"], "CQP 2014 Log Confirmation", "\
-CQP 2014 Log Confirmation
+  confirm.sendEmail(entry["emailaddr"], "CQP 2015 Log Confirmation", "\
+CQP 2015 Log Confirmation
 
           Callsign: #{entry['callsign_confirm']}
        Entry-Class: #{db.translateClass(entry['opclass'])}
@@ -110,12 +110,12 @@ def backupEmail(db, entry)
       maxwidth = col.length
     end
   }
-  body = "CQP 2014 Log Entry Received\n\n"
+  body = "CQP 2015 Log Entry Received\n\n"
   columns.each { |col|
     body << ("%#{maxwidth}s: %s\n" % [col.upcase, entry[col].to_s])
   }
   confirm = OutgoingEmail.new
-  confirm.sendEmail(CQPConfig::LOG_EMAIL_ACCOUNT, "CQP 2014 Log Received", body, 
+  confirm.sendEmail(CQPConfig::LOG_EMAIL_ACCOUNT, "CQP 2015 Log Received", body, 
                     [{ "mime" => "application/octet", "filename" => File.basename(entry['originalfile']),
                        "content" => File.read(entry['originalfile'], {:mode => "rb"}) } ])
 end
