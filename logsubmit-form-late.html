@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CQP Log Submission Form</title>
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 40x40 64x64 128x128" type="image/vnd.microsoft.icon">
+
+  <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+  <link rel="stylesheet" href="css/jquery.fileupload.css">
+  <link rel="stylesheet" href="css/cqp_style.css">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js" type="text/javascript"></script>
+  <script src="js/vendor/jquery.ui.widget.js" type="text/javascript"></script>
+  <script src="js/jquery.iframe-transport.js" type="text/javascript"></script>
+  <script src="js/jquery.fileupload.js" type="text/javascript"></script>
+  <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.0/jquery.validate.min.js" type="text/javascript"></script>
+  <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.0/additional-methods.min.js" type="text/javascript"></script>
+
+</head>
+<body>
+<img  src="images/cqplogo80075.jpg" alt="California QSO Party" > 
+<div id="tabs" style="display: none">
+  <ul>
+    <li><a href="#tabs-1">Upload or drag-and-drop</a></li>
+    <li><a href="#tabs-2">Traditional cut-and-paste</a></li>
+  </ul>
+  <div id="tabs-1">
+    <div id="step-1">
+      <p>
+	<strong>
+	  Please note that the log submission deadline for CQP 2014, 31 October 2014 23:59 UTC, 
+	  has past.
+	</strong>
+	Unless you made prior arrangements with the CQP Chairman, your log is late and by
+	default will be treated as a checklog. We would still like to receive your log because
+	it makes log cross-checking more accurate.
+      </p>
+      <p>Uploading a CQP Cabrillo file is as easy as 1, 2, 3.  Please complete all three steps to complete
+	your contest entry.</p>
+      <h1>Step 1: Upload Cabrillo file</h1>
+      <span class="btn btn-success fileinput-button">
+        <i class="glyphicon glyphicon-plus"></i>
+        <span>Drag and drop Cabrillo file here or click to upload...</span>
+        <!-- The file input field used as target for the file upload widget -->
+	<input id="fileupload" type="file" name="cabrillofile">
+      </span>
+      <br >
+      <div id="progress" class="progress">
+        <div class="progress-bar progress-bar-success"></div>
+      </div>
+    </div>
+    <div id="step-2">
+      <h1>Step 2: Review Cabrillo file</h1>
+      <p>
+We're tried to provide some feedback on your log in case there are
+errors. If the number of Readable QSO lines is close to the Total QSO lines and
+the number of Multiplier errors is low, you can probably ignore any 
+warnings or error messages below. If the number of readable QSOs is low or the
+number of multiplier errors is high, you may want to try to edit your log and
+resubmit. Examples of the preferred QSO line syntax are available 
+<a href="qso_syntax.html">here</a>. In any case, we will do our best to fairly score every log.</p>
+<p>To upload again, use the "Clear &amp; Reload" button. Otherwise, move on to Step 3.</p>
+      <div class="circle" id="circleId"></div>
+      <div class="QSOSummCol">
+        <table class="QSOSummary">
+	  <caption class="QSOSumCap">Summary Statistics</caption>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Total QSO lines:</th><td class="QSOSumData" id="maxQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Readable QSOs:</th><td class="QSOSumData" id="validQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Errors:</th><td class="QSOSumData" id="numErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Warnings:</th><td class="QSOSumData" id="numWarningsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier errors:</th><td class="QSOSumData" id="numMultErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier aliases:</th><td class="QSOSumData" id="numMultAliasesId">&nbsp;</td></tr>
+	</table>
+	<input id="ReloadID" type="button" name="Reupload" class="cqpbutton" value="Clear &amp; Reupload">
+      </div>
+      <div class="QSOReport"><h2>Error &amp; Warnings</h2><div id="QSOErrorsID"></div></div>
+      <div class="QSOReport"><h2>Multiplier Issues</h2><div id="MultErrorsID"></div></div>
+      <div class="QCallReport"><h2>Irregular Callsigns</h2><div id="CallErrorsID"></div></div>
+      <div class="clear"></div>
+    </div>
+    <div id="step-3">
+      <h1>Step 3: Provide Supplemental information</h1>
+      <form action="server/upload.fcgi" method="post" id="supplementalForm" accept-charset="UTF-8">
+	<input type="hidden" name="logID" value="-1" id="logDBId" class="jForm">
+	<input type="hidden" name="source" value="form1">
+	<label for="callsignId" class="inLabel">Callsign*:</label>
+	<input type="text" name="callsign" value="" id="callsignId" class="jForm"><br >
+	<label for="emailId" class="inLabel">Email*:</label>
+	<input type="email" name="email" id="emailId" class="jForm"><br>
+	<label for="confirmId" class="inLabel">Confirm Email*:</label>
+	<input type="email" name="confirm" id="confirmId" class="jForm"><br >
+	<label for="phoneId" class="inLabel">Phone Number:</label>
+	<input type="text" name="phone" id="phoneId" class="jForm"><br >
+	<label for="sentQTHId" class="inLabel">Sent QTH:</label>
+	<input type="text" name="sentQTH" id="sentQTHId" class="jForm"><br >
+	<label for="opclassId" class="inLabel">Entry class:</label>
+	<select name="opclass" id="opclassId" class="jForm">
+	  <option value="single">Single-op</option>
+	  <option value="multi-single">Multi-single</option>
+	  <option value="multi-multi" selected="selected">Multi-multi</option>
+	  <option value="checklog" >Checklog</option>
+	</select>
+	<select name="power" id="powerId" class="jForm">
+	  <option value="Low">Low Power</option>
+	  <option value="High" selected="selected">High Power</option>
+	  <option value="QRP">QRP</option>
+	</select>
+	<span id="opmsgId" style="color: red"></span>
+	<p><b>Categories</b> (check all that apply)</p>
+	<table>
+	  <tr>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="expedition" value="County Expedition" id="expedition" class="jForm">
+		County Expedition</label>
+	    </td>
+	    <td class="catCol" >
+              <label>
+		<input type="checkbox" name="youth" value="Youth" id="youth" class="jForm">
+		Youth (under 18)</label>
+            </td>
+            <td class="catCol" >
+              <label>
+		<input type="checkbox" name="mobile" value="Mobile" id="mobile" class="jForm">
+		Mobile Operation</label>
+            </td>
+	  </tr>
+	  <tr>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="female" value="YL" id="yl" class="jForm">
+		YL</label>
+            </td>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="school" value="School" id="school" class="jForm">
+		School</label>
+            </td>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="new" value="New Contester" id="newcontester" class="jForm">
+		New Contester</label>
+            </td>
+	  </tr>
+	</table>
+	<label for="commentId">Comments:</label><br>
+	<textarea name="comments" id="commentId" cols="80" 
+		  rows="5" class="jForm"></textarea><br>
+        <input type="submit" id="submit" class="jForm cqpbutton" value="Submit Details">
+	<p>* Indicates <strong>required</strong> fields.
+      </form>
+    </div>
+    <div id="doneMsg" style="visibility: hidden;"><p><strong class="UploadDone">Upload Completed!</strong></p></div>
+    <div id="reminder" >
+      <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
+	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.
+      </p>
+    </div>
+  </div>
+  <div id="tabs-2">
+    <div id="step-1a">
+      <p>
+	<strong>
+	  Please note that the log submission deadline for CQP 2014, 31 October 2014 23:59 UTC, 
+	  has past.
+	</strong>
+	Unless you made prior arrangements with the CQP Chairman, your log is late and by
+	default will be treated as a checklog. We would still like to receive your log because
+	it makes log cross-checking more accurate.
+      </p>
+      <p>Uploading a CQP Cabrillo file is as easy as 1, 2, 3.  Please complete all three steps to complete
+	your contest entry.</p>
+      <h1>Step 1: Cut-n-paste Cabrillo file</h1>
+      <form id="cutnpaste" action="server/upload.fcgi" method="post" accept-charset="UTF-8">
+	<label for="cabcontentId">Paste your log here:</label><br>
+	<textarea name="cabcontent" id="cabcontentId" cols="100" wrap="soft"
+		  rows="5" ></textarea><br>
+	<input type="submit" id="cabsubmit" class="cqpbutton" value="Submit Log">
+      </form>
+    </div>
+    <div id="step-2a">
+      <h1>Step 2: Review Cabrillo file</h1>
+      <p>
+We're tried to provide some feedback on your log in case there are
+errors. If the number of Readable QSO lines is close to the Total QSO lines and
+the number of Multiplier errors is low, you can probably ignore any 
+warnings or error messages below. If the number of readable QSOs is low or the
+number of multiplier errors is high, you may want to try to edit your log and
+resubmit. Examples of the preferred QSO line syntax are available 
+<a href="qso_syntax.html">here</a>. In any case, we will do our best to fairly score every log.</p>
+<p>To upload again, use the "Clear &amp; Reload" button. Otherwise, move on to Step 3.</p>
+      <div class="circle" id="AltcircleId"></div>
+      <div class="QSOSummCol">
+        <table class="QSOSummary">
+	  <caption class="QSOSumCap">Summary Statistics</caption>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Total QSO lines:</th><td class="QSOSumData" id="AltmaxQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Readable QSOs:</th><td class="QSOSumData" id="AltvalidQSOId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Errors:</th><td class="QSOSumData" id="AltnumErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead"># Warnings:</th><td class="QSOSumData" id="AltnumWarningsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier errors:</th><td class="QSOSumData" id="AltnumMultErrorsId">&nbsp;</td></tr>
+	  <tr class="QSOSumLine"><th class="QSOSumHead">Multiplier aliases:</th><td class="QSOSumData" id="AltnumMultAliasesId">&nbsp;</td></tr>
+	</table>
+	<input id="AltReloadID" type="button" name="Reupload" class="cqpbutton" value="Clear &amp; Reupload">
+      </div>
+      <div class="QSOReport"><h2>Error &amp; Warnings</h2><div id="AltQSOErrorsID"></div></div>
+      <div class="QSOReport"><h2>Multiplier Issues</h2><div id="AltMultErrorsID"></div></div>
+      <div class="QCallReport"><h2>Irregular Callsigns</h2><div id="AltCallErrorsID"></div></div>
+      <div class="clear"></div>
+    </div>
+    <div id="step-3a">
+      <h1>Step 3: Provide Supplemental information</h1>
+      <form action="server/upload.fcgi" method="post" id="AltsupplementalForm"  accept-charset="UTF-8">
+	<input type="hidden" name="logID" value="-1" id="AltlogDBId" class="jForma">
+	<input type="hidden" name="source" value="form2">
+	<label for="AltcallsignId" class="inLabel">Callsign*:</label>
+	<input type="text" name="callsign" value="" id="AltcallsignId" class="jForma"><br >
+	<label for="AltemailId" class="inLabel">Email*:</label>
+	<input type="email" name="email" id="AltemailId" class="jForma"><br>
+	<label for="AltconfirmId" class="inLabel">Confirm Email*:</label>
+	<input type="email" name="confirm" id="AltconfirmId" class="jForma"><br >
+	<label for="AltphoneId" class="inLabel">Phone Number:</label>
+	<input type="text" name="phone" id="AltphoneId" class="jForma"><br >
+	<label for="AltsentQTHId" class="inLabel">Sent QTH:</label>
+	<input type="text" name="sentQTH" id="AltsentQTHId" class="jForma"><br >
+	<label for="AltopclassId" class="inLabel">Entry class:</label>
+	<select name="opclass" id="AltopclassId" class="jForma">
+	  <option value="single">Single-op</option>
+	  <option value="multi-single">Multi-single</option>
+	  <option value="multi-multi" selected="selected">Multi-multi</option>
+	  <option value="checklog" >Checklog</option>
+	</select>
+	<select name="power" id="AltpowerId" class="jForma">
+	  <option value="Low">Low Power</option>
+	  <option value="High" selected="selected">High Power</option>
+	  <option value="QRP">QRP</option>
+	</select>
+	<span id="AltopmsgId" style="color: red"></span>
+	<p><b>Categories</b> (check all that apply)</p>
+	<table>
+	  <tr>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="expedition" value="County Expedition" id="Altexpedition" class="jForma">
+		County Expedition</label>
+	    </td>
+	    <td class="catCol" >
+              <label>
+		<input type="checkbox" name="youth" value="Youth" id="Altyouth" class="jForma">
+		Youth (under 18)</label>
+            </td>
+            <td class="catCol" >
+              <label>
+		<input type="checkbox" name="mobile" value="Mobile" id="Altmobile" class="jForma">
+		Mobile Operation</label>
+            </td>
+	  </tr>
+	  <tr>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="female" value="YL" id="Altyl" class="jForma">
+		YL</label>
+            </td>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="school" value="School" id="Altschool" class="jForma">
+		School</label>
+            </td>
+            <td class="catCol">
+              <label>
+		<input type="checkbox" name="new" value="New Contester" id="Altnewcontester" class="jForma">
+		New Contester</label>
+            </td>
+	  </tr>
+	</table>
+	<label for="AltcommentId">Comments:</label><br>
+	<textarea name="comments" id="AltcommentId" cols="80"
+		  rows="5" class="jForma"></textarea><br>
+        <input type="submit" id="Altsubmit" class="jForma cqpbutton" value="Submit Details">
+	<p>* Indicates <strong>required</strong> fields.
+      </form>
+    </div>
+    <div id="AltdoneMsg" style="visibility: hidden;"><p><strong class="UploadDone">Upload Completed!</strong></p></div>
+    <div id="Altreminder" >
+      <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
+	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div id="AllInOne"> 
+  <h1>Upload your CQP Load</h1>
+  <p>
+    <strong>
+      Please note that the log submission deadline for CQP 2014, 31 October 23:59 UTC 2014, 
+      has past.
+    </strong>
+    Unless you made prior arrangements with the CQP Chairman, your log is late and by
+    default will be treated as a checklog. We still would like to receive your log because
+    it makes log cross-checking more accurate.
+  </p>
+  <form id="OneForm" action="server/upload.fcgi" method="post" accept-charset="UTF-8">
+    <label for="ALLcabcontentId">Paste your log here:</label><br>
+    <textarea name="cabcontent" id="ALLcabcontentId" cols="100" wrap="soft"
+	      rows="5" ></textarea><br>
+    <input type="hidden" name="logID" value="-1" id="ALLlogDBId" class="jFormb">
+    <input type="hidden" name="source" value="form3">
+    <label for="ALLcallsignId" class="inLabel">Callsign*:</label>
+    <input type="text" name="callsign" value="" id="ALLcallsignId" class="jFormb"><br >
+    <label for="ALLemailId" class="inLabel">Email*:</label>
+    <input type="email" name="email" id="ALLemailId" class="jFormb"><br>
+    <label for="ALLconfirmId" class="inLabel">Confirm Email*:</label>
+    <input type="email" name="confirm" id="ALLconfirmId" class="jFormb"><br >
+    <label for="ALLphoneId" class="inLabel">Phone Number:</label>
+    <input type="text" name="phone" id="ALLphoneId" class="jFormb"><br >
+    <label for="ALLsentQTHId" class="inLabel">Sent QTH:</label>
+    <input type="text" name="sentQTH" id="ALLsentQTHId" class="jFormb"><br >
+    <label for="ALLopclassId" class="inLabel">Entry class:</label>
+    <select name="opclass" id="ALLopclassId" class="jFormb">
+      <option value="single">Single-op</option>
+      <option value="multi-single">Multi-single</option>
+      <option value="multi-multi" selected="selected">Multi-multi</option>
+      <option value="checklog" >Checklog</option>
+    </select>
+    <select name="power" id="ALLpowerId" class="jFormb">
+      <option value="Low">Low Power</option>
+      <option value="High" selected="selected">High Power</option>
+      <option value="QRP">QRP</option>
+    </select>
+    <p><b>Categories</b> (check all that apply)</p>
+    <table>
+      <tr>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="expedition" value="County Expedition" id="ALLexpedition" class="jFormb">
+	    County Expedition</label>
+	</td>
+	<td class="catCol" >
+          <label>
+	    <input type="checkbox" name="youth" value="Youth" id="ALLyouth" class="jFormb">
+	    Youth (under 18)</label>
+        </td>
+        <td class="catCol" >
+          <label>
+	    <input type="checkbox" name="mobile" value="Mobile" id="ALLmobile" class="jFormb">
+	    Mobile Operation</label>
+        </td>
+      </tr>
+      <tr>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="female" value="YL" id="ALLyl" class="jFormb">
+	    YL</label>
+        </td>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="school" value="School" id="ALLschool" class="jFormb">
+	    School</label>
+        </td>
+        <td class="catCol">
+          <label>
+	    <input type="checkbox" name="new" value="New Contester" id="ALLnewcontester" class="jFormb">
+	    New Contester</label>
+        </td>
+      </tr>
+    </table>
+    <label for="ALLcommentId">Comments:</label><br>
+    <textarea name="comments" id="ALLcommentId" cols="80"
+	      rows="5" class="jFormb"></textarea><br>
+    <input type="submit" id="ALLsubmit" class="jFormb">
+    <input type="reset" id="ALLreset" value="Reset" class="jFormb">
+    <p>* Indicates <strong>required</strong> fields.
+  </form>
+    <div id="ALLreminder" >
+      <p>PLEASE NOTE: you should receive a brief confirmation of your log via email, and it is your responsibility to verify that your
+	log has been received by checking the <a href="server/received.fcgi">CQP Logs Received page</a>.
+      </p>
+    </div>
+</div>
+
+ 
+<script  type="text/javascript">
+<!--
+function clearTabOne() {
+  $("#logDBId").val("");
+  $("#callsignId").val("");
+  $("#emailId").val("");
+  $("#confirmId").val("");
+  $("#phoneId").val("");
+  $("#sentQTHId").val("");
+  $("#opclassId").val("multi-multi");
+  $("#opmsgId").html("");
+  $('#maxQSOId').html("&nbsp;");
+  $('#validQSOId').html("&nbsp;");
+  $('#numErrorsId').html("&nbsp;");
+  $('#numWarningsId').html("&nbsp;");
+  $('#numMultAliasesId').html("&nbsp;");
+  $('#numMultErrorsId').html("&nbsp;");
+  $('#CallErrorsID').text("");
+  $('#MultErrorsID').text("");
+  $('#QSOErrorsID').text("");
+  $("#powerId").val("High");
+  $("#commentId").val("");
+  $("#expedition").prop("checked", false);
+  $("#youth").prop("checked", false);
+  $("#mobile").prop("checked", false);
+  $("#yl").prop("checked", false);
+  $("#school").prop("checked", false);
+  $("#newcontester").prop("checked", false);
+  $('#step-1').fadeTo(100, 1.0);
+  $('#fileupload').fileupload("enable");
+  $("#doneMsg").css("visibility", "hidden");
+  $('#step-2').fadeTo(100, 0.4);
+  $('.jForm').prop("disabled", true);
+  $('#step-3').fadeTo(100, 0.4);
+  $('#circleId').css('background-color', '#00ff00');
+  $('#progress .progress-bar').css(
+      'width', '0%' );
+}
+
+function clearTabTwo() {
+  $("#AltlogDBId").val("");
+  $("#AltcallsignId").val("");
+  $("#AltemailId").val("");
+  $("#AltconfirmId").val("");
+  $("#AltphoneId").val("");
+  $("#AltsentQTHId").val("");
+  $("#AltopclassId").val("multi-multi");
+  $("#AltopmsgId").html("");
+  $('#AltmaxQSOId').html("&nbsp;");
+  $('#AltvalidQSOId').html("&nbsp;");
+  $('#AltnumErrorsId').html("&nbsp;");
+  $('#AltnumWarningsId').html("&nbsp;");
+  $('#AltnumMultAliasesId').html("&nbsp;");
+  $('#AltnumMultErrorsId').html("&nbsp;");
+  $('#AltCallErrorsID').text("");
+  $('#AltMultErrorsID').text("");
+  $('#AltQSOErrorsID').text("");
+  $("#AlpowerId").val("High");
+  $("#AltcommentId").val("");
+  $("#Altexpedition").prop("checked", false);
+  $("#Altyouth").prop("checked", false);
+  $("#Altmobile").prop("checked", false);
+  $("#Altyl").prop("checked", false);
+  $("#Altschool").prop("checked", false);
+  $("#Altnewcontester").prop("checked", false);
+  $("#AltdoneMsg").css("visibility", "hidden");
+  $('#AltcircleId').css('background-color', '#00ff00');
+  $('#step-1a').fadeTo(100, 1.0);
+  $('#fileupload').fileupload("enable");
+  $('#step-2a').fadeTo(100, 0.4);
+  $('.jForma').prop("disabled", true);
+  $('#step-3a').fadeTo(100, 0.4);
+  $('#cabcontentId').prop("disabled", false);
+}
+
+
+
+/**
+ * Converts integer to a hexidecimal code, prepad's single 
+ * digit hex codes with 0 to always return a two digit code. 
+ * 
+ * @param {Integer} i Integer to convert 
+ * @returns {String} The hexidecimal code
+ */
+function intToHex(i) {
+    var hex = parseInt(i,10).toString(16);
+    return (hex.length < 2) ? "0" + hex : hex;
+}   
+
+/**
+ * Return hex color from scalar *value*.
+ *
+ * @param {float} value Scalar value between 0 and 1
+ * @return {String} color
+ */
+function makeColor(value) {
+    // value must be between [0, 510]
+    value = Math.min(Math.max(0,value), 1) * 510;
+    var redValue;
+    var greenValue;
+    if (value < 255) {
+        redValue = 255;
+        greenValue = Math.sqrt(value) * 16;
+        greenValue = Math.round(greenValue);
+    } else {
+        greenValue = 255;
+        value = value - 255;
+        redValue = 256 - (value * value / 255);
+        redValue = Math.round(redValue);
+    }
+   return "#" + intToHex(redValue) + intToHex(greenValue) + "00";
+}
+
+var entityMap = {
+   "&": "&amp;",
+   "<": "&lt;",
+   ">": "&gt;",
+   '"': '&quot;',
+   "'": '&#39;',
+   "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+  return String(string).replace(/[&<>"'\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
+function calcColor(validQ, maxQ, badMults) {
+   if (maxQ === 0) {
+     return "#ff0000";
+   }
+   else {
+     validQ = Math.max(0, validQ - badMults);
+     percent = 4.0*validQ/maxQ - 3.0;
+     return makeColor(percent);
+   }
+}
+ 
+  $(function () {
+    var urlval = "server/upload.fcgi";
+    $('#tabs').show();
+    $('#AllInOne').hide();
+    $('#fileupload').fileupload({
+        url: urlval,
+        dataType: 'json',
+        done: function (e, data) {
+	    if (console) {
+              console.log("Success 4");
+              console.log(JSON.stringify(data.result));
+            }
+            $.each(data.result.files, function (index, file) {
+                if (console) {
+                  console.log("File name = " + file.name);
+                  console.log("ID = " + file.id);
+                }
+                $('#logDBId').val(file.id);
+            });
+            if (data.result.callsign) {
+              $('#callsignId').val(escapeHtml(data.result.callsign));
+            }
+            if (data.result.email) { 
+              $('#emailId').val(escapeHtml(data.result.email));
+            }
+            if (data.result.SentQTH) {
+              $('#sentQTHId').val(escapeHtml(data.result.SentQTH.join(" ")));
+            }
+            if (data.result.opclass) {
+              $('#opclassId').val(escapeHtml(data.result.opclass));
+            }
+            if (data.result.opmsg) {
+              $('#opmsgId').html(escapeHtml(data.result.opmsg));
+            }
+            if (data.result.power) {
+              $('#powerId').val(escapeHtml(data.result.power));
+            }
+            if (data.result.categories) {
+               $.each(data.result.categories, function (index, cat) {
+                  $('#'.concat(cat)).prop("checked", true);
+               });
+            }
+            if (!(typeof data.result.MaxQSO === 'undefined')) {
+              $('#maxQSOId').text(data.result.MaxQSO.toString());
+              if (0 === data.result.MaxQSO) {
+                $('#circleId').css('background-color', "#ff0000");
+              }
+              else {
+                if (!(typeof data.result.ParseableQSO === 'undefined')) {
+		  var badMults;
+		  if (data.result.multipliers.errors) {
+		    badMults = data.result.multipliers.errors.length;
+		  }
+		  else {
+		    badMults = 0;
+                  }
+                  $('#circleId').css('background-color', calcColor(data.result.ParseableQSO, data.result.MaxQSO, badMults));
+                }
+              }
+            }
+            else {
+              $('#maxQSOId').html("&nbsp;");
+            }
+            if (!(typeof data.result.ParseableQSO === 'undefined')) {
+              $('#validQSOId').text(data.result.ParseableQSO.toString());
+            }
+            else {
+              $('#validQSOId').html("&nbsp;");
+            }
+            if (data.result.errors) { 
+              $('#numErrorsId').text(data.result.errors.length.toString());
+            }
+            else {
+              $('#numErrorsId').html("&nbsp;");
+            }
+            if (data.result.warnings) { 
+              $('#numWarningsId').text(data.result.warnings.length.toString());
+            }
+            else {
+              $('#numWarningsId').html("&nbsp;");
+            }
+            $('#numMultAliasesId').html("&nbsp;");
+            if (data.result.multipliers) {
+              if (data.result.multipliers.warnings) {
+                $('#numMultAliasesId').text(data.result.multipliers.warnings.length.toString());
+              }
+              if (data.result.multipliers.errors) {
+                $('#numMultErrorsId').text(data.result.multipliers.errors.length.toString());
+              }
+            }
+            $('#CallErrorsID').text("");
+            $('#MultErrorsID').text("");
+            $('#QSOErrorsID').text("");
+            if (data.result.badcallsigns) {
+               $.each(data.result.badcallsigns, function (index, callsign) {
+                  $('#CallErrorsID').append('<p class="badcall">' + escapeHtml(callsign) + "</p>\n");
+               });
+            }
+            if (data.result.errors && data.result.errors.length > 0) {
+               $('#QSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n");
+               $.each(data.result.errors, function (index, errval) {
+                  $('#QSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
+                                            escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                            escapeHtml(errval.msg) + "</span></p>\n");
+               });
+            }
+            if (data.result.warnings && data.result.warnings.length > 0) {
+               $('#QSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n");
+               $.each(data.result.warnings, function (index, errval) {
+                  $('#QSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
+                                            escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                            escapeHtml(errval.msg) + "</span></p>\n");
+               });
+            }
+            if (data.result.multipliers) {
+               if (data.result.multipliers.errors && data.result.multipliers.errors.length > 0) {
+                 $('#MultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n");
+                 $.each(data.result.multipliers.errors, function (index, errval) {
+                    $('#MultErrorsID').append('<p class="multerr">' + escapeHtml(errval) + "</p>\n");
+                 });
+               }
+               if (data.result.multipliers.warnings && data.result.multipliers.warnings.length > 0) {
+                 $('#MultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n");
+                 $.each(data.result.multipliers.warnings, function (index, errval) {
+                    $('#MultErrorsID').append('<p class="multerr"><span class="multalias">' + escapeHtml(errval.log) +
+                                             '</span> &rarr; <span class="multireal">' + 
+					     escapeHtml(errval.real) + "</span></p>\n");
+                 });
+               }
+            }
+            $('#step-1').fadeTo(100, 0.4);
+            $('#fileupload').fileupload("disable");
+            $('#step-2').fadeTo(100, 1.0);
+            $('.jForm').prop("disabled", false);
+            $('#step-3').fadeTo(100, 1.0);
+            if (console) {
+               console.log("Done");
+            }
+        },
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css(
+                'width',
+                progress + '%' );
+        }
+    }).prop('disabled', !$.support.fileInput).
+        parent().addClass($.support.fileInput ? undefined :
+       'disabled');
+    clearTabOne();
+    clearTabTwo();
+    $( '#ReloadID' ).click( function () {
+       if (console) {
+         console.log("Click");
+       }
+       clearTabOne();
+    });
+    $( '#AltReloadID' ).click( function () {
+       if (console) {
+         console.log("Click");
+       }
+       clearTabTwo();
+    });
+    $( "#tabs" ).tabs({ active: 0});
+    $( "#supplementalForm" ).validate({
+       rules: {
+         callsign: "required",
+         email: "required",
+         confirm: {
+           equalTo: "#emailId"
+         }
+       }
+     });
+    $("#supplementalForm" ).submit(function(ev) {
+      var urlval = "server/upload.fcgi";
+      var checker = $('#supplementalForm').validate();
+      if (checker.form()) {
+        $.ajax({
+            type: "POST",
+            url : urlval,
+            data: $("#supplementalForm").serialize(),
+            success: function(data) {
+               if (console) {
+                 console.log("Success 3");
+               }
+               clearTabOne();
+               $("#doneMsg").css("visibility", "visible");
+            }
+        });
+      }
+      ev.preventDefault();
+    });
+    $( "#AltsupplementalForm" ).validate({
+       rules: {
+         callsign: "required",
+         email: "required",
+         confirm: {
+           equalTo: "#AltemailId"
+         }
+       }
+     });
+    $('#AltsupplementalForm').submit(function(ev) {
+      var urlval = "server/upload.fcgi";
+      var checker = $('#AltsupplementalForm').validate();
+      if (checker.form()) {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url : urlval,
+            data: $("#AltsupplementalForm").serialize(),
+            success: function(data) {
+               if (console) {
+                 console.log("Success 2");
+               }
+               clearTabTwo();
+               $("#AltdoneMsg").css("visibility", "visible");
+            },
+            error: function(xhr, tstatus, errthrn)  {
+               if (console) {
+                 console.log("Error 2");
+                 console.log(xhr.responseText);
+                 console.log(tstatus);
+                 console.log(errthrn);
+               }
+            }
+        });
+      }
+      ev.preventDefault();
+    });
+
+    $('#cutnpaste' ).submit(function(ev) {
+      var urlval = "server/upload.fcgi";
+      $.ajax({
+          type: "POST",
+          url : urlval,
+          dataType: "json",
+          data: $("#cutnpaste").serialize(),
+          success: function(data) {
+             if (console) {
+               console.log(data);
+             }
+             if (data.files) {
+               $.each(data.files, function (index, file) {
+                  if (console) {
+                    console.log("ID = " + file.id);
+                  }
+                  $('#AltlogDBId').val(file.id);
+               });
+             }
+             else {
+               if (console) {
+                 console.log("Insufficient JSON");
+               }
+               return 1;
+             }
+             if (console) {
+               console.log("Success 1");
+             }
+             $('#step-1a').fadeTo(100, 0.4);
+             $('#cabcontentId').val("");
+             $('#step-2a').fadeTo(100, 1.0);
+             $('.jForma').prop("disabled", false);
+             $('#step-3a').fadeTo(100, 1.0);
+             if (data.callsign) {
+               $('#AltcallsignId').val(escapeHtml(data.callsign));
+             }
+             if (data.email) { 
+               $('#AltemailId').val(escapeHtml(data.email));
+             }
+             if (data.SentQTH) {
+                $('#AltsentQTHId').val(escapeHtml(data.SentQTH.join(" ")));
+             }
+             if (data.opclass) {
+               $('#AltopclassId').val(escapeHtml(data.opclass));
+             }
+             if (data.power) {
+               $('#AltpowerId').val(escapeHtml(data.power));
+             }
+             if (data.opmsg) {
+               $('#AltopmsgId').html(escapeHtml(data.opmsg));
+             }
+             if (data.categories) {
+                $.each(data.categories, function (index, cat) {
+                   $('#Alt'.concat(cat)).prop("checked", true);
+                });
+             }
+             if (!(typeof data.MaxQSO === 'undefined')) {
+               $('#AltmaxQSOId').text(data.MaxQSO.toString());
+              if (0 === data.MaxQSO) {
+                $('#AltcircleId').css('background-color', "#ff0000");
+              }
+              else {
+                if (!(typeof data.ParseableQSO === 'undefined')) {
+		  var badMults;
+		  if (data.multipliers.errors) {
+		    badMults = data.multipliers.errors.length;
+		  }
+		  else {
+		    badMults = 0;
+                  }
+                  $('#AltcircleId').css('background-color', calcColor(data.ParseableQSO, data.MaxQSO, badMults));
+                }
+              }
+             }
+             else {
+               $('#AltmaxQSOId').html("&nbsp;");
+             }
+             if (!(typeof data.ParseableQSO === 'undefined')) {
+               $('#AltvalidQSOId').text(data.ParseableQSO);
+             }
+             else {
+               $('#AltvalidQSOId').html("&nbsp;");
+             }
+             if (data.errors) { 
+               $('#AltnumErrorsId').text(data.errors.length.toString());
+             }
+             else {
+               $('#AltnumErrorsId').html("&nbsp;");
+             }
+             if (data.warnings) { 
+               $('#AltnumWarningsId').text(data.warnings.length.toString());
+             }
+             else {
+               $('#AltnumWarningsId').html("&nbsp;");
+             }
+             $('#AltnumMultAliasesId').html("&nbsp;");
+             if (data.multipliers) {
+               if (data.multipliers.warnings) {
+                 $('#AltnumMultAliasesId').text(data.multipliers.warnings.length.toString());
+               }
+               if (data.multipliers.errors) {
+                 $('#AltnumMultErrorsId').text(data.multipliers.errors.length.toString());
+               }
+             }
+             $('#AltCallErrorsID').text("");
+             $('#AltMultErrorsID').text("");
+             $('#AltQSOErrorsID').text("");
+             if (data.badcallsigns) {
+                $.each(data.badcallsigns, function (index, callsign) {
+                   $('#AltCallErrorsID').append('<p class="badcall">' + escapeHtml(callsign) + "</p>\n");
+                });
+             }
+             if (data.errors && data.errors.length > 0) {
+                 $('#AltQSOErrorsID').append('<p class="miniheading">Errors</p>' + "\n");
+                 $.each(data.errors, function (index, errval) {
+                   $('#AltQSOErrorsID').append('<p class="logerr"><span class="linenum">' + 
+                                             escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                             escapeHtml(errval.msg) + "</span></p>\n");
+                });
+             }
+             if (data.warnings && data.warnings.length > 0) {
+                 $('#AltQSOErrorsID').append('<p class="miniheading">Warnings</p>' + "\n");
+                $.each(data.warnings, function (index, errval) {
+                   $('#AltQSOErrorsID').append('<p class="logwarn"><span class="linenum">' + 
+                                             escapeHtml(errval.line.toString()) + ':</span> <span class="errmsg">' +
+                                             escapeHtml(errval.msg) + "</span></p>\n");
+                });
+             }
+             if (data.multipliers) {
+                if (data.multipliers.errors && data.multipliers.errors.length > 0) {
+                  $('#AltMultErrorsID').append('<p class="miniheading">Unknown multipliers</p>' + "\n");
+                  $.each(data.multipliers.errors, function (index, errval) {
+                     $('#AltMultErrorsID').append('<p class="multerr">' + escapeHtml(errval) + "</p>\n");
+                  });
+                }
+                if (data.multipliers.warnings && data.multipliers.warnings.length > 0) {
+                  $('#AltMultErrorsID').append('<p class="miniheading">Multipliers remapped</p>' + "\n");
+                  $.each(data.multipliers.warnings, function (index, errval) {
+                     $('#AltMultErrorsID').append('<p class="multerr"><span class="multalias">' + escapeHtml(errval.log) +
+                                              '</span> &rarr; <span class="multireal">' + 
+					      escapeHtml(errval.real) + "</span></p>\n");
+                  });
+                }
+             }
+             $('#cabcontentId').prop("disabled", true);
+             if (console) {
+               console.log("Success 1 done");
+             }
+          },
+          error: function(xhr, tstatus, errthrn)      {
+             if (console) {
+               console.log("Error 1");
+               console.log(xhr.responseText);
+               console.log(tstatus);
+               console.log(errthrn);
+             }
+          }
+      });
+      ev.preventDefault();
+    });
+  });
+// -->
+</script>
+</body>
+</html>
