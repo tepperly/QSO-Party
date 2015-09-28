@@ -150,8 +150,6 @@ class CQPLog
       if @assisted
         if (@numtrans == :two) or (@numtrans == :unlimited)
           return "Single-op assisted more than one transceiver maps to Multi-multi"
-        else
-          return "Single-op assisted maps to Multi-single"
         end
       end
     end
@@ -165,7 +163,7 @@ class CQPLog
         if @numtrans == :two or @numtrans == :unlimited
           return "multi-multi"
         else
-          return "multi-single"
+          return "single-assisted"
         end
       else
         return "single"
