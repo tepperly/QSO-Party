@@ -12,8 +12,8 @@ require_relative '../database'
 
 KNOWN_GRAPHS = {
   "power" => %w(High Low QRP ),
-  "opclass" => %w(checklog multi-multi multi-single single),
-  "source" => %w(uknown email form1 form2 form3)
+  "opclass" => %w(checklog multi-multi multi-single single single-assisted),
+  "source" => %w(uknown email form1 form2 form3 form4)
 }
 
 def handleRequest(request, db)
