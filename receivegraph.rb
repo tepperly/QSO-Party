@@ -28,13 +28,13 @@ data.each_index { |i|
 graph = SVG::Graph::TimeSeries.new( {
                                    :width => 1024,
                                    :height => 800,
-                                   :graph_title => "Logs Received 2013",
+                                   :graph_title => "Logs Received 2014",
                                       :show_data_values => false,
                                    :show_graph_title => true,
                                       :show_data_labels => false,
                                       :scale_y_integers => true,
                                       :x_label_format => "%m/%d/%y" } )
 
-graph.add_data( {:data => graphdata, :title => "2013" } )
+graph.add_data( {:data => graphdata, :title => "2014" } )
 
 print graph.burn()
