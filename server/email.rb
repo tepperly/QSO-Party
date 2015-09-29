@@ -54,6 +54,14 @@ class OutgoingEmail
   end
 end
 
+def nonCabrilloWarning(num)
+  num = num.to_i
+  if 0 >= num
+    return "\nWARNING: The file you uploaded does not appear to be a Cabrillo\nfile because there are *no* QSO lines detected. We are only accepting\nCabrillo files this year, so please convert your log to Cabrillo and\nupload again.\n"
+  end
+  ""
+end
+
 def confEmail(db, entry)
   catmap = { "county" => "CA County Expedition",
     "mobile" => "Mobile",
@@ -83,7 +91,7 @@ Special Categories: #{categories}
    Valid QSO Lines: #{entry['parseqso']}
             Log ID: #{entry['id']}
    Log SHA1 Digest: #{entry['origdigest']}
-
+#{nonCabrilloWarning(entry['maxqso'])}
 Thank you for entering the contest and submitting your log. Please
 review the information listed above.  If valid QSO lines is lower 
 than the total QSO lines, it means that some of the QSO lines are
