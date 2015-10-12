@@ -1,0 +1,29 @@
+.mode {
+    width: 50px;
+}
+.date {
+    width: 75px;
+    font: "monospace";
+}
+.time {
+    width: 60px;
+    font: "monospace";
+}
+.call, .sent_call {
+    width: 75px;
+    font: "monospace";
+}
+.serial, .sent_serial {
+    width: 45px;
+    font: "monospace";
+}
+.location , .sent_location {
+    width: 45px;
+    font: "monospace";
+}
+.cabrillo {
+    overflow: scroll;
+    width: 95%;
+    height: 300px;
+    font: "monospace";
+}
