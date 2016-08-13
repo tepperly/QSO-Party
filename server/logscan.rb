@@ -26,8 +26,8 @@ class ContestPeriod
 end
 
 $CONTESTS = [
-  ContestPeriod.new(Time.utc(2015, 10, 3, 16, 0), Time.utc(2015, 10, 4, 22, 0)),
-  ContestPeriod.new(Time.utc(2014, 10, 4, 16, 0), Time.utc(2014, 10, 5, 22, 0)), # CQP 2014
+  ContestPeriod.new(Time.utc(2015, 10, 3, 16, 0), Time.utc(2015, 10, 4, 22, 0))
+#  ContestPeriod.new(Time.utc(2014, 10, 4, 16, 0), Time.utc(2014, 10, 5, 22, 0)), # CQP 2014
 #  ContestPeriod.new(Time.utc(2013, 10, 5, 16, 0), Time.utc(2013, 10, 6, 22, 0)), # CQP 2013
 #  ContestPeriod.new(Time.utc(2012, 10, 6, 16, 0), Time.utc(2013, 10, 7, 22, 0))
 ]
@@ -131,7 +131,7 @@ class CQPLog
   attr_reader :id, :callsign, :assisted, :numops, :power, :categories, :numtrans, :maxqso,
             :validqso, :email, :sentqth, :operators, :qsos, :warnings, :errors, :state, :band,
             :name, :badcallsigns, :version, :mode, :comments, :badmultipliers, :warnmultipliers,
-            :tally
+            :tally, :filename
 
   def to_s
     @id.to_s + "\nCabrillo version: " + @version.to_s + "\nCallsign: " + @callsign.to_s + "\nState: " +

@@ -29,7 +29,7 @@ the number of Multiplier errors is low, you can probably ignore any
 warnings or error messages below. If the number of readable QSOs is low,
 you may want to try to edit your log and resubmit using the
 <a href="http://robot.cqp.org/cqp/logsubmit-form.html">CQP Log Upload form</a>.
-In any case, we will do our best to fairly score every log.
+In any case, we will do our best to fairly score every Cabrillo log.
 </p>
 INSTRUCTIONS_END
 

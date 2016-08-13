@@ -314,7 +314,7 @@ class LogDatabase
     end
   end
 
-  def workedStats(entries, threshold=0)
+  def workedStats(entries, threshold=0, maxlines=nil)
     results = Hash.new(0)
     connect
     data = entries
@@ -322,7 +322,11 @@ class LogDatabase
       data = [ -1 ]
     end
     if @connection
-      res = @connection.query("select callsign, sum(count) as tot from CQPWorked where logid in (#{data.join(', ')}) group by callsign having tot >= #{threshold.to_i};")
+      if maxlines
+        res = @connection.query("select callsign, sum(count) as tot from CQPWorked where logid in (#{data.join(', ')}) group by callsign having tot >= #{threshold.to_i} order by tot desc limit #{maxlines.to_i};")
+      else
+        res = @connection.query("select callsign, sum(count) as tot from CQPWorked where logid in (#{data.join(', ')}) group by callsign having tot >= #{threshold.to_i} order by tot desc;")
+      end
       res.each(:as => :array) { |row|
         results[row[0]] = row[1].to_i
       }
