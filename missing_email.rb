@@ -7,22 +7,94 @@ require 'email'
 require 'getoptlong'
 require 'nokogiri'
 
+CONTEST_DEADLINE=DateTime.new(2015,10,12,23,59, 59,'+0').to_time
 XML_NAMESPACE = {'qrz' => 'http://xmldata.qrz.com'}
 DELIM = /\s*,\s*/
+
+def charClasses(str)
+  classes = Hash.new
+  if str =~ /[A-Z]/
+    classes[:alpha] = true
+  end
+  if str =~ /\d/
+    classes[:digit] = true
+  end
+  classes
+end
+
+def compareCallParts(x, y)
+  if x == y
+    0
+  else
+    xc = charClasses(x)
+    yc = charClasses(y)
+    cmp = (xc.size <=> yc.size)
+    if cmp != 0
+      cmp
+    else
+      if xc.length == 2         # both have numbers and letters
+        if x =~ /\d\z/ and y !~ /\d\z/
+          -1
+        elsif x !~ /d\z/ and y =~ /\d\z/
+          1
+        else
+          return x.length <=> y.length
+        end
+      elsif xc.length == 1
+        if xc.has_key?(:alpha) and yc.has_key?(:digit)
+          1
+        elsif xc.has_key?(:digit) and yc.has_key?(:alpha)
+          -1
+        else
+          return x.length <=> y.length
+        end
+      else                      # neither has alpha or digits
+        return x.length <=> y.length
+      end
+    end
+  end
+end
+
+def callBase(str)
+  str = str.upcase.encode("US-ASCII")
+  str.gsub!(/\s+/,"")
+  parts = str.split("/")
+  case parts.length
+  when 0
+    str
+  when 1
+    parts[0]
+  when 2
+    if parts[0] =~ /\d\z/ or (parts[0] !~ /\d/ and parts[1] !~ /\A\d\z/)
+      parts[1]
+    else 
+      parts[0]
+    end
+  else                          # more than 3 who knows
+    parts.sort! { |x,y|
+      compareCallParts(x,y)
+    }
+    parts[-1]
+  end
+end
 
 
 ALREADY_EMAILED="alreadyemailed.csv"
 
 opts = GetoptLong.new(
+  [ '--max', '-m', GetoptLong::REQUIRED_ARGUMENT ],                    
   [ '--threshold', '-t', GetoptLong::REQUIRED_ARGUMENT ],
   [ '--email', '-e', GetoptLong::REQUIRED_ARGUMENT ]
 )
 
-reportThreshold = 75
+reportThreshold = nil
+maximumStations = nil
 testAddress = nil
 
 opts.each { |opt, arg|
   case opt
+  when '--max'
+    maximumStations = arg.to_i
   when '--threshold'
     reportThreshold = arg.to_i
   when '--email'
@@ -30,9 +102,14 @@ opts.each { |opt, arg|
   end
 }
 
-def calcMissingCalls(db, threshold)
+if not (maximumStations or reportThreshold)
+  print "Must supply either --max or --threshold\n"
+  exit 2
+end
+
+def calcMissingCalls(db, threshold, maximum)
   completedLogs = db.allEntries
-  callsWorked = db.workedStats(completedLogs, threshold)
+  callsWorked = db.workedStats(completedLogs, threshold, maximum)
   completedLogs.each { |id|
     call = db.getCallsign(id)
     call.split(/(\s|[(),])+/).each { |indcall|
@@ -111,17 +188,16 @@ def lookupEmail(call, xml, oneby)
   nil
 end
 
-MESSAGE_ONE = """Dear %{call}
+MESSAGE_ONE = """Dear %{call},
 
-Preliminary analysis of the logs already received from CQP 2014
-suggest that your station was active making QSOs during the contest.
-Thanks for your participation!
+Preliminary analysis of the logs already received for the 2015
+California QSO Party (CQP) suggest that your station was active making
+QSOs during the contest.  Thanks for your participation! Having lots
+of stations on the air makes it an exciting contest for everyone.
 
-This is a second courtesy reminder to ask you to please submit your
-log in Cabrillo format. For those who already sent in your log in
-paper format, we haven't added your callsign to the received
-list, so you may be receiving this despite having submitted a paper
-log.
+This is reminder to ask you to please submit your log to our electronic
+log retrieval system.  This year's logs must be submitted in Cabrillo
+format.
 
 Our log submission website is here:
 
@@ -130,18 +206,18 @@ Our log submission website is here:
 Alternatively, you can email your log as an *ATTACHMENT* to
 logs@cqp.org
 
-We look forward to receiving your log before the deadline: Friday,
-October 31, 2014
+We look forward to receiving your log before the deadline: Monday,
+12 October 2015 23:59 UTC (16:59 PDT).
 
 Many thanks.
 
 73 de Tom NS6T
-CQP 2014 Team
+CQP 2015 Log Retrieval and Scoring
 """
 
-MESSAGE_TWO = """Dear %{call}
+MESSAGE_TWO = """Dear %{call},
 
-Preliminary analysis of the logs already received from CQP 2014
+Preliminary analysis of the logs already received from CQP 2015
 suggest that your station was active making QSOs during the contest.
 Thanks for your participation!
 
@@ -154,33 +230,30 @@ easy.  Just use our online submission form:
 Alternatively, you can email your log as an *ATTACHMENT* to
 logs@cqp.org
 
-We look forward to receiving your log before the deadline: Friday,
-October 31, 2014
+We look forward to receiving your log before the deadline: Monday,
+12 October 2015 23:59 UTC (16:59 PDT).
+
 
 Many thanks.
 
 73 de Tom NS6T
-CQP 2014 Team
+CQP 2015 Log Retrieval and Scoring
 """
 
 def sendReminderEmail(toAddr, call, testAddr = nil)
   remind = OutgoingEmail.new
   remind.sendEmail(testAddr ? testAddr : toAddr,
-                   "Your California QSO Party Log",
-                   MESSAGE_ONE % { :call => call } )
-  sleep 15
+                   "Send in your California QSO Party Log",
+                   MESSAGE_ONE % { :call => call, :minutes => ((CONTEST_DEADLINE - Time.now)/60).to_i } )
+  sleep 15 + 10*rand
 end
 
 def getBase(fullcall)
-  base = nil
-  IO.popen("perl -Iqrz qrz/getbase.pl #{fullcall}", "r") { |io|
-    base = io.read.strip
-  }
-  base.upcase.strip
+  return callBase(fullcall).upcase.strip
 end
     
 
-calls = calcMissingCalls(LogDatabase.new(true), reportThreshold)
+calls = calcMissingCalls(LogDatabase.new(true), reportThreshold, maximumStations)
 
 notifiedCalls, notifiedEmails = readCSV(ALREADY_EMAILED)
 notifiedCalls.each { |call|
@@ -190,7 +263,8 @@ emailDb = Hash.new(false)
 notifiedEmails.each { |email|
   emailDb[email] = true
 }
-xmlDb = scanXML("qrz/xml_db")
+print "#{calls.length} calls to report\n"
+xmlDb = scanXML("/home/tepperly/xml_db")
 oneByOne = readOne("one-by-one.txt")
 CSV.open(ALREADY_EMAILED, "a:utf-8") { |csvout|
   calls.each { |call|

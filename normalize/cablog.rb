@@ -7,8 +7,8 @@
 require 'csv'
 require 'time'
 
-CONTEST_START=Time.utc(2014,10,4, 16, 0)
-CONTEST_END=Time.utc(2014,10,5,22,0)
+CONTEST_START=Time.utc(2015,10,3, 16, 0)
+CONTEST_END=Time.utc(2015,10,4, 22,0)
 
 def mySplit(str, pattern)
   result = [ ]
@@ -215,6 +215,7 @@ class Cabrillo
     @parsestate = 0
     @logCat = OperatorClass.new
     @dbCat = OperatorClass.new
+    @dbtimestamp = nil
     @dbcomments = nil
     @stationType = nil
     @band = nil
@@ -239,6 +240,16 @@ class Cabrillo
     }
   end
 
+  def interpolatetime(range, start, endtime)
+    delta = (endtime - start).to_f/(range.size - 1)
+    @qsos.each { |qso|
+      if range.include?(qso.sentExch.serial.to_i)
+        qso.datetime = (start + delta * 
+                        (qso.sentExch.serial.to_i - range.first))
+      end
+    }
+  end
+
   def trans(oldstate, newstate)
     if @parsestate <= oldstate
       @parsestate = newstate
@@ -253,7 +264,7 @@ class Cabrillo
     if MULTIPLIER_ALIASES[tmp]
       return  MULTIPLIER_ALIASES[tmp]
     else
-      $stderr.write("Unknown multiplier: '" + str + "'\n")
+      $stderr.write("#{logCall} has unknown multiplier: '" + str + "'\n")
       if tmp =~ /[^a-z0-9]/i
         return "XXXX"
       else
@@ -530,6 +541,9 @@ class Cabrillo
     when /\Ax-cqp-power:\s*(.*)\Z/i
       trans(1,1)
       @dbCat.power = $1.downcase.strip.to_sym
+    when /\Ax-cqp-timestamp:\s*(.*)\Z/i
+      trans(1, 1)
+      @dbtimestamp = $1
     when /\Ax-cqp-categories:\s*(.*)\Z/i
       trans(1, 1)
       processCQPCategories($1)
@@ -731,10 +745,10 @@ class Cabrillo
 
   def checkTime(qso)
     if qso.datetime < CONTEST_START
-      print "QSO date #{qso.datetime} before contest start by #{(CONTEST_START-qso.datetime)/60} minutes\n"
+      print "#{logCall} QSO date #{qso.datetime} before contest start by #{(CONTEST_START-qso.datetime)/60} minutes\n"
     end
     if qso.datetime > CONTEST_END
-      print "QSO date #{qso.datetime} after contest end by #{(qso.datetime - CONTEST_END)/60} minutes\n"
+      print "#{logCall} QSO date #{qso.datetime} after contest end by #{(qso.datetime - CONTEST_END)/60} minutes\n"
     end
   end
 
@@ -759,7 +773,6 @@ class Cabrillo
     }
     reviewQSOs
     @qsos.each { |qso| checkTime(qso) }
-    print "cleanparse is #{@cleanparse.to_s}\n"
   end
 
   def logCall
@@ -960,13 +973,14 @@ NAME: #{@name}
   end
 
   def writeCQPHeaders(out)
-    out.write("X-CQP-CALLSIGN: #{@dblogcall.upcase.strip}
+    if @dblogcall and @dbCat and @dbCat.sentQTH and @dbCat.email
+      out.write("X-CQP-CALLSIGN: #{@dblogcall.upcase.strip}
 X-CQP-SENTQTH: #{@dbCat.sentQTH.strip}
 X-CQP-EMAIL: #{@dbCat.email.strip}
 X-CQP-CONFIRM1: #{@dbCat.email.strip}
 X-CQP-PHONE: #{dbphone}
-X-CQP-POWER: #{@dbCat.power.to_s.upcase}
-X-CQP-OPCLASS: #{cqpOpClass}\n")
+")
+    end
     if @dbcomments 
       comments = @dbcomments.encode("US-ASCII", :invalid => :replace, :undef => :replace)
       comments.split(/\r\n?|\n\r?/).each { |line|
@@ -975,22 +989,28 @@ X-CQP-OPCLASS: #{cqpOpClass}\n")
     else
       out.write("X-CQP-COMMENTS:\n")
     end
-    out.write("X-CQP-CATEGORIES: #{cqpCategories}
-X-CQP-ID: #{@logID.to_s}
-")
+    if cqpCategories and @dbCat and @dbCat.power and cqpOpClass
+      out.write("X-CQP-CATEGORIES: #{cqpCategories}
+X-CQP-POWER: #{@dbCat.power.to_s.upcase}
+X-CQP-OPCLASS: #{cqpOpClass}
+X-CQP-ID: #{@logID.to_s}\n")
+    end
+    if @dbtimestamp
+      out.write("X-CQP-TIMESTAMP: #{@dbtimestamp}\n")
+    end
   end
 
   def cqpOpClass
     case @dbCat.numop
     when :single
-      "Single-op"
+      @dbCat.assisted ? "SINGLE-ASSISTED" : "SINGLE"
     when :checklog
-      "Checklog"
+      "CHECKLOG"
     when :multi
       if :one == @dbCat.numtrans
-        "Multi-single"
+        "MULTI-SINGLE"
       else
-        "Multi-multi"
+        "MULTI-MULTI"
         end
     else
       "Unknown"
@@ -1103,7 +1123,9 @@ X-CQP-ID: #{@logID.to_s}
       when /PHONE/
         @mode = "SSB"
       else
-        $stderr.write("Missing: '#{tok}'\n")
+        if (tok and not tok.empty?)
+          $stderr.write("#{logCall} category missing: '#{tok}'\n")
+        end
       end
     }
   end
@@ -1132,6 +1154,10 @@ X-CQP-ID: #{@logID.to_s}
     case value
     when "single", "single-op"
       @dbCat.assisted = false
+      @dbCat.numop = :single
+      @dbCat.numtrans = :one
+    when "single-assisted"
+      @dbCat.assisted = true
       @dbCat.numop = :single
       @dbCat.numtrans = :one
     when "multi-single"
