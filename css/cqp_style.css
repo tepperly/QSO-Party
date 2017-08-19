@@ -129,6 +129,11 @@ div.QSOReport h2, div.QCallReport h2 {
     text-align: right;
 }
 
+.inLabelCat {
+    width: 90px;
+    text-align: left;
+}
+
 #cabcontentId, #ALLcabcontentId {
     font-family: "Courier New", "Lucida Console", monospace;
 }
