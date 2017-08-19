@@ -7,6 +7,15 @@ h1 {
     margin-bottom: 10px;
 }
 
+.countdown {
+    font-family: "Trebuchet MS", Verdana, Sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 a {
     color: #428BCA;
     text-decoration: underline;

@@ -26,7 +26,8 @@ class ContestPeriod
 end
 
 $CONTESTS = [
-  ContestPeriod.new(Time.utc(2016, 10, 1, 16, 0), Time.utc(2016, 10, 2, 22, 0))
+  ContestPeriod.new(Time.utc(2017, 10, 7, 16, 0), Time.utc(2017, 10, 8, 22, 0))
+#  ContestPeriod.new(Time.utc(2016, 10, 1, 16, 0), Time.utc(2016, 10, 2, 22, 0))
 #  ContestPeriod.new(Time.utc(2015, 10, 3, 16, 0), Time.utc(2015, 10, 4, 22, 0))
 #  ContestPeriod.new(Time.utc(2014, 10, 4, 16, 0), Time.utc(2014, 10, 5, 22, 0)), # CQP 2014
 #  ContestPeriod.new(Time.utc(2013, 10, 5, 16, 0), Time.utc(2013, 10, 6, 22, 0)), # CQP 2013

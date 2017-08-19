@@ -17,10 +17,13 @@
   <script src="js/jquery.fileupload.js" type="text/javascript"></script>
   <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.0/jquery.validate.min.js" type="text/javascript"></script>
   <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.13.0/additional-methods.min.js" type="text/javascript"></script>
-
+  <script src="js/jquery.countdown-2.2.0/jquery.countdown.min.js"></script>
 </head>
 <body>
 <img  src="images/cqplogo80075.jpg" alt="California QSO Party" > 
+<div id="countdownclock" class="countdown">
+  Deadline for log submission is in <span id="clock"></span>
+</div>
 <div id="tabs" style="display: none">
   <ul>
     <li><a href="#tabs-1">Upload or drag-and-drop</a></li>
@@ -500,6 +503,22 @@ function calcColor(validQ, maxQ, badMults) {
 }
  
   $(function () {
+    $('#clock').countdown('2017/10/23 23:59:59 +0000')
+    .on('update.countdown', function(event) {
+     var format = '%H hour%!H %M minute%!M %S second%!S';
+     if(event.offset.totalDays > 0) {
+      format = '%-d day%!d ' + format;
+     }
+     if(event.offset.weeks > 0) {
+       format = '%-w week%!w ' + format;
+     }
+     $(this).html(event.strftime(format));
+   })
+  .on('finish.countdown', function(event) {
+    $(this).html('past. Logs submitted now will be treated as checklogs.')
+      .parent().addClass('disabled');
+   });
+
     var urlval = "server/upload.fcgi";
     $('#tabs').show();
     $('#AllInOne').hide();
