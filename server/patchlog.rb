@@ -44,7 +44,8 @@ def patchLog(content, attributes)
 end
 
 def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, comments,
-                   expedition, youth, mobile, female, school, newcontester)
+                   expedition, youth, mobile, female, school, newcontester,
+                   clubname, clubother, clubcategory)
   result = { }
   result['X-CQP-CALLSIGN'] = callsign
   result['X-CQP-SENTQTH'] = sentqth
@@ -70,6 +71,16 @@ def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, comments,
   end
   if newcontester == 1
     categories.push("NEW_CONTESTER")
+  end
+  if clubname and (not clubname.strip.empty?) and "OTHER" != clubname
+    result['X-CQP-CLUBNAME'] = clubname.strip.upcase
+  else
+    if clubother and (not clubother.strip.empty?)
+      result['X-CQP-CLUBNAME'] = clubother.strip.upcase
+    end
+  end
+  if clubcategory and (not clubcategory.strip.empty?)
+    result['X-CQP-CLUBCATEGORY'] = clubcategory.strip.upcase
   end
   result['X-CQP-CATEGORIES'] = categories.join(" ")
   result['X-CQP-ID'] = id.to_s

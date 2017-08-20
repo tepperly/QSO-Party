@@ -42,6 +42,16 @@ def guessEmail(str)
   nil
 end
 
+def getClub(name, altname)
+  if name and (not ["OTHER", "NONE"].include?(name)) and (not name.strip.empty?)
+    return name
+  end
+  if altname and not altname.strip.empty?
+    return altname
+  end
+  return nil
+end
+
 def handleRequest(request, db, logCheck)
   timestamp = Time.new.utc
   logID=nil
@@ -154,6 +164,7 @@ def handleRequest(request, db, logCheck)
       if not logID
         logID = request["logID"].to_i
       end
+      clubName = 
       db.addExtra(logID, request["callsign"],
                   request["email"], 
                   request["opclass"],
@@ -164,7 +175,9 @@ def handleRequest(request, db, logCheck)
                   checkBox(request, "expedition"), checkBox(request, "youth"),
                   checkBox(request, "mobile"), checkBox(request, "female"),
                   checkBox(request, "school"), checkBox(request, "new"), 
-                  source, nil)
+                  source, nil, 
+                  getClub(request["clubname"], request["otherclubname"]), 
+                  request["clubsize"])
       asciiFile = db.getASCIIFile(logID)
       if asciiFile
         attrib = makeAttributes(logID, request["callsign"],
@@ -174,7 +187,10 @@ def handleRequest(request, db, logCheck)
                                 request["comments"],
                                 checkBox(request, "expedition"), checkBox(request, "youth"),
                                 checkBox(request, "mobile"), checkBox(request, "female"),
-                                checkBox(request, "school"), checkBox(request, "new"))
+                                checkBox(request, "school"), checkBox(request, "new"),
+                                request['clubname'],
+                                request['otherclubname'],
+                                request['clubsize'])
         open(asciiFile,File::Constants::RDONLY,
              :encoding => "US-ASCII") { |io|
           content = io.read()

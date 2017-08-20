@@ -47,7 +47,7 @@ class LogDatabase
           @connection.query("use CQPUploads;")
           @connection.query("create table if not exists CQPLog (id bigint primary key, callsign varchar(32), callsign_confirm varchar(32), userfilename varchar(1024), originalfile varchar(1024), asciifile varchar(1024), logencoding varchar(32), origdigest char(40), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single', 'single-assisted'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, uploadinstant double, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), maxqso int, parseqso int, county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, completed tinyint(1) unsigned not null default 0, source enum('unknown', 'email', 'form1', 'form2', 'form3', 'form4') not null default 'unknown', index callindex (callsign asc), index calltwoind (callsign_confirm asc), index uploadtimeind (uploadtime asc), index uploadinstind (uploadinstant asc));")
           @connection.query("create table if not exists CQPError (id int auto_increment primary key, message varchar(256), traceback varchar(1024), timestamp datetime);")
-          @connection.query("create table if not exists CQPExtra (id bigint primary key auto_increment, logid bigint, callsign varchar(32), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single', 'single-assisted'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, source enum('unknown', 'email', 'form1', 'form2', 'form3', 'form4') not null default 'unknown', ipaddress varchar(22), index uploadtimeind (uploadtime asc));")
+          @connection.query("create table if not exists CQPExtra (id bigint primary key auto_increment, logid bigint, callsign varchar(32), opclass ENUM('checklog', 'multi-multi', 'multi-single', 'single', 'single-assisted'), power ENUM('High', 'Low', 'QRP'), uploadtime datetime, emailaddr varchar(256), sentqth varchar(256), phonenum varchar(32), comments varchar(4096), county tinyint(1) unsigned,  youth tinyint(1) unsigned, mobile tinyint(1) unsigned, female tinyint(1) unsigned, school tinyint(1) unsigned, newcontester tinyint(1) unsigned, source enum('unknown', 'email', 'form1', 'form2', 'form3', 'form4') not null default 'unknown', ipaddress varchar(22), clubname varchar(128), clubcat enum('unknown','small','medium','large') default 'unknown' not null, index uploadtimeind (uploadtime asc));")
           @connection.query("create table if not exists CQPWorked (id bigint primary key auto_increment, logid bigint not null, callsign varchar(32) not null, count smallint unsigned not null default 0, index logind (logid asc), index callind (callsign asc));")
         end
       end
@@ -158,8 +158,26 @@ class LogDatabase
     return nil, nil
   end
 
+  def nullOrString(str)
+    if str and ("NONE" != str) and ("OTHER" != str)
+      return "'" + Mysql2::Client::escape(str) + "'"
+    else
+      return "NULL"
+    end
+  end
+
+  def clubCategory(cat)
+    if cat then
+      cat = cat.strip.downcase
+      if ['unknown', 'small', 'medium', 'large'].include?(cat)  then
+        return "'" + cat + "'"
+      end
+    end
+    return "'unknown'"
+  end
+
   def addExtra(id,callsign, email, opclass, power, sentqth, phone, comments, county, youth, mobile, female, school, newcontester, source,
-               ipaddr)
+               ipaddr, clubname, clubcat)
     connect
     if @connection
       id = id.to_i
@@ -170,9 +188,9 @@ class LogDatabase
 #      $outfile.write(queryStr + "\n");
       @connection.query(queryStr)
       if ipaddr
-        @connection.query("insert into CQPExtra (logid, callsign, opclass, power, uploadtime, emailaddr, sentqth, phonenum, comments, county, youth, mobile, female, school, newcontester, source, ipaddress) values (#{id}, '#{Mysql2::Client::escape(callsign)}', '#{Mysql2::Client::escape(opclass)}', '#{Mysql2::Client::escape(power)}', NOW(), '#{Mysql2::Client::escape(email)}', '#{Mysql2::Client::escape(sentqth)}', '#{Mysql2::Client::escape(phone)}', '#{Mysql2::Client::escape(comments)}', #{county.to_i}, #{youth.to_i}, #{mobile.to_i}, #{female.to_i}, #{school.to_i}, #{newcontester.to_i}, '#{Mysql2::Client::escape(source)}', '#{Mysql2::Client::escape(ipaddr)}');")
+        @connection.query("insert into CQPExtra (logid, callsign, opclass, power, uploadtime, emailaddr, sentqth, phonenum, comments, county, youth, mobile, female, school, newcontester, source, ipaddress, clubname, clubcat) values (#{id}, '#{Mysql2::Client::escape(callsign)}', '#{Mysql2::Client::escape(opclass)}', '#{Mysql2::Client::escape(power)}', NOW(), '#{Mysql2::Client::escape(email)}', '#{Mysql2::Client::escape(sentqth)}', '#{Mysql2::Client::escape(phone)}', '#{Mysql2::Client::escape(comments)}', #{county.to_i}, #{youth.to_i}, #{mobile.to_i}, #{female.to_i}, #{school.to_i}, #{newcontester.to_i}, '#{Mysql2::Client::escape(source)}', '#{Mysql2::Client::escape(ipaddr)}', #{nullOrString(clubname)}, #{clubCategory(clubcat)});")
       else
-        @connection.query("insert into CQPExtra (logid, callsign, opclass, power, uploadtime, emailaddr, sentqth, phonenum, comments, county, youth, mobile, female, school, newcontester, source) values (#{id}, '#{Mysql2::Client::escape(callsign)}', '#{Mysql2::Client::escape(opclass)}', '#{Mysql2::Client::escape(power)}', NOW(), '#{Mysql2::Client::escape(email)}', '#{Mysql2::Client::escape(sentqth)}', '#{Mysql2::Client::escape(phone)}', '#{Mysql2::Client::escape(comments)}', #{county.to_i}, #{youth.to_i}, #{mobile.to_i}, #{female.to_i}, #{school.to_i}, #{newcontester.to_i}, '#{Mysql2::Client::escape(source)}');")
+        @connection.query("insert into CQPExtra (logid, callsign, opclass, power, uploadtime, emailaddr, sentqth, phonenum, comments, county, youth, mobile, female, school, newcontester, source, clubname, clubcat) values (#{id}, '#{Mysql2::Client::escape(callsign)}', '#{Mysql2::Client::escape(opclass)}', '#{Mysql2::Client::escape(power)}', NOW(), '#{Mysql2::Client::escape(email)}', '#{Mysql2::Client::escape(sentqth)}', '#{Mysql2::Client::escape(phone)}', '#{Mysql2::Client::escape(comments)}', #{county.to_i}, #{youth.to_i}, #{mobile.to_i}, #{female.to_i}, #{school.to_i}, #{newcontester.to_i}, '#{Mysql2::Client::escape(source)}', #{nullOrString(clubname)}, #{clubCategory(clubcat)});")
       end
       true
     else

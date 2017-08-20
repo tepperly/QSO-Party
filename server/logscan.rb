@@ -59,6 +59,7 @@ class CQPLog
     @filename = filename
     @version = nil              # Cabrillo version
     @callsign = nil
+    @club = nil
     @state = 0                  # 0 - before log, 1 - start-of-log, 2 - QSO section, 3 - end-of-line
     @band = nil
     @badcallsigns = { }         # collection of bad callsigns
@@ -129,11 +130,11 @@ class CQPLog
   
   attr_writer :callsign, :assisted, :numops, :power, :categories, :numtrans, :maxqso, :band,
             :validqso, :email, :sentqth, :operators, :qsos, :warnings, :errors,
-            :state, :name, :badcallsigns, :version, :mode, :comments
+            :state, :name, :badcallsigns, :version, :mode, :comments, :club
   attr_reader :id, :callsign, :assisted, :numops, :power, :categories, :numtrans, :maxqso,
             :validqso, :email, :sentqth, :operators, :qsos, :warnings, :errors, :state, :band,
             :name, :badcallsigns, :version, :mode, :comments, :badmultipliers, :warnmultipliers,
-            :tally, :filename
+            :tally, :filename, :club
 
   def to_s
     @id.to_s + "\nCabrillo version: " + @version.to_s + "\nCallsign: " + @callsign.to_s + "\nState: " +
@@ -210,6 +211,9 @@ class CQPLog
     result["MaxQSO"] = @maxqso
     result["ParseableQSO"] = @validqso
     result["opclass"] = calcOpClass
+    if @club
+      result["club"] = @club
+    end
     result["badcallsigns"] = @badcallsigns.keys.sort
     result["opmsg"] = calcOpMessage
     if @power
@@ -892,6 +896,10 @@ class ClubTag < HeaderTag
     @tagregex = TAGREGEX
     @strictregex = WHOLETAG
     @error = false
+  end
+
+  def tagMatch(match, log, linenum)
+    log.club = match[2].strip.upcase
   end
 end
 
