@@ -287,6 +287,19 @@ class LogDatabase
         row.each { |column, value|
           result[column] = value
         }
+        res2 = @connection.query("select clubname, clubcat from CQPExtra where logid = #{id} limit 1;")
+        res2.each { |extrarow|
+          if extrarow["clubname"] and not extrarow["clubname"].empty?
+            result["clubname"] = extrarow["clubname"]
+          else
+            result["clubname"] = nil
+          end
+          if extrarow["clubcat"]
+            result["clubcat"] = extrarow["clubcat"]
+          else
+            result["clubcat"] = "unknown"
+          end
+        }
         return result
       }
     end

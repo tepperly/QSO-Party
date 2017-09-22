@@ -85,6 +85,8 @@ CQP 2017 Log Confirmation
        Power Level: #{entry['power']}
           Sent QTH: #{entry['sentqth']}
 Special Categories: #{categories}
+              Club: #{entry['clubname'].to_s}
+     Club-Category: #{entry['clubcat'].to_s}
        Received at: #{entry['uploadtime']}
        Deadline at: #{CQPConfig::CONTEST_DEADLINE}
    Total QSO Lines: #{entry['maxqso']}

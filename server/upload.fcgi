@@ -52,6 +52,18 @@ def getClub(name, altname)
   return nil
 end
 
+def contentsMatch(content, filename)
+  begin
+    open(filename, File::Constants::RDONLY, :encoding => "US-ASCII") { |inf|
+      fileContent = inf.read()
+      return content == fileContent
+    }
+  rescue
+    return false
+  end
+  return false
+end
+
 def handleRequest(request, db, logCheck)
   timestamp = Time.new.utc
   logID=nil
@@ -195,12 +207,31 @@ def handleRequest(request, db, logCheck)
              :encoding => "US-ASCII") { |io|
           content = io.read()
           content = patchLog(content, attrib) # add X-CQP lines
-          open(asciiFile.gsub(/\.ascii$/, ".log"), 
-               File::Constants::CREAT | File::Constants::EXCL | 
-               File::Constants::WRONLY,
-               :encoding => "US-ASCII") { |lout|
-            lout.write(content)
-          }
+          iteration=0
+          notWritten = true
+          while (notWritten)
+            if (iteration > 0)
+              suffix=("_" + iteration.to_s)
+            else
+              suffix=""
+            end
+            logFilename = asciiFile.gsub(/\.ascii$/, suffix + ".log")
+            begin
+              open(logFilename, 
+                   File::Constants::CREAT | File::Constants::EXCL | 
+                   File::Constants::WRONLY,
+                   :encoding => "US-ASCII") { |lout|
+                lout.write(content)
+              }
+              notWritten = false
+            rescue
+              if (contentsMatch(content, logFilename))
+                notWritten = false
+              else
+                iteration = iteration + 1
+              end
+            end
+          end
         }
       end
     end

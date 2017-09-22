@@ -899,7 +899,9 @@ class ClubTag < HeaderTag
   end
 
   def tagMatch(match, log, linenum)
-    log.club = match[2].strip.upcase
+    if match.length >= 3 and match[2]
+      log.club = match[2].strip.upcase
+    end
   end
 end
 
