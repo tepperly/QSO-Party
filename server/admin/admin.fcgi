@@ -101,7 +101,6 @@ MIDDLE=<<MIDDLE_END
 MIDDLE_END
 
 HTML_TRAILER = <<TRAILER_END
-    </TABLE>
 
      <h1>Entries by Power Level</h1>
      <img src="piechart.fcgi?type=power" height="450" width="500">
@@ -300,6 +299,32 @@ def multiplierTable(db)
   } + "</table>\n\n"
 end
 
+def clubReport(db, ids)
+  lines = db.clubReport(ids)
+  count = 1
+  return "<!-- #{lines.join(", ")}-->\n" +
+    "<table %{tablestyle}>
+<caption %{capstyle}>CQP %{year} Club Submissions</caption>
+<tr>
+  <th %{headeven}>Club</th><th %{headeven}>Category</th><th %{headeven}># Logs</th>
+</tr>
+" + lines.reduce("") { |total, line|
+    if count.even?
+      total = total.to_s + "<tr><td %{dataeven}>" + line[0].to_s +
+        "</td><td %{dataeven}>" + line[1].to_s +
+        "</td><td %{dataeven}>" + line[2].to_s +
+        "</td></tr>\n"
+    else
+      total = total.to_s + "<tr><td %{dataodd}>" + line[0].to_s +
+        "</td><td %{dataodd}>" + line[1].to_s +
+        "</td><td %{dataodd}>" + line[2].to_s +
+        "</td></tr>\n"
+    end
+    count = count + 1
+    total
+  } + "</table>\n\n"
+end
+
 
 def handle_request(request, db)
   timestamp = Time.new.utc
@@ -388,6 +413,8 @@ def handle_request(request, db)
         end
         total
       } + "</table>\n" + multiplierTable(db) + 
+      "   </table>\n\n" +
+      clubReport(db, completedLogs) +
       HTML_TRAILER) % attr
   }
 end

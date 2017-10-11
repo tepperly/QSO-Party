@@ -145,7 +145,17 @@ def checkMail(mail, subject, sender, headers, db, logCheck)
 end
 
 def getReturnEmail(mail)
-  mail.from[0]
+  begin
+    if mail.reply_to and mail.reply_to.kind_of?(Array) and mail.reply_to.length == 1
+      return mail.reply_to[0]
+    else
+      return mail.from[0]
+    end
+  rescue => e
+    $stderr.write("Exception: " + e.class.to_s + "\nMessage: " + e.message + "\nTraceback: \n: " + e.backtrace.join("\n") + "\n")
+    $stderr.flush
+    return mail.from[0]
+  end
 end
 
 begin

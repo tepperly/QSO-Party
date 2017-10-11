@@ -323,12 +323,23 @@ class LogDatabase
     result
   end
 
+def clubReport(ids)
+  result = Array.new
+  if @connection and (ids.length > 0)
+    res = @connection.query("select clubname, clubcat, count(*) from CQPExtra, CQPLog where CQPExtra.logid = CQPLog.id and clubname is not null and clubname != '' and CQPLog.id in (#{ids.join(", ")}) group by concat(clubname, '-', clubcat) order by clubname asc, clubcat asc;")
+    res.each(:as => :array) { |row|
+      result << [row[0].to_s, row[1].to_s, row[2].to_i]
+    }
+  end
+  return result
+end
+
   def incompleteEntries
     connect
     result = nil
     if @connection
       result = [ ]
-      res = @connection.query("select l1.id from CQPLog l1 left outer join CQPLog l2 on (l1.callsign = l2.callsign and l2.completed) where l2.id is null and not l1.completed group by l1.callsign asc order by l1.callsign asc;");
+      res = @connection.query("select l1.id from CQPLog l1 left outer join CQPLog l2 on (l1.callsign = l2.callsign and l2.completed) where l2.id is null and not l1.completed group by l1.callsign asc order by l1.callsign asc;")
       res.each(:as => :array) { |row|
         result << row[0].to_i
       }
