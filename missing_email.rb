@@ -2,12 +2,14 @@
 # -*- encoding: utf-8 -*-
 
 require 'database'
+require 'date'
 require 'csv'
 require 'email'
 require 'getoptlong'
 require 'nokogiri'
+require_relative 'qrz/fetch'
 
-CONTEST_DEADLINE=DateTime.new(2015,10,12,23,59, 59,'+0').to_time
+CONTEST_DEADLINE=DateTime.new(2016,10,17,23,59, 59,'+0').to_time
 XML_NAMESPACE = {'qrz' => 'http://xmldata.qrz.com'}
 DELIM = /\s*,\s*/
 
@@ -115,6 +117,10 @@ def calcMissingCalls(db, threshold, maximum)
     call.split(/(\s|[(),])+/).each { |indcall|
       if indcall.length > 0
         callsWorked.delete(indcall)
+        base = callBase(indcall)
+        if base.length > 0
+          callsWorked.delete(base)
+        end
       end
     }
   }
@@ -190,7 +196,7 @@ end
 
 MESSAGE_ONE = """Dear %{call},
 
-Preliminary analysis of the logs already received for the 2015
+Preliminary analysis of the logs already received for the %{year}
 California QSO Party (CQP) suggest that your station was active making
 QSOs during the contest.  Thanks for your participation! Having lots
 of stations on the air makes it an exciting contest for everyone.
@@ -206,18 +212,18 @@ Our log submission website is here:
 Alternatively, you can email your log as an *ATTACHMENT* to
 logs@cqp.org
 
-We look forward to receiving your log before the deadline: Monday,
-12 October 2015 23:59 UTC (16:59 PDT).
+We look forward to receiving your log before the deadline: 
+%{deadline}.
 
 Many thanks.
 
 73 de Tom NS6T
-CQP 2015 Log Retrieval and Scoring
+CQP %{year} Log Retrieval and Scoring
 """
 
 MESSAGE_TWO = """Dear %{call},
 
-Preliminary analysis of the logs already received from CQP 2015
+Preliminary analysis of the logs already received from CQP %{year}
 suggest that your station was active making QSOs during the contest.
 Thanks for your participation!
 
@@ -230,22 +236,24 @@ easy.  Just use our online submission form:
 Alternatively, you can email your log as an *ATTACHMENT* to
 logs@cqp.org
 
-We look forward to receiving your log before the deadline: Monday,
-12 October 2015 23:59 UTC (16:59 PDT).
+We look forward to receiving your log before the deadline: 
+%{deadline}.
 
 
 Many thanks.
 
 73 de Tom NS6T
-CQP 2015 Log Retrieval and Scoring
+CQP %{year} Log Retrieval and Scoring
 """
 
 def sendReminderEmail(toAddr, call, testAddr = nil)
+  sleep 25 + 10*rand
   remind = OutgoingEmail.new
   remind.sendEmail(testAddr ? testAddr : toAddr,
-                   "Send in your California QSO Party Log",
-                   MESSAGE_ONE % { :call => call, :minutes => ((CONTEST_DEADLINE - Time.now)/60).to_i } )
-  sleep 15 + 10*rand
+                   "Send in your California QSO Party Log (" +
+                   format("%.1f", ((CONTEST_DEADLINE - Time.now)/3600.0)) + 
+                   " hours until the deadline)",
+                   MESSAGE_ONE % { :call => call, :minutes => ((CONTEST_DEADLINE - Time.now)/60).to_i, :year => CONTEST_DEADLINE.year, :deadline => CONTEST_DEADLINE.strftime("%A, %-d %B %Y %H:%M %Z") } )
 end
 
 def getBase(fullcall)
@@ -254,6 +262,20 @@ end
     
 
 calls = calcMissingCalls(LogDatabase.new(true), reportThreshold, maximumStations)
+xmlDb = scanXML("/home/tepperly/xml_db")
+ql = QRZLookup.new("k6tu","coetanian")
+calls.each { |call|
+  basecall = getBase(call)
+  if not xmlDb.has_key?(call) and not xmlDb.has_key?(basecall) and call !~ /\A[A-Z][0-9][A-Z]\Z/i
+    sleep 1 + rand(1.0)
+    str, xml = ql.lookupCall(basecall)
+    filename = "/home/tepperly/xml_db/" + basecall + ".xml"
+    if str and not File.exists?(filename)
+      open(filename, "w:utf-8") { |xout| xout.write(str) }
+    end
+  end
+}
+print "Done fetching from QRZ\n"
 
 notifiedCalls, notifiedEmails = readCSV(ALREADY_EMAILED)
 notifiedCalls.each { |call|
