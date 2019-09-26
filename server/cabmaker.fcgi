@@ -165,7 +165,7 @@ def handleRequest(req)
 	      </select>
 	    </td>
 	    <td>
-	      <input name="date1" id="date1" value="2017-10-07" class="date" type="text">
+	      <input name="date1" id="date1" value="2018-10-06" class="date" type="text">
 	    </td>
 	    <td>
 	      <input name="time1" id="time1" value="" class="time" type="text">
@@ -233,7 +233,7 @@ function updateQSOGrid(grid, num) {
 	    </select>\
 	  </td>\
 	  <td>\
-	    <input name=\"date" + numqsos + "\" id=\"date" + numqsos + "\" value=\"2017-10-07\" class=\"date\" type=\"text\">\
+	    <input name=\"date" + numqsos + "\" id=\"date" + numqsos + "\" value=\"2018-10-06\" class=\"date\" type=\"text\">\
 	  </td>\
 	  <td>\
 	    <input name=\"time" + numqsos + "\" id=\"time" + numqsos + "\" value=\"\" class=\"time\" type=\"text\">\

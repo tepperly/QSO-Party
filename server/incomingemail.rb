@@ -89,7 +89,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
     attrib = makeAttributes(logID, callsign, sender, sender, log.filterQTH[0].to_s,
                             "", "", log.county?, log.youth?, log.mobile?,
                             log.female?, log.school?, log.newcontester?,
-                            log.club, nil, nil)
+                            log.club, nil, nil, log.calcOpClass, log.power)
     patchedContent = patchLog(asciiContent, attrib) # add X-CQP lines
     open(asciiFilename.gsub(/\.ascii$/, ".log"),
          File::Constants::CREAT | File::Constants::EXCL | 
@@ -99,7 +99,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
     }
     outE = OutgoingEmail.new
     html = logHtml(log, db.getEntry(logID))
-    outE.sendEmailAlt(sender, "CQP 2017 Log Confirmation", htmlToPlain(html, "text/html"), html)
+    outE.sendEmailAlt(sender, "CQP 2018 Log Confirmation", htmlToPlain(html, "text/html"), html)
     return true
   end
   false
@@ -183,10 +183,10 @@ begin
       numlogs = checkMail(mail, mail.subject, getReturnEmail(mail), mail.header, db, logCheck)
 #    print "Mail message #{uid} had #{numlogs} log(s)\n"
       if numlogs > 0
-        #    imap.store(uid, "+X-GM-LABELS", ["CQP2017/Log"])
+        #    imap.store(uid, "+X-GM-LABELS", ["CQP2018/Log"])
         imap.copy(seqno, CQPConfig::INCOMING_IMAP_SUCCESS_FOLDER)
       else
-        #    imap.store(uid, "+X-GM-LABELS", ["CQP2017/Unknown"])
+        #    imap.store(uid, "+X-GM-LABELS", ["CQP2018/Unknown"])
         imap.copy(seqno, CQPConfig::INCOMING_IMAP_FAIL_FOLDER)
       end
       #  imap.store(uid, "-X-GM-LABELS", ["\\Inbox"])

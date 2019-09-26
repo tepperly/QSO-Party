@@ -202,7 +202,9 @@ def handleRequest(request, db, logCheck)
                                 checkBox(request, "school"), checkBox(request, "new"),
                                 request['clubname'],
                                 request['otherclubname'],
-                                request['clubsize'])
+                                request['clubsize'],
+                                request['opclass'],
+                                request['power'])
         open(asciiFile,File::Constants::RDONLY,
              :encoding => "US-ASCII") { |io|
           content = io.read()

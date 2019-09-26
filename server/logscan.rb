@@ -26,7 +26,8 @@ class ContestPeriod
 end
 
 $CONTESTS = [
-  ContestPeriod.new(Time.utc(2017, 10, 7, 16, 0), Time.utc(2017, 10, 8, 22, 0))
+  ContestPeriod.new(Time.utc(2018, 10, 6, 16, 0), Time.utc(2018, 10, 7, 22, 0))
+#  ContestPeriod.new(Time.utc(2017, 10, 7, 16, 0), Time.utc(2017, 10, 8, 22, 0))
 #  ContestPeriod.new(Time.utc(2016, 10, 1, 16, 0), Time.utc(2016, 10, 2, 22, 0))
 #  ContestPeriod.new(Time.utc(2015, 10, 3, 16, 0), Time.utc(2015, 10, 4, 22, 0))
 #  ContestPeriod.new(Time.utc(2014, 10, 4, 16, 0), Time.utc(2014, 10, 5, 22, 0)), # CQP 2014
@@ -884,7 +885,7 @@ end
 class ClubTag < HeaderTag
   TAG="CLUB"
   TAGREGEX=/\Aclub(-name)?:/i
-  WHOLETAG=/\Aclub(-name)?:\s*(([a-z0-9][a-z0-9\/\.]*(\s+(&|[a-z0-9][a-z0-9\/\.]*))*))?\s*/i
+  WHOLETAG=/\Aclub(-name)?:\s*(([-a-z0-9][-a-z0-9\/\.()]*(\s+(&|[-a-z0-9][-a-z0-9\/\.()]*))*))?\s*/i
 
   def properSyntax
     "CLUB: club-name"
@@ -961,8 +962,8 @@ end
 
 class XCQPTag < HeaderTag
   TAG="X-CQP-TAG"
-  TAGREGEX=/\Ax-cqp-(confirm1|email|special-\d+|comments|phone):/i
-  WHOLETAG=/\Ax-cqp-(confirm1|email|special-\d+|comments|phone):\s*(.+)\s*/i
+  TAGREGEX=/\Ax-cqp-(confirm1|email|special-\d+|comments|phone|sentqth|id|timestamp|callsign|clubname|categories|clubcategory):/i
+  WHOLETAG=/\Ax-cqp-(confirm1|email|special-\d+|comments|phone|sentqth|id|timestamp|callsign|clubname|categories|clubcategory):\s*(.+)\s*/i
 
   def initialize
     super
@@ -1026,7 +1027,7 @@ end
 class NameTag < HeaderTag
   TAG="NAME"
   TAGREGEX=/\Aname:/i
-  WHOLETAG=/\Aname:\s*([a-z0-9][a-z0-9\/\.]*(((\s*,\s*|\s+)(&|[a-z0-9][a-z0-9\/\.]*))*))\s*/i
+  WHOLETAG=/\Aname:\s*([-a-z0-9'"()][-a-z0-9\/\.'"()]*(((\s*,\s*|\s+)(&|[-a-z0-9'"()][a-z0-9\/\.'"()]*))*))\s*/i
 
   def properSyntax
     "NAME: text"

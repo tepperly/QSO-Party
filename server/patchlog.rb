@@ -5,6 +5,7 @@
 # ns6t@arrl.net
 #
 #
+require 'set'
 
 def makePatch(attributes)
   result = "".encode("US-ASCII")
@@ -16,7 +17,7 @@ def makePatch(attributes)
                                                            :undef => :replace) + "\n"
       }
     else
-      result = result + keystr + value.strip.encode("US-ASCII", :invalid => :replace,
+      result = result + keystr + value.to_s.strip.encode("US-ASCII", :invalid => :replace,
                                                            :undef => :replace) + "\n"
     end
   }
@@ -43,9 +44,14 @@ def patchLog(content, attributes)
   content
 end
 
-def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, comments,
+BADCLUBNAME = %w{OTHER NONE }.to_set
+BADCLUBNAME.freeze
+
+def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, 
+                   comments,
                    expedition, youth, mobile, female, school, newcontester,
-                   clubname, clubother, clubcategory)
+                   clubname, clubother, clubcategory,
+                   opclass, powclass)
   result = { }
   result['X-CQP-CALLSIGN'] = callsign
   result['X-CQP-SENTQTH'] = sentqth
@@ -53,6 +59,8 @@ def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, comments,
   result['X-CQP-CONFIRM1'] = email_confirm
   result['X-CQP-PHONE'] = phone
   result['X-CQP-COMMENTS'] = comments
+  result['X-CQP-POWER'] = (powclass ? powclass.upcase : "")
+  result['X-CQP-OPCLASS'] = (opclass ? opclass.upcase : "")
   categories = [ ]
   if expedition == 1
     categories.push("COUNTY")
@@ -72,15 +80,19 @@ def makeAttributes(id, callsign, email, email_confirm, sentqth, phone, comments,
   if newcontester == 1
     categories.push("NEW_CONTESTER")
   end
-  if clubname and (not clubname.strip.empty?) and "OTHER" != clubname
+  if clubname and (not clubname.strip.empty?) and (not BADCLUBNAME.include?( clubname))
     result['X-CQP-CLUBNAME'] = clubname.strip.upcase
   else
-    if clubother and (not clubother.strip.empty?)
+    if clubother and (not clubother.strip.empty?) and (not BADCLUBNAME.include?(clubother))
       result['X-CQP-CLUBNAME'] = clubother.strip.upcase
+    else
+      result['X-CQP-CLUBNAME'] = "NONE"
     end
   end
   if clubcategory and (not clubcategory.strip.empty?)
     result['X-CQP-CLUBCATEGORY'] = clubcategory.strip.upcase
+  else
+    result['X-CQP-CLUBCATEGORY'] = "UNSPECIFIED"
   end
   result['X-CQP-CATEGORIES'] = categories.join(" ")
   result['X-CQP-ID'] = id.to_s

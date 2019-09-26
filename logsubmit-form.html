@@ -1289,7 +1289,7 @@ function calcColor(validQ, maxQ, badMults) {
 }
  
   $(function () {
-    $('#clock').countdown('2017/10/24 06:59:59 +0000')
+    $('#clock').countdown('2018/10/22 23:59:59 +0000')
     .on('update.countdown', function(event) {
      var format = '%H hour%!H %M minute%!M %S second%!S';
      if(event.offset.totalDays > 0) {
@@ -1301,8 +1301,7 @@ function calcColor(validQ, maxQ, badMults) {
      $(this).html(event.strftime(format));
    })
   .on('finish.countdown', function(event) {
-    $(this).html('past. Logs submitted now will be treated as checklogs.')
-      .parent().addClass('disabled');
+    $(this).html('past. Logs submitted now will be treated as checklogs. Please submit your log anyway because it will help verify QSOs.').parent().addClass('disabled');
    });
 
     var urlval = "server/upload.fcgi";
