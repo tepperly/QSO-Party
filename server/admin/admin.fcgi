@@ -27,7 +27,8 @@ HTML_HEADER=<<HEADER_END
       <P>Data as of: %{timestamp}<br>
          <a href="../received.fcgi">Received Logs</a><br>
          <a href="/cqp/logsubmit-form.html">Submission Page</a><br>
-         <a href="qsograph.fcgi">QSO Graph</a>
+         <a href="qsograph.fcgi">QSO by Band Graph</a><br>
+         <a href="qsototgraph.fcgi">QSO Totals Graph</a>
       </P>
       <TABLE %{tablestyle}>
       <CAPTION %{capstyle}>CQP %{year} Incoming Logs Summary</CAPTION>

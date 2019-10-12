@@ -26,7 +26,8 @@ class ContestPeriod
 end
 
 $CONTESTS = [
-  ContestPeriod.new(Time.utc(2018, 10, 6, 16, 0), Time.utc(2018, 10, 7, 22, 0))
+  ContestPeriod.new(Time.utc(2019, 10, 5, 16, 0), Time.utc(2019, 10, 6, 22, 0))
+#  ContestPeriod.new(Time.utc(2018, 10, 6, 16, 0), Time.utc(2018, 10, 7, 22, 0))
 #  ContestPeriod.new(Time.utc(2017, 10, 7, 16, 0), Time.utc(2017, 10, 8, 22, 0))
 #  ContestPeriod.new(Time.utc(2016, 10, 1, 16, 0), Time.utc(2016, 10, 2, 22, 0))
 #  ContestPeriod.new(Time.utc(2015, 10, 3, 16, 0), Time.utc(2015, 10, 4, 22, 0))
@@ -1212,7 +1213,7 @@ end
 class QSOTag < StandardNearMiss
   TAG="QSO"
   TAGREGEX=/\Aqso:/i
-  QSO_ONE=/\Aqso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d+)\s+(\d+)\s+([a-z0-9]+(\/[a-z0-9]+(\/[a-z0-9])?)?)\s+(\d+)\s+([a-z]+)\s+([a-z0-9]+(\/[a-z0-9]+(\/[a-z0-9])?)?)\s+(\d+)\s+([a-z]+)(\s+(\d+)\s*|\s*)$/i
+  QSO_ONE=/\Aqso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d+)\s+(\d+)\s+([a-z0-9]+(\/[a-z0-9]+(\/[a-z0-9])?)?)\s+(\d+)\s+([a-z]+([,\/][a-z]+)*)\s+([a-z0-9]+(\/[a-z0-9]+(\/[a-z0-9])?)?)\s+(\d+)\s+([a-z]+([,\/][a-z]+)*)(\s+(\d+)\s*|\s*)$/i
   QSO_TWO=/\Aqso:\s+(\d+)\s+([a-z]+)\s+(\d+-\d+-\d+)\s+(\d+)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)\s+(([A-Z0-9]{1,4}\/)?(\d?[A-Z]+\d*\d[A-Z]+)(\/[A-Z0-9]{1,4})?)\s+(\d+)\s+([a-z]+(\s+[a-z]+)*)(\s+(\d+)|\s*)$/i
   QSO_GRP_ONE =  [ QSO_ONE, QSO_TWO ]
 
@@ -1293,7 +1294,7 @@ class QSOTag < StandardNearMiss
     valid = true
     valid = valid and checkFreqMode(log, lineNum, freq, mode)
     valid = valid and checkDateTime(log, lineNum, date, time)
-    log.sentqth[sentqth.upcase] = 1
+    sentqth.each { |qth| log.sentqth[qth.upcase] = 1 } 
     valid = valid and callCheck(log, sentcall)
     if callCheck(log, recvdcall)
       if log.tally
@@ -1303,8 +1304,8 @@ class QSOTag < StandardNearMiss
     else
       valid = false
     end
-    valid = valid and multiplierCheck(log, sentqth)
-    valid = valid and multiplierCheck(log, recvdqth)
+    sentqth.each { |qth| valid = valid and multiplierCheck(log, qth.upcase) }
+    recvdqth.each { |qth| valid = valid and multiplierCheck(log, qth.upcase) }
 
     if valid
       log.validqso = log.validqso + 1
@@ -1317,7 +1318,8 @@ class QSOTag < StandardNearMiss
   def syntaxCheck(line, log, startLineNum)
     m = QSO_ONE.match(line)
     if m
-      checkQSO(line, log, startLineNum, m[1], m[2], m[3], m[4], m[5], m[8], m[9], m[10], m[13], m[14], m[16])
+      checkQSO(line, log, startLineNum, m[1], m[2], m[3], m[4], m[5], m[8], m[9].split(/[,\/]/), m[11], m[14],
+               m[15].split(/[,\/]/), m[17])
       eolCheck(line[0,m.end(0)], log, startLineNum)
       if m.end(0) < line.length
         return checkTheRest(line, m.end(0), log, startLineNum)
@@ -1326,7 +1328,8 @@ class QSOTag < StandardNearMiss
     end
     m = QSO_TWO.match(line)
     if m
-      checkQSO(line, log, startLineNum, m[1], m[2], m[3], m[4], m[5], m[9], m[10], m[12], m[16], m[17], m[20])
+      checkQSO(line, log, startLineNum, m[1], m[2], m[3], m[4], m[5], m[9], [ m[10] ],
+               m[12], m[16], [ m[17] ], m[20])
       eolCheck(line[0,m.end(0)], log, startLineNum)
       if m.end(0) < line.length
         return checkTheRest(line, m.end(0), log, startLineNum)
@@ -1337,7 +1340,7 @@ class QSOTag < StandardNearMiss
       m = regex.match(line)
       if m
         log.warnings << LineIssue.new(startLineNum, "QSO contains signal report that isn't required", false)
-        checkQSO(line, log, startLineNum, m[1], m[2], m[3], m[4], m[5], m[9], m[10], m[12], m[16], m[17], m[20])
+        checkQSO(line, log, startLineNum, m[1], m[2], m[3], m[4], m[5], m[9], [ m[10] ], m[12], m[16], [ m[17] ], m[20])
         eolCheck(line[0,m.end(0)], log, startLineNum)
         if m.end(0) < line.length
           return checkTheRest(line, m.end(0), log, startLineNum)

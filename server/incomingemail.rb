@@ -99,7 +99,7 @@ def processEmailLog(rawContent, fixedContent, filename, subject, sender, headers
     }
     outE = OutgoingEmail.new
     html = logHtml(log, db.getEntry(logID))
-    outE.sendEmailAlt(sender, "CQP 2018 Log Confirmation", htmlToPlain(html, "text/html"), html)
+    outE.sendEmailAlt(sender, "CQP 2019 Log Confirmation", htmlToPlain(html, "text/html"), html)
     return true
   end
   false
@@ -183,10 +183,10 @@ begin
       numlogs = checkMail(mail, mail.subject, getReturnEmail(mail), mail.header, db, logCheck)
 #    print "Mail message #{uid} had #{numlogs} log(s)\n"
       if numlogs > 0
-        #    imap.store(uid, "+X-GM-LABELS", ["CQP2018/Log"])
+        #    imap.store(uid, "+X-GM-LABELS", ["CQP2019/Log"])
         imap.copy(seqno, CQPConfig::INCOMING_IMAP_SUCCESS_FOLDER)
       else
-        #    imap.store(uid, "+X-GM-LABELS", ["CQP2018/Unknown"])
+        #    imap.store(uid, "+X-GM-LABELS", ["CQP2019/Unknown"])
         imap.copy(seqno, CQPConfig::INCOMING_IMAP_FAIL_FOLDER)
       end
       #  imap.store(uid, "-X-GM-LABELS", ["\\Inbox"])
