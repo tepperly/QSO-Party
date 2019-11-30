@@ -153,6 +153,11 @@ def handle_request(request, db)
     tmp = db.getCallsign(id).upcase
     callsigns[tmp] = true
     callsigns[callBase(tmp)] = true
+    if CGI::unescapeHTML(tmp) != tmp
+      tmp = CGI::unescapeHTML(tmp)
+      callsigns[tmp] = true
+      callsigns[callBase(tmp)] = true
+    end
   }
   callsWorked = db.workedStats(completedLogs, MISSING_THRESHOLD)
   callsigns.keys.each { |call|

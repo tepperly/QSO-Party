@@ -7,18 +7,18 @@ def rootCall(call)
   # adapted from WX5S's CQP_RootCall.pm
   call = call.upcase.gsub(/\s+/,"") # remove space and convert to upper case
   parts = call.split("/")
-  if parts.length <= 1
+  case parts.length
+  when 0
     return call
-  else
-    if parts[0] =~ /\d\z/
+  when 1
+    return parts[0]
+  when 2
+    if parts[0] =~ /\d\z/ or (parts[0] !~ /\d/ and parts[1] !~ /\A\d\z/)
       return parts[1]
     else
-      if (parts[0] =~ /\d/) or (parts[1] =~ /\d$/)
-        return parts[1]
-      else
-        return parts[0]
-      end
+      return parts[0]
     end
+
   end
 end
 
@@ -81,12 +81,10 @@ def callBase(str)
     else 
       parts[0]
     end
-  else                          # more than 3 who knows
-    parts.sort! { |x,y|
-      compareCallParts(x,y)
-    }
-    parts[-1]
+  else
+    return parts[1]
   end
+  str
 end
 
 def scanQSOs(filename, aliases, potLogs)

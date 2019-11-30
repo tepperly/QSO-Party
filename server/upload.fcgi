@@ -177,13 +177,13 @@ def handleRequest(request, db, logCheck)
         logID = request["logID"].to_i
       end
       clubName = 
-      db.addExtra(logID, request["callsign"],
-                  request["email"], 
+      db.addExtra(logID, CGI::unescapeHTML(request["callsign"]),
+                  CGI::unescapeHTML(request["email"]), 
                   request["opclass"],
                   request["power"],
-                  request["sentQTH"],
-                  request["phone"],
-                  request["comments"],
+                  CGI::unescapeHTML(request["sentQTH"]),
+                  CGI::unescapeHTML(request["phone"]),
+                  CGI::unescapeHTML(request["comments"]),
                   checkBox(request, "expedition"), checkBox(request, "youth"),
                   checkBox(request, "mobile"), checkBox(request, "female"),
                   checkBox(request, "school"), checkBox(request, "new"), 
@@ -192,11 +192,11 @@ def handleRequest(request, db, logCheck)
                   request["clubsize"])
       asciiFile = db.getASCIIFile(logID)
       if asciiFile
-        attrib = makeAttributes(logID, request["callsign"],
-                                request["email"], request["confirm"], 
-                                request["sentqth"],
-                                request["phone"],
-                                request["comments"],
+        attrib = makeAttributes(logID, CGI::unescapeHTML(request["callsign"]),
+                                CGI::unescapeHTML(request["email"]), request["confirm"], 
+                                CGI::unescapeHTML(request["sentqth"]),
+                                CGI::unescapeHTML(request["phone"]),
+                                CGI::unescapeHTML(request["comments"]),
                                 checkBox(request, "expedition"), checkBox(request, "youth"),
                                 checkBox(request, "mobile"), checkBox(request, "female"),
                                 checkBox(request, "school"), checkBox(request, "new"),
